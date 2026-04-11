@@ -1,0 +1,135 @@
+{
+  "name": "WorldModels_Elite_System_V7_ZOMBIE_PROOF",
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "elite/inbound",
+        "responseMode": "lastNode"
+      },
+      "name": "Webhook Inbound WhatsApp",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 1,
+      "position": [ 0, 300 ]
+    },
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "telegram/inbound",
+        "responseMode": "lastNode"
+      },
+      "name": "Webhook Inbound Telegram",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 1,
+      "position": [ 0, 500 ]
+    },
+    {
+      "parameters": {
+        "functionCode": "const crypto = require('crypto');\n\n// Universal Text & Source Extraction\nlet text = 'Sin texto';\nlet source = 'Unknown';\n\nif ($json.body && $json.body.text) {\n  text = $json.body.text;\n  source = 'WhatsApp_Inbound';\n} else if ($json.text) {\n  text = $json.text;\n  source = 'Telegram_UserBot';\n} else if ($json.message && typeof $json.message === 'string') {\n  text = $json.message;\n  source = 'Telegram_Channel';\n}\n\nconst normalized = text.toLowerCase().replace(/\\s+/g, '');\nconst hash = crypto.createHash('md5').update(normalized).digest('hex');\n\nreturn [{ json: { extracted_text: text, source: source, hash: hash, processed_ts: new Date().toISOString() } }];"
+      },
+      "name": "Universal Data Extractor",
+      "type": "n8n-nodes-base.function",
+      "typeVersion": 1,
+      "position": [ 300, 400 ]
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "boolean": [
+            {
+              "value1": "={{ !['bot', 'http', 'https', 'link', 't.me'].some(word => ($json.extracted_text || '').toLowerCase().includes(word)) && ([ 'viaje', 'cena', 'servicio', 'extra', 'budget', 'cita', 'modelo', 'hotel', 'plaza', 'libre', 'disponible', 'trabajo', 'oferta', 'alojamiento', 'busco', 'ofrezco', 'zurich', 'travel', 'dinner', 'service', 'client', 'appointment', 'model', 'vacancy', 'free', 'available', 'room', 'girl', 'job', 'offer', 'accommodation', 'looking', 'путешествие', 'ужин', 'сервис', 'бюджет', 'сделка', 'клиент', 'встреча', 'модель', 'отель', 'место', 'свободно', 'девушка', 'работа', 'предложение', 'viagem', 'jantar', 'serviço', 'acordo', 'cliente', 'encontro', 'vaga', 'livre', 'quarto', 'garota', 'trabalho' ].some(word => ($json.extracted_text || '').toLowerCase().includes(word)) || (($json.extracted_text || '').length > 35 && /\\d/.test($json.extracted_text))) }}",
+              "operation": "true"
+            }
+          ]
+        }
+      },
+      "name": "Diamond Quality Shield",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 1,
+      "position": [ 600, 400 ]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://api.deepseek.com/chat/completions",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={\n  \"model\": \"deepseek-chat\",\n  \"messages\": [\n    {\n      \"role\": \"system\",\n      \"content\": \"### ROLE: WORLDMODELS ELITE INTELLIGENCE V7 ###\\nAnaliza si el mensaje es una PLAZA o EVENTO real. Si no tiene contacto/localización o es spam, responde: {\\\"trash\\\": true}. Si es real, extrae metadatos y traduce a ES, EN, RU, PT-BR. Responde EXCLUSIVAMENTE en JSON.\"\n    },\n    {\n      \"role\": \"user\",\n      \"content\": \"={{ $json.extracted_text }}\"\n    }\n  ],\n  \"response_format\": { \"type\": \"json_object\" },\n  \"temperature\": 0.1\n}",
+        "options": {
+          "timeout": 5000,
+          "sendQueryParameters": false
+        }
+      },
+      "name": "Elite AI Intelligence Brain",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.1,
+      "position": [ 900, 350 ]
+    },
+    {
+      "parameters": {
+        "functionCode": "const raw = $json.choices[0].message.content; try { const data = JSON.parse(raw); return [{ json: { ...data, hash: $node[\"Universal Data Extractor\"].json.hash, source: $node[\"Universal Data Extractor\"].json.source } }]; } catch(e) { return [{ json: { trash: true, error: 'invalid_json', raw } }]; }"
+      },
+      "name": "Metadata & Translation Parser",
+      "type": "n8n-nodes-base.function",
+      "typeVersion": 1,
+      "position": [ 1150, 350 ]
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "boolean": [
+            {
+              "value1": "={{$json.trash}}",
+              "value2": true
+            }
+          ]
+        }
+      },
+      "name": "Is Reality Trash?",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 1,
+      "position": [ 1400, 350 ]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://worldmodels-jobs.web.app/api/posts",
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={\n \"categoria\": \"{{$json.category === 'PLAZA' ? 'CAT_PLAZAS' : 'CAT_EVENTOS'}}\",\n \"ubicacion\": \"{{$json.city || $json.country || 'Global'}}\",\n \"presupuesto\": \"{{$json.budget || 'N/A'}}\",\n \"titulo\": \"{{$json.category}} en {{$json.city || $json.country || 'Global'}}\",\n \"descripcion\": \"{{$json.text_es}}\",\n \"fuente\": \"{{$json.source}}\",\n \"translations\": {\n   \"es\": { \"titulo\": \"{{$json.category}}\", \"descripcion\": \"{{$json.text_es}}\" },\n   \"en\": { \"titulo\": \"{{$json.category}}\", \"descripcion\": \"{{$json.text_en}}\" },\n   \"ru\": { \"titulo\": \"{{$json.category}}\", \"descripcion\": \"{{$json.text_ru}}\" },\n   \"pt\": { \"titulo\": \"{{$json.category}}\", \"descripcion\": \"{{$json.text_pt}}\" }\n }\n}",
+        "options": {
+          "sendQueryParameters": false
+        }
+      },
+      "name": "Post to Elite Dashboard",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.1,
+      "position": [ 1700, 400 ]
+    },
+    {
+      "parameters": {},
+      "name": "Stop Discarded",
+      "type": "n8n-nodes-base.noOp",
+      "typeVersion": 1,
+      "position": [ 1400, 150 ]
+    },
+    {
+      "parameters": {},
+      "name": "Stop Shielded",
+      "type": "n8n-nodes-base.noOp",
+      "typeVersion": 1,
+      "position": [ 850, 600 ]
+    }
+  ],
+  "connections": {
+    "Webhook Inbound WhatsApp": { "main": [[{ "node": "Universal Data Extractor", "type": "main", "index": 0 }]] },
+    "Webhook Inbound Telegram": { "main": [[{ "node": "Universal Data Extractor", "type": "main", "index": 0 }]] },
+    "Universal Data Extractor": { "main": [[{ "node": "Diamond Quality Shield", "type": "main", "index": 0 }]] },
+    "Diamond Quality Shield": { "main": [[{ "node": "Elite AI Intelligence Brain", "type": "main", "index": 0 }], [{ "node": "Stop Shielded", "type": "main", "index": 0 }]] },
+    "Elite AI Intelligence Brain": { "main": [[{ "node": "Metadata & Translation Parser", "type": "main", "index": 0 }]] },
+    "Metadata & Translation Parser": { "main": [[{ "node": "Is Reality Trash?", "type": "main", "index": 0 }]] },
+    "Is Reality Trash?": { "main": [[{ "node": "Stop Discarded", "type": "main", "index": 0 }], [{ "node": "Post to Elite Dashboard", "type": "main", "index": 0 }]] }
+  }
+}

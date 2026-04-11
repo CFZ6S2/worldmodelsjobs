@@ -1,0 +1,85 @@
+{
+  "name": "WorldModels_Elite_System_V5",
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "elite/inbound",
+        "responseMode": "lastNode"
+      },
+      "name": "Webhook Inbound",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 1,
+      "position": [ 100, 300 ]
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "boolean": [
+            {
+              "value1": "={{ !['bot', 'http', 'https', 'link', 'click here', 'unete', 'join', 'canal', 'channel'].some(word => $json.message.text.toLowerCase().includes(word)) && ([ 'viaje', 'cena', 'servicio', 'extra', 'budget', 'acuerdo', 'cliente', 'cita', 'modelo', 'hotel', 'plaza', 'libre', 'disponible', 'habitacion', 'chica', 'trabajo', 'oferta', 'alojamiento', 'busco', 'ofrezco', 'travel', 'dinner', 'service', 'deal', 'agreement', 'client', 'date', 'appointment', 'model', 'vacancy', 'free', 'available', 'room', 'girl', 'job', 'offer', 'accommodation', 'looking', 'путешествие', 'ужин', 'сервис', 'бюджет', 'сделка', 'клиент', 'встреча', 'модель', 'отель', 'место', 'свободно', 'девушка', 'работа', 'предложение', 'viagem', 'jantar', 'serviço', 'acordo', 'cliente', 'encontro', 'modelo', 'vaga', 'livre', 'disponível', 'quarto', 'garota', 'trabalho', 'oferta' ].some(word => $json.message.text.toLowerCase().includes(word)) || ($json.message.text.length > 35 && /\\d/.test($json.message.text))) }}",
+              "operation": "true"
+            }
+          ]
+        }
+      },
+      "name": "Filtro Diamante",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 1,
+      "position": [ 400, 300 ]
+    },
+    {
+      "parameters": {
+        "url": "https://api.openai.com/v1/chat/completions",
+        "jsonParameters": true,
+        "headers": [
+          { "name": "Authorization", "value": "=Bearer {{$env.OPENAI_API_KEY}}" }
+        ],
+        "bodyParametersUi": {
+          "parameter": [
+            { "name": "model", "value": "gpt-4o-mini" },
+            { "name": "messages", "value": "={{[{role:'system',content:'Eres el Motor de Inteligencia Élite de WorldModels. Clasifica CUALQUIER mensaje ÚNICAMENTE en CAT_PLAZAS o CAT_EVENTOS. No categorices como nada más. Extrae JSON: { categoria, ciudad, budget, requisitos, titulo, tipo_oferta }.'},{role:'user',content:$json.message.text}]}}" }
+          ]
+        }
+      },
+      "name": "Elite AI Classifier",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.1,
+      "position": [ 700, 200 ]
+    },
+    {
+      "parameters": {
+        "functionCode": "const raw = $json.choices[0].message.content; try { return [{ json: JSON.parse(raw) }]; } catch(e) { return [{ json: { error: 'invalid_json', raw } }]; }"
+      },
+      "name": "Parse Elite JSON",
+      "type": "n8n-nodes-base.function",
+      "typeVersion": 1,
+      "position": [ 950, 200 ]
+    },
+    {
+      "parameters": {
+        "url": "https://worldmodels-jobs.web.app/jobs-api/api/ads",
+        "jsonParameters": true,
+        "bodyParametersUi": {
+          "parameter": [
+            { "name": "categoria", "value": "={{$json.categoria}}" },
+            { "name": "ubicacion", "value": "={{$json.ciudad}}" },
+            { "name": "presupuesto", "value": "={{$json.budget}}" },
+            { "name": "titulo", "value": "={{$json.titulo}}" },
+            { "name": "descripcion", "value": "={{$json.requisitos}}" }
+          ]
+        }
+      },
+      "name": "Post to Elite Dashboard",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.1,
+      "position": [ 1200, 200 ]
+    }
+  ],
+  "connections": {
+    "Webhook Inbound": { "main": [[{ "node": "Filtro Diamante", "type": "main", "index": 0 }]] },
+    "Filtro Diamante": { "main": [[{ "node": "Elite AI Classifier", "type": "main", "index": 0 }]] },
+    "Elite AI Classifier": { "main": [[{ "node": "Parse Elite JSON", "type": "main", "index": 0 }]] },
+    "Parse Elite JSON": { "main": [[{ "node": "Post to Elite Dashboard", "type": "main", "index": 0 }]] }
+  }
+}

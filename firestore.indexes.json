@@ -1,0 +1,21 @@
+{
+  "indexes": [
+    {
+      "collectionGroup": "ofertas",
+      "queryScope": "COLLECTION",
+      "fields": [
+        { "fieldPath": "categoria", "order": "ASCENDING" },
+        { "fieldPath": "timestamp", "order": "DESCENDING" }
+      ]
+    },
+    {
+      "collectionGroup": "ofertas",
+      "queryScope": "COLLECTION",
+      "fields": [
+        { "fieldPath": "fingerprint", "order": "ASCENDING" },
+        { "fieldPath": "timestamp", "order": "ASCENDING" }
+      ]
+    }
+  ],
+  "fieldOverrides": []
+}

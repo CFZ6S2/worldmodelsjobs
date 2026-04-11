@@ -1,0 +1,56 @@
+{
+  "functions": { "source": "firebase/functions" },
+  "hosting": {
+    "public": "web/worldmodels-frontend",
+    "ignore": [
+      "firebase.json",
+      "**/.*",
+      "**/node_modules/**"
+    ],
+    "rewrites": [
+      {
+        "source": "/api/**",
+        "run": {
+          "serviceId": "ssrworldmodelsjobs",
+          "region": "europe-west2"
+        }
+      },
+      {
+        "source": "/login",
+        "run": {
+          "serviceId": "ssrworldmodelsjobs",
+          "region": "europe-west2"
+        }
+      },
+      {
+        "source": "/signup",
+        "run": {
+          "serviceId": "ssrworldmodelsjobs",
+          "region": "europe-west2"
+        }
+      },
+      {
+        "source": "/account",
+        "run": {
+          "serviceId": "ssrworldmodelsjobs",
+          "region": "europe-west2"
+        }
+      },
+      {
+        "source": "/dashboard",
+        "destination": "/index.html"
+      },
+      {
+        "source": "**",
+        "run": {
+          "serviceId": "ssrworldmodelsjobs",
+          "region": "europe-west2"
+        }
+      }
+    ]
+  },
+  "firestore": {
+    "rules": "firestore.rules",
+    "indexes": "firestore.indexes.json"
+  }
+}

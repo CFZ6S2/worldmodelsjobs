@@ -1,0 +1,488 @@
+{
+  "name": "WorldModels_V32_ULTIMATE",
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "worldmodels-platinum-v5",
+        "responseMode": "lastNode",
+        "options": {}
+      },
+      "id": "516ef5d2-ddce-4db0-aadd-7d2cbff017b5",
+      "name": "Webhook Ingestion",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 1,
+      "position": [
+        -2128,
+        0
+      ],
+      "webhookId": "33308b41-7114-449d-89ad-4bba475ae910"
+    },
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "webhook-test/1fd718d6-49f8-43dc-a881-ff7ecf7b94ef",
+        "responseMode": "lastNode",
+        "options": {}
+      },
+      "id": "8e03589f-1271-44e7-85c5-6d8bcd41d7dd",
+      "name": "Webhook WhatsApp",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 1,
+      "position": [
+        -1680,
+        -192
+      ],
+      "webhookId": "a3acf1aa-fd09-4c68-b982-38527611122a"
+    },
+    {
+      "parameters": {
+        "jsCode": "// 🧠 Extract and unify metadata between Telegram and WhatsApp\nconst item = $input.first().json;\nlet platform = \"\";\nlet sender_contact = \"\";\nlet extracted_text = \"\";\n\nif (item.message) {\n  platform = \"Telegram\";\n  extracted_text = item.message.text || item.message.caption || \"\";\n  sender_contact = item.message.from.username ? `@${item.message.from.username}` : (item.message.from.first_name || item.message.from.id.toString());\n} else if (item.body) {\n  platform = \"WhatsApp\";\n  extracted_text = item.body.text || item.text || item.content || \"\";\n  const num = item.key?.remoteJid?.split('@')[0] || \"\";\n  sender_contact = item.pushName ? `${item.pushName} (${num})` : num;\n} else {\n  platform = \"Unknown\";\n  extracted_text = JSON.stringify(item);\n}\n\nreturn {\n  platform,\n  sender_contact: String(sender_contact).trim(),\n  extracted_text: String(extracted_text).trim(),\n  texto_limpio: String(extracted_text).trim()\n};"
+      },
+      "id": "b7a4e0aa-a270-4582-a7e0-2d60ad461913",
+      "name": "Extract Metadata",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 1,
+      "position": [
+        -1888,
+        0
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "const store = $getWorkflowStaticData('global');\nif (!store.seen) store.seen = {};\nconst now = Date.now();\nconst ttl = 60 * 60 * 1000; // 1 hour\nfor (const k in store.seen) {\n  if (now - store.seen[k] > ttl) delete store.seen[k];\n}\nconst raw = String($json.extracted_text || '').toLowerCase().trim().replace(/[^a-z0-9\\u00C0-\\u024F\\u0400-\\u04FF]/gi, '');\nif (raw.length < 15) return items;\nlet hash = 0;\nfor (let i = 0; i < raw.length; i++) {\n  hash = ((hash << 5) - hash) + raw.charCodeAt(i);\n  hash |= 0;\n}\nconst key = String(hash);\nif (store.seen[key]) return [];\nstore.seen[key] = now;\nreturn items;"
+      },
+      "id": "ffbb9c56-2021-4387-ba32-acaa366b775b",
+      "name": "Check Clone",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 1,
+      "position": [
+        -1680,
+        0
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "// 🧠 Enhanced lead validation\nconst items = $input.all();\nconst bannedKeywords = ['crypto','binance','forex','casino','stake','signals','trading','pump'];\nconst qualityKeywords = ['plaza','room','spot','booking','viaje','casting','agency','model','budget'];\n\nconst out = [];\nfor (const item of items) {\n  const text = (item.json.texto_limpio || '').toLowerCase();\n  const hasBanned = bannedKeywords.some(k => text.includes(k));\n  const hasQuality = qualityKeywords.some(k => text.includes(k));\n  const isValuable = !hasBanned && (hasQuality || text.length > 50);\n  \n  out.push({ json: { ...item.json, looksValuable: isValuable, prefilter_v2: true } });\n}\nreturn out;"
+      },
+      "id": "8cfe1243-7959-4388-94d0-8446b9fa0605",
+      "name": "Prefilter 2",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 1,
+      "position": [
+        -1488,
+        0
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "// 🧠 Centralizer code for different platforms and formats\nconst items = $input.all();\nreturn items.map(i => ({\n  json: {\n    ...i.json,\n    balanced_at: new Date().toISOString(),\n    source_id: i.json.platform || \"Unknown\"\n  }\n}));"
+      },
+      "id": "21387412-a7ff-4d9a-8ba4-30408a77e873",
+      "name": "Balancer Universal",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 1,
+      "position": [
+        -1280,
+        -48
+      ]
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "boolean": [
+            {
+              "value1": "={{ $json.looksValuable }}",
+              "value2": true
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "9038739f-03f8-4bde-a19e-c5a37b385174",
+      "name": "IF VIP",
+      "type": "n8n-nodes-base.filter",
+      "typeVersion": 2,
+      "position": [
+        -1088,
+        0
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "let content;\ntry {\n  const rawText = $input.first().json.content.parts[0].text;\n  content = JSON.parse(rawText.replace(/```json|```/g, '').trim());\n\n  // REGLA ESTRICTA DE PLAZAS: Evitar falsos positivos\n  if (content.category === 'plaza') {\n    const rawInput = ($node[\"Extract Metadata\"].json.extracted_text || \"\").toUpperCase();\n    const plazaKeywords = [\"PLAZA\", \"HABITACION\", \"PLAZAS\", \"QUARTO\", \"VAGA\", \"ROOM\", \"SPOT\", \"ВАКАНСИЯ\", \"КОМНАТА\"];\n    const hasPlazaKeyword = plazaKeywords.some(word => rawInput.includes(word));\n    \n    if (!hasPlazaKeyword) {\n      content.category = 'evento'; // Democión automática si no hay palabra clave\n    }\n  }\n} catch (e) {\n  content = { trash: true };\n}\n\nreturn [{ json: content }];\n"
+      },
+      "id": "f4208c58-43c4-4044-836f-26c47b7fdbae",
+      "name": "Parse",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 1,
+      "position": [
+        -640,
+        -96
+      ]
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "boolean": [
+            {
+              "value1": "={{ $json.trash }}",
+              "value2": false
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "ccb8531e-6750-4a5c-9047-a7c19afc83ba",
+      "name": "Filter Source",
+      "type": "n8n-nodes-base.filter",
+      "typeVersion": 2,
+      "position": [
+        -432,
+        -96
+      ]
+    },
+    {
+      "parameters": {
+        "dataType": "string",
+        "value1": "={{ $json.category || 'lead' }}",
+        "rules": {
+          "rules": [
+            {
+              "value2": "plaza"
+            },
+            {
+              "value2": "evento",
+              "output": 1
+            }
+          ]
+        }
+      },
+      "id": "de7e9919-32a0-4036-9073-d4670fefe276",
+      "name": "Switch",
+      "type": "n8n-nodes-base.switch",
+      "typeVersion": 1,
+      "position": [
+        -240,
+        -96
+      ]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://api-v2-bgr45y36sq-ew.a.run.app/ofertas",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "sendBody": true,
+        "bodyParameters": {
+          "parameters": [
+            {
+              "name": "titulo",
+              "value": "={{ $json.title_es || $json.title || $json.summary }}"
+            },
+            {
+              "name": "descripcion",
+              "value": "={{ $json.text_es || $json.summary || $json.rawText }}"
+            },
+            {
+              "name": "title_en",
+              "value": "={{ $json.title_en }}"
+            },
+            {
+              "name": "text_en",
+              "value": "={{ $json.text_en }}"
+            },
+            {
+              "name": "title_ru",
+              "value": "={{ $json.title_ru }}"
+            },
+            {
+              "name": "text_ru",
+              "value": "={{ $json.text_ru }}"
+            },
+            {
+              "name": "title_pt",
+              "value": "={{ $json.title_pt }}"
+            },
+            {
+              "name": "text_pt",
+              "value": "={{ $json.text_pt }}"
+            },
+            {
+              "name": "ubicacion",
+              "value": "={{ $json.city || 'Global' }}"
+            },
+            {
+              "name": "contact",
+              "value": "={{ $json.contact || $json.contacto }}"
+            },
+            {
+              "name": "presupuesto",
+              "value": "={{ $json.budget || $json.presupuesto }}"
+            },
+            {
+              "name": "categoria",
+              "value": "={{ $json.category === 'plaza' ? 'CAT_PLAZAS' : 'CAT_EVENTOS' }}"
+            },
+            {
+              "name": "plataforma",
+              "value": "={{ $json.platform || 'TELEGRAM' }}"
+            }
+          ]
+        },
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "x-api-key",
+              "value": "WORLDMODELS_N8N_2026"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "42b78535-e042-4f90-9def-9844243a2680",
+      "name": "Post API",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.1,
+      "position": [
+        -32,
+        -256
+      ],
+      "credentials": {
+        "httpHeaderAuth": {
+          "id": "C6j5jY2OWBIE469n",
+          "name": "Header Auth account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "chatId": "-1003788619075",
+        "text": "=❌ LEAD DESCARTADO (AI TRASH):\n{{ $json.text_es }}\n\nSource: {{ $json.platform }}\nContact: {{ $json.sender_contact }}",
+        "additionalFields": {}
+      },
+      "id": "febf99b2-2445-4fb0-a058-e8fed351cbeb",
+      "name": "Telegram Descartes1",
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1,
+      "position": [
+        -32,
+        -96
+      ],
+      "credentials": {
+        "telegramApi": {
+          "id": "TC7QChVOx72xT6Kf",
+          "name": "Telegram account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "chatId": "-1003788619075",
+        "text": "=🌟 NUEVO LEAD PREMIUM\n\n📌 Título: {{ $json.title_es }}\n📍 Ciudad: {{ $json.city || 'Global' }}\n💰 Presupuesto: {{ $json.budget || 'Open' }}\n📱 Contacto: {{ $json.contact || 'See Dashboard' }}\n\n📝 Descripción:\n{{ $json.text_es }}\n\n🌐 Ver en Dashboard: https://worldmodels-jobs.web.app/",
+        "additionalFields": {}
+      },
+      "id": "a1b2c3d4-e5f6-7890-abcd-ef1234567890",
+      "name": "Telegram News",
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1,
+      "position": [
+        240,
+        -256
+      ],
+      "credentials": {
+        "telegramApi": {
+          "id": "TC7QChVOx72xT6Kf",
+          "name": "Telegram account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "modelId": {
+          "__rl": true,
+          "value": "models/gemini-2.5-flash-lite",
+          "mode": "list",
+          "cachedResultName": "models/gemini-2.5-flash-lite"
+        },
+        "messages": {
+          "values": [
+            {
+              "content": "### ROLE: WORLDMODELS ELITE INTELLIGENCE V7 ###\n\nREGLAS GENERALES:\n- Analiza SOLO el texto proporcionado (Lead Inbound).\n- FILTRO DE CALIDAD: Solo son válidos mensajes que correspondan a PLAZAS (Habitaciones, Alojamiento) o EVENTOS/TOURS (Clubs, hoteles, yates, reclutamiento para tours/modelaje).\n\nREGLA DE ORO: Si el mensaje tiene ingresos (ej: $40.000), destinos (Chipre, Europa) y oferta clara de trabajo o tour, es VÁLIDO. NO marcar como trash si es reclutamiento legítimo.\n\nSi el mensaje es SPAM o PUBLICIDAD IRRELEVANTE:\nResponde: {\"trash\": true}\n\nSALIDA JSON:\n{\n  \"trash\": false,\n  \"category\": \"plaza\" o \"evento\",\n  \"city\": \"\",\n  \"budget\": \"\",\n  \"contact\": \"\",\n  \"title_es\": \"\",\n  \"text_es\": \"\",\n  \"title_en\": \"\",\n  \"text_en\": \"\",\n  \"title_ru\": \"\",\n  \"text_ru\": \"\",\n  \"title_pt\": \"\",\n  \"text_pt\": \"\"\n}\n",
+              "role": "model"
+            },
+            {
+              "content": "={{ $json.extracted_text }}"
+            }
+          ]
+        },
+        "jsonOutput": true,
+        "options": {}
+      },
+      "id": "511f3158-785c-415d-9ebe-be922f0855a0",
+      "name": "Message a model",
+      "type": "@n8n/n8n-nodes-langchain.googleGemini",
+      "typeVersion": 1,
+      "position": [
+        -880,
+        160
+      ],
+      "credentials": {
+        "googlePalmApi": {
+          "id": "kOlibdVOdQMq94s8",
+          "name": "Google Gemini(PaLM) Api account"
+        }
+      }
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Webhook Ingestion": {
+      "main": [
+        [
+          {
+            "node": "Extract Metadata",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Extract Metadata": {
+      "main": [
+        [
+          {
+            "node": "Check Clone",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Check Clone": {
+      "main": [
+        [
+          {
+            "node": "Prefilter 2",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Prefilter 2": {
+      "main": [
+        [
+          {
+            "node": "Balancer Universal",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Webhook WhatsApp": {
+      "main": [
+        [
+          {
+            "node": "Balancer Universal",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Balancer Universal": {
+      "main": [
+        [
+          {
+            "node": "IF VIP",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "IF VIP": {
+      "main": [
+        [
+          {
+            "node": "Message a model",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Parse": {
+      "main": [
+        [
+          {
+            "node": "Filter Source",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Filter Source": {
+      "main": [
+        [
+          {
+            "node": "Switch",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Switch": {
+      "main": [
+        [
+          {
+            "node": "Post API",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Telegram News",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Telegram Descartes",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        []
+      ]
+    },
+    "Message a model": {
+      "main": [
+        [
+          {
+            "node": "Parse",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": true,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate",
+    "availableInMCP": false
+  },
+  "versionId": "f6068e48-3a39-47b8-a109-cf857bf04a05",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "076f774a55a5ee35adb97b88c4f2827a760bc82be4a432b2b5434d7c166e8234"
+  },
+  "id": "bLymcjnDtQaTFhiF",
+  "tags": []
+}

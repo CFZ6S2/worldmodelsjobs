@@ -1,0 +1,54 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    
+    // Helper function to check if the user is an admin
+    function isAdmin() {
+      return request.auth != null && (
+        request.auth.token.email == 'cesar.herrera.rojo@gmail.com' ||
+        request.auth.token.email == 'ceo@worldmodels.com' ||
+        get(/databases/$(database)/documents/profiles/$(request.auth.uid)).data.role == 'admin'
+      );
+    }
+
+    // 1. Leads and Offers (Ingestion & Public Feed)
+    match /ofertas/{docId} {
+      allow read: if true;       // Public feed
+      allow create: if true;     // Server-side gating via X-API-KEY
+      allow update: if isAdmin(); // Ban = admin only
+      allow delete: if isAdmin();
+    }
+
+    // 2. Reports (User Moderation Feedback)
+    match /reports/{docId} {
+      allow create: if request.auth != null;
+      allow read, update, delete: if isAdmin();
+    }
+
+    // 3. User Data (Profiles & Settings)
+    match /profiles/{userId} {
+      allow read: if request.auth != null;
+      allow write: if request.auth != null && (request.auth.uid == userId || isAdmin());
+    }
+
+    // Support for both flat and nested settings structures
+    match /user_settings/{userId} {
+      allow read, write: if request.auth != null && (request.auth.uid == userId || isAdmin());
+    }
+    
+    match /users/{userId}/{document=**} {
+      allow read, write: if request.auth != null && (request.auth.uid == userId || isAdmin());
+    }
+
+    // 4. Activity (Applications)
+    match /applications/{docId} {
+      allow create: if request.auth != null;
+      allow read: if request.auth != null && (resource.data.modelId == request.auth.uid || isAdmin());
+    }
+
+    // Global Deny
+    match /{document=**} {
+      allow read, write: if false;
+    }
+  }
+}

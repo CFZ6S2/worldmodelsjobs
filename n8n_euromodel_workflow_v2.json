@@ -1,0 +1,174 @@
+{
+  "name": "Euromodel_Master_System_V2",
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "euromodel/inbound",
+        "responseMode": "lastNode"
+      },
+      "name": "Webhook",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 1,
+      "position": [
+        100,
+        300
+      ]
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "all": [
+            {
+              "value1": "={{$json.request_id}}",
+              "operation": "notEmpty"
+            },
+            {
+              "value1": "={{$json.message.message_id}}",
+              "operation": "notEmpty"
+            },
+            {
+              "value1": "={{$json.sender.wa_id}}",
+              "operation": "notEmpty"
+            }
+          ]
+        }
+      },
+      "name": "Validate Schema",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 1,
+      "position": [
+        320,
+        300
+      ]
+    },
+    {
+      "parameters": {
+        "operation": "runQuery",
+        "query": "=INSERT INTO processed_messages (request_id, message_id, wa_id, created_at) \nVALUES ('{{$json.request_id}}', '{{$json.message.message_id}}', '{{$json.sender.wa_id}}', '{{$json.timestamp}}');"
+      },
+      "name": "SQLite Dedupe",
+      "type": "n8n-nodes-base.sqlite",
+      "typeVersion": 1,
+      "position": [
+        540,
+        300
+      ],
+      "onError": "ignoreError"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "boolean": [
+            {
+              "value1": "={{$node[\"SQLite Dedupe\"].error !== undefined}}",
+              "value2": true
+            }
+          ]
+        }
+      },
+      "name": "Check Duplicate",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 1,
+      "position": [
+        760,
+        300
+      ]
+    },
+    {
+      "parameters": {
+        "dataType": "string",
+        "value1": "={{$json.message.type}}",
+        "rules": {
+          "rules": [
+            {
+              "value2": "text",
+              "output": 0
+            },
+            {
+              "value2": "image",
+              "output": 1
+            },
+            {
+              "value2": "audio",
+              "output": 2
+            }
+          ]
+        }
+      },
+      "name": "Router Type",
+      "type": "n8n-nodes-base.switch",
+      "typeVersion": 1,
+      "position": [
+        1000,
+        450
+      ]
+    },
+    {
+      "parameters": {
+        "options": {},
+        "responseBody": "={\n  \"ok\": false,\n  \"reason\": \"duplicate\"\n}"
+      },
+      "name": "Respond Duplicate",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1,
+      "position": [
+        1000,
+        200
+      ]
+    }
+  ],
+  "connections": {
+    "Webhook": {
+      "main": [
+        [
+          {
+            "node": "Validate Schema",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Validate Schema": {
+      "main": [
+        [
+          {
+            "node": "SQLite Dedupe",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "SQLite Dedupe": {
+      "main": [
+        [
+          {
+            "node": "Check Duplicate",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Check Duplicate": {
+      "main": [
+        [
+          {
+            "node": "Respond Duplicate",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Router Type",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  }
+}

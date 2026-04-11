@@ -1,0 +1,83 @@
+[
+  {
+    "id": "platinum-v5-production",
+    "name": "WorldModelsJobs - PLATINUM V5 (Production Ready)",
+    "nodes": [
+      {
+        "parameters": {
+          "httpMethod": "POST",
+          "path": "worldmodels-platinum-v5",
+          "options": {}
+        },
+        "id": "webhook-v5",
+        "name": "Webhook Inbound",
+        "type": "n8n-nodes-base.webhook",
+        "typeVersion": 1,
+        "position": [ 200, 240 ],
+        "webhookId": "worldmodels-platinum-v5"
+      },
+      {
+        "parameters": {
+          "method": "POST",
+          "url": "https://api.deepseek.com/chat/completions",
+          "sendHeaders": true,
+          "headerParameters": {
+            "parameters": [
+              { "name": "Authorization", "value": "Bearer sk-8ac552c338d4451bba606c73880cb343" }
+            ]
+          },
+          "sendBody": true,
+          "specifyBody": "json",
+          "jsonBody": "={{ { model: 'deepseek-chat', messages: [ { role: 'system', content: 'Eres el motor de inteligencia de WorldModels Jobs. Tu función es transformar mensajes brutos de Telegram/WhatsApp en datos estructurados de alta calidad.\\n\\nTAREAS CRÍTICAS:\\n1. RAZONAMIENTO FORZADO: Analiza semánticamente el mensaje antes de decidir.\\n2. CATEGORIZACIÓN ESTRICTA (REGLA DE ORO):\\n   - Si menciona precio, ciudad o duración (temporada/fijo) -> DEBE SER CAT_PLAZAS o CAT_EVENTOS.\\n   - CAT_PLAZAS: Trabajo fijo, staff, permanencia.\\n   - CAT_EVENTOS: Castings, cenas, viajes, eventos de un día.\\n   - CAT_AGENCY: Búsquedas de agencias.\\n   - CAT_MODELOS: Perfiles de chicas.\\n   - CAT_VARIOS: Solo si es ruido absoluto sin datos de tiempo/lugar/rol.\\n3. TRADUCCIÓN VIP (4 IDIOMAS): es, en, ru, pt (Brasil). Genera títulos potentes.\\n\\nJSON ÚNICAMENTE:\\n{\\n  \"razonamiento\": \"...\",\\n  \"categoria\": \"CAT_XXXX\",\\n  \"ubicacion\": \"...\",\\n  \"contacto\": \"...\",\\n  \"translations\": {\\n    \"es\": {\"titulo\": \"\", \"descripcion\": \"\"},\\n    \"en\": {\"titulo\": \"\", \"descripcion\": \"\"},\\n    \"ru\": {\"titulo\": \"\", \"descripcion\": \"\"},\\n    \"pt\": {\"titulo\": \"\", \"descripcion\": \"\"}\\n  }\\n}' }, { role: 'user', content: $json.body.text || $json.text } ], temperature: 0.1, response_format: { type: 'json_object' } } }}",
+          "options": {}
+        },
+        "id": "ai-node-v5",
+        "name": "AI_Node",
+        "type": "n8n-nodes-base.httpRequest",
+        "typeVersion": 3,
+        "position": [ 450, 240 ]
+      },
+      {
+        "parameters": {
+          "jsCode": "const ai = $node[\"AI_Node\"].json;\nconst webhook = $node[\"Webhook Inbound\"].json;\nconst rawContent = ai.choices?.[0]?.message?.content || \"{}\";\nlet parsed = {};\ntry {\n  parsed = JSON.parse(rawContent.replace(/```json|```/g, '').trim());\n} catch (e) {\n  parsed = { categoria: \"CAT_VARIOS\", translations: { es: { titulo: \"Error AI\", descripcion: \"Parse failure\" } } };\n}\n\n// 1. FILTRO CERO BASURA (ANTI-VARIOS)\nconst validCats = [\"CAT_PLAZAS\", \"CAT_EVENTOS\", \"CAT_AGENCY\", \"CAT_MODELOS\", \"CAT_VARIOS\"];\nlet finalCat = parsed.categoria;\nconst rawText = (webhook.body?.text || \"\").toLowerCase();\n\nif (!validCats.includes(finalCat)) {\n    if (rawText.includes(\"fija\") || rawText.includes(\"staff\") || rawText.includes(\"club\")) {\n        finalCat = \"CAT_PLAZAS\";\n    } else {\n        finalCat = \"CAT_VARIOS\";\n    }\n}\n\n// 3. BLINDAJE DE DUPLICADOS (Deduplication)\n// Generamos un ID único basado en el message_id de Telegram o un hash simple del texto\nconst external_id = webhook.body?.message_id || \n                   webhook.body?.update_id || \n                   Math.abs(rawText.split('').reduce((a,b)=>{a=((a<<5)-a)+b.charCodeAt(0);return a&a},0)).toString();\n\nreturn {\n  categoria: finalCat,\n  translations: parsed.translations,\n  ubicacion: parsed.ubicacion || \"Global\",\n  contacto: parsed.contacto || \"Ver en Telegram\",\n  activa: true,\n  timestamp: new Date().toISOString(),\n  platform: webhook.body?.platform || \"TELEGRAM\",\n  external_id: external_id.toString()\n};"
+        },
+        "id": "parser-v5",
+        "name": "Prepare Premium JSON",
+        "type": "n8n-nodes-base.code",
+        "typeVersion": 1,
+        "position": [ 700, 240 ]
+      },
+      {
+        "parameters": {
+          "method": "POST",
+          "url": "https://europe-west1-worldmodels-jobs.cloudfunctions.net/api/ads",
+          "sendHeaders": true,
+          "headerParameters": {
+            "parameters": [
+              { "name": "x-api-key", "value": "WORLDMODELS_N8N_2026" }
+            ]
+          },
+          "sendBody": true,
+          "specifyBody": "json",
+          "jsonBody": "={{ $json }}",
+          "options": {}
+        },
+        "id": "http-v5",
+        "name": "Post to WorldModels Dashboard",
+        "type": "n8n-nodes-base.httpRequest",
+        "typeVersion": 3,
+        "position": [ 950, 240 ]
+      }
+    ],
+    "connections": {
+      "Webhook Inbound": { "main": [ [ { "node": "AI_Node", "type": "main", "index": 0 } ] ] },
+      "AI_Node": { "main": [ [ { "node": "Prepare Premium JSON", "type": "main", "index": 0 } ] ] },
+      "Prepare Premium JSON": { "main": [ [ { "node": "Post to WorldModels Dashboard", "type": "main", "index": 0 } ] ] }
+    },
+    "active": true,
+    "settings": {},
+    "staticData": null,
+    "meta": null,
+    "pinData": null
+  }
+]

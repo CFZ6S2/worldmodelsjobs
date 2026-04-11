@@ -1,0 +1,308 @@
+<!DOCTYPE html>
+<html lang="es" class="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Dashboard | WorldModels & Jobs</title>
+    <link rel="stylesheet" href="styles.css?v=5.0">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800;900&family=Playfair+Display:wght@700&display=swap" rel="stylesheet">
+    <script src="https://unpkg.com/lucide@latest"></script>
+</head>
+<body>
+    <div class="app-shell">
+        <header class="navbar glass">
+            <div style="display: flex; align-items: center; gap: 12px;">
+                <div style="background: var(--gold-gradient); padding: 6px; border-radius: 10px; color: #000; box-shadow: var(--shadow-gold);">
+                    <i data-lucide="crown" size="18"></i>
+                </div>
+                <div>
+                    <h1 class="brand">WorldModels<span>&Jobs</span></h1>
+                    <p style="font-size: 8px; font-weight: 900; color: var(--gold-primary); letter-spacing: 1.5px; text-transform: uppercase; margin-top: 2px;">Premium Intelligence</p>
+                </div>
+            </div>
+            
+            <div style="display: flex; gap: 10px; align-items: center;">
+                <div class="lang-container">
+                    <button id="langBtn" class="category-pill" style="padding: 8px 12px; border-radius: var(--radius-sm);">
+                        <i data-lucide="languages" size="14" style="color: var(--gold-primary);"></i>
+                        <span id="currentLangLabel" style="margin-left: 4px;">ES</span>
+                    </button>
+                    <div id="langDropdown" class="modal-overlay" onclick="if(event.target === this) this.style.display='none'">
+                        <div class="modal-content">
+                            <h3 style="text-align: center; margin-bottom: 20px;">LANGUAGE</h3>
+                            <div style="display: flex; flex-direction: column; gap: 8px;">
+                                <button class="btn-cta" onclick="changeLanguage('es')" style="background: rgba(255,255,255,0.05); color: #fff;">🇪🇸 Español</button>
+                                <button class="btn-cta" onclick="changeLanguage('en')" style="background: rgba(255,255,255,0.05); color: #fff;">🇬🇧 English</button>
+                                <button class="btn-cta" onclick="changeLanguage('ru')" style="background: rgba(255,255,255,0.05); color: #fff;">🇷🇺 Pусский</button>
+                                <button class="btn-cta" onclick="changeLanguage('pt')" style="background: rgba(255,255,255,0.05); color: #fff;">🇧🇷 Português</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div onclick="showView('alerts')" class="tap-scale" style="background: rgba(255,255,255,0.05); padding: 10px; border-radius: 50%; border: 1px solid var(--border-glass); cursor: pointer; position: relative;">
+                    <i data-lucide="bell" size="18"></i>
+                    <span style="position: absolute; top: 8px; right: 8px; width: 6px; height: 6px; background: var(--gold-primary); border-radius: 50%; border: 1px solid #000;"></span>
+                </div>
+            </div>
+        </header>
+
+        <main id="listingsView">
+            <div class="search-bar">
+                <input type="text" id="searchInput" placeholder="Search agencies, models, cities..." data-i18n="search_placeholder">
+            </div>
+
+            <nav class="category-pills" id="categoryBar">
+                <button class="category-pill active" data-category="PLAZAS" data-i18n="cat_plazas">PLAZAS</button> 
+                <button class="category-pill" data-category="EVENTOS" data-i18n="cat_eventos">EVENTOS</button>
+            </nav>
+
+            <div id="listingsFeed" class="feed-container">
+                <div style="text-align:center; padding:100px 40px; opacity:0.3; font-size:12px; font-weight:800; letter-spacing:1px;">
+                    <i data-lucide="loader-2" size="24" class="animate-spin" style="margin-bottom: 12px; display: block; margin: 0 auto 12px;"></i>
+                    SYNCHRONIZING FEED...
+                </div>
+            </div>
+        </main>
+
+        <main id="profileView" style="display: none;">
+            <div class="profile-container">
+                <!-- Header VIP -->
+                <div class="profile-header">
+                    <div class="profile-avatar-outer">
+                        <div class="profile-avatar-inner" id="profileAvatar">
+                            <i data-lucide="user"></i>
+                        </div>
+                        <div class="profile-badge">ELITE GOLD</div>
+                    </div>
+                    <h2 id="userName" style="font-family: 'Playfair Display', serif; font-size: 24px; margin-bottom: 4px;">--</h2>
+                    <p id="userEmail" style="font-size: 11px; color: var(--gold-primary); font-weight: 700; letter-spacing: 1px;">--</p>
+                    <div class="vip-id">ID: <span id="userIdText">---------</span></div>
+                </div>
+
+                <!-- Gallery Section -->
+                <div class="gallery-section">
+                    <label class="section-label">GALERÍA / PORTFOLIO</label>
+                    <div class="gallery-grid" id="profileGallery">
+                        <div class="gallery-item" onclick="alert('Funcionalidad de carga en desarrollo')">
+                            <i data-lucide="plus" class="add-photo-btn"></i>
+                        </div>
+                        <div class="gallery-item"></div>
+                        <div class="gallery-item"></div>
+                        <div class="gallery-item"></div>
+                        <div class="gallery-item"></div>
+                        <div class="gallery-item"></div>
+                    </div>
+                </div>
+
+                <!-- Bio / Descripcion -->
+                <div class="form-group" style="margin-top: 32px;">
+                    <label class="section-label">BIO / DESCRIPCIÓN</label>
+                    <textarea id="profileBio" placeholder="Define tu perfil, servicios y lo que te hace única..."></textarea>
+                </div>
+
+                <!-- Stats Grid -->
+                <div class="profile-stats-grid">
+                    <div class="form-group">
+                        <label>Altura (cm)</label>
+                        <input type="number" id="profileHeight" placeholder="175">
+                    </div>
+                    <div class="form-group">
+                        <label>Busto (cm)</label>
+                        <input type="number" id="profileBust" placeholder="90">
+                    </div>
+                    <div class="form-group">
+                        <label>Ubicación</label>
+                        <input type="text" id="profileLocation" placeholder="Madrid, Dubai...">
+                    </div>
+                    <div class="form-group">
+                        <label>Presupuesto / Fee</label>
+                        <input type="text" id="profileBudget" placeholder="€ / HR">
+                    </div>
+                </div>
+
+                <!-- Disponibilidad -->
+                <div class="form-group">
+                    <label>Disponibilidad</label>
+                    <select id="profileAvailability">
+                        <option value="INMEDIATA">INMEDIATA</option>
+                        <option value="VIAJES">DISPONIBLE PARA VIAJES</option>
+                        <option value="SOLO_CITAS">SOLO CITAS PROGRAMADAS</option>
+                        <option value="OCUPADA">OCUPADA</option>
+                    </select>
+                </div>
+
+                <!-- Action Buttons -->
+                <div style="display: flex; flex-direction: column; gap: 12px; margin-top: 20px;">
+                    <!-- PRO AGENCY PANEL (Only for Ultra/Agency) -->
+                    <div id="proAgencyPanel" class="agency-card tap-scale" onclick="openPublishModal()">
+                        <div class="agency-badge">PRO AGENCY</div>
+                        <div class="agency-content">
+                            <h3>PUBLICA TUS ANUNCIOS</h3>
+                            <p>Postea tus plazas o eventos y recibe candidatas al instante.</p>
+                        </div>
+                        <i data-lucide="plus-circle" class="gold-icon"></i>
+                    </div>
+
+                    <button onclick="saveProfile()" class="btn-save tap-scale">
+                        GUARDAR PERFIL ✨
+                    </button>
+                    <button id="logoutBtn" class="btn-cta" style="background: transparent; color: #ff4444; border: 1px solid rgba(255, 68, 68, 0.3); box-shadow: none;">CERRAR SESIÓN</button>
+                </div>
+            </div>
+        </main>
+
+        <footer class="bottom-nav">
+            <button class="tab-item" onclick="showView('home')">
+                <i data-lucide="home" size="22"></i>
+                <span data-i18n="nav_home">Home</span>
+            </button>
+            <button class="tab-item active" onclick="showView('inicio')">
+                <i data-lucide="zap" size="22"></i>
+                <span data-i18n="nav_feed">Feed</span>
+            </button>
+            <button class="tab-item" onclick="showView('alerts')">
+                <i data-lucide="bell" size="22"></i>
+                <span data-i18n="nav_alerts">Alerts</span>
+            </button>
+            <button class="tab-item" onclick="showView('perfil')">
+                <i data-lucide="user" size="22"></i>
+                <span data-i18n="nav_profile">Profile</span>
+            </button>
+        </footer>
+    </div>
+
+    <!-- Modals -->
+    <div id="alertsModal" class="modal-overlay" onclick="if(event.target === this) closeAlertsModal()">
+        <div class="modal-content premium-modal" style="padding: 32px;">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px;">
+                <h3 style="font-size: 20px; font-weight: 800; font-family: 'Playfair Display', serif;">Alert Configurator</h3>
+                <button onclick="closeAlertsModal()" style="background:none; border:none; color:var(--text-dim); cursor:pointer;">
+                    <i data-lucide="x" size="24"></i>
+                </button>
+            </div>
+            
+            <div style="display: flex; flex-direction: column; gap: 24px;">
+                <!-- MODAL: PUBLISH AD -->
+                <div id="publishModal" class="modal">
+                    <div class="modal-content glass">
+                        <button class="close-btn" onclick="closePublishModal()">&times;</button>
+                        <h2 class="modal-title gold-text">NUEVO ANUNCIO</h2>
+                        <p class="modal-subtitle">Publica tu oferta en el Feed Global de WorldModels</p>
+                        
+                        <form id="publishForm" onsubmit="publishAdInternal(event)">
+                            <div class="input-group">
+                                <label>TÍTULO DEL ANUNCIO</label>
+                                <input type="text" id="pubTitle" placeholder="Ej: Casting para Evento VIP Marbella" required>
+                            </div>
+                            
+                            <div class="input-row">
+                                <div class="input-group">
+                                    <label>CATEGORÍA</label>
+                                    <select id="pubCategory" required>
+                                        <option value="PLAZAS">PLAZAS</option>
+                                        <option value="EVENTOS">EVENTOS</option>
+                                    </select>
+                                </div>
+                                <div class="input-group">
+                                    <label>CIUDAD / UBICACIÓN</label>
+                                    <input type="text" id="pubLocation" placeholder="Ej: Madrid, Ibiza..." required>
+                                </div>
+                            </div>
+
+                            <div class="input-group">
+                                <label>BUDGET / TARIFA (Opcional)</label>
+                                <input type="text" id="pubBudget" placeholder="Ej: 500€/día, A convenir...">
+                            </div>
+
+                            <div class="input-group">
+                                <label>DESCRIPCIÓN DETALLADA</label>
+                                <textarea id="pubDescription" placeholder="Detalla los requisitos, fechas y condiciones..." rows="4" required></textarea>
+                            </div>
+
+                            <div class="input-group">
+                                <label>WHATSAPP DE CONTACTO (Sin símbolos)</label>
+                                <input type="tel" id="pubWhatsapp" placeholder="34600000000" required>
+                            </div>
+
+                            <button type="submit" id="pubSubmitBtn" class="btn-cta tap-scale" style="background: var(--gold-gradient); color: #000; margin-top: 15px;">
+                                PUBLICAR AHORA ✨
+                            </button>
+                        </form>
+                    </div>
+                </div>
+                <!-- Master Toggle -->
+                <div style="display: flex; justify-content: space-between; align-items: center; padding: 16px; background: rgba(255,255,255,0.03); border-radius: 12px;">
+                    <div>
+                        <p style="font-size: 13px; font-weight: 800;">Master Alerts</p>
+                        <p style="font-size: 10px; color: var(--text-dim);">Enable all notifications</p>
+                    </div>
+                    <label class="switch">
+                        <input type="checkbox" id="alertEnabled" checked>
+                        <span class="slider round"></span>
+                    </label>
+                </div>
+
+                <!-- Categories -->
+                <div>
+                    <label style="display: block; font-size: 9px; font-weight: 900; color: var(--text-dim); margin-bottom: 12px; letter-spacing: 1px; text-transform: uppercase;">1. Monitoring Categories</label>
+                    <div style="display: flex; gap: 10px;">
+                         <button class="category-pill alert-cat-pill" data-cat="CAT_PLAZAS" onclick="this.classList.toggle('active')">PLAZAS</button>
+                         <button class="category-pill alert-cat-pill" data-cat="CAT_EVENTOS" onclick="this.classList.toggle('active')">EVENTOS</button>
+                    </div>
+                </div>
+
+                <!-- Cities -->
+                <div>
+                    <label style="display: block; font-size: 9px; font-weight: 900; color: var(--text-dim); margin-bottom: 12px; letter-spacing: 1px; text-transform: uppercase;">2. Targeted Locations</label>
+                    <input type="text" id="alertCities" placeholder="e.g. Madrid, Marbella, Dubai" style="width:100%; padding:14px; background:rgba(0,0,0,0.2); border:1px solid var(--border-glass); border-radius:12px; color:#fff; font-size: 13px;">
+                    <p style="font-size: 9px; color: var(--text-dim); margin-top: 8px;">Separate cities with commas.</p>
+                </div>
+
+                <!-- Keywords -->
+                <div>
+                    <label style="display: block; font-size: 9px; font-weight: 900; color: var(--text-dim); margin-bottom: 12px; letter-spacing: 1px; text-transform: uppercase;">3. Critical Keywords</label>
+                    <input type="text" id="alertKeywords" placeholder="e.g. Urgente, Casting..." style="width:100%; padding:14px; background:rgba(0,0,0,0.2); border:1px solid var(--border-glass); border-radius:12px; color:#fff; font-size: 13px;">
+                </div>
+
+                <!-- Browser Permission -->
+                <button onclick="requestNotificationPermission()" id="notifPermissionBtn" class="btn-cta" style="background: rgba(212,175,55,0.1); border: 1px solid var(--border-gold); color: var(--gold-primary);">
+                    <i data-lucide="bell-ring" size="14" style="margin-right: 8px; vertical-align: middle;"></i>
+                    Enable Browser Push
+                </button>
+            </div>
+
+            <div style="margin-top: 32px; display: flex; gap: 12px;">
+                <button onclick="saveAlerts()" class="btn-cta" style="flex: 2;">SAVE CONFIGURATION</button>
+                <button onclick="closeAlertsModal()" class="btn-cta" style="flex: 1; background: transparent; border: 1px solid var(--border-glass); color: var(--text-secondary); box-shadow: none;">CANCEL</button>
+            </div>
+        </div>
+    </div>
+
+    <div id="contactModal" class="modal-overlay" onclick="if(event.target === this) closeContactModal()">
+        <div class="modal-content premium-modal">
+            <div style="text-align: center; margin-bottom: 32px;">
+                <div class="icon-pill">
+                    <i data-lucide="shield-check" size="32"></i>
+                </div>
+                <h3 style="font-size: 22px; font-family: 'Playfair Display', serif; margin-bottom: 8px;">Platinum Intelligence</h3>
+                <p style="font-size: 10px; color: var(--text-dim); font-weight: 800; letter-spacing: 1px; text-transform: uppercase;">CONFIDENTIAL DATA | VIP ACCESS ONLY</p>
+            </div>
+            
+            <div id="contactInfoArea" style="background: rgba(0,0,0,0.4); border: 1px dashed var(--border-glass); border-radius: 12px; padding: 24px; text-align: center; margin-bottom: 32px;">
+                <!-- Content injected via app.js -->
+            </div>
+
+            <div style="display: flex; flex-direction: column; gap: 12px;">
+                <a id="contactFinalBtn" href="#" target="_blank" class="btn-cta" style="text-decoration: none; text-align: center;">Establish Connection</a>
+                <button onclick="closeContactModal()" class="btn-cta" style="background: transparent; border: 1px solid var(--border-glass); color: var(--text-secondary); box-shadow: none;">Back to Feed</button>
+            </div>
+        </div>
+    </div>
+
+    <script type="module" src="/app.js?v=6"></script>
+    <script>
+        // Inline small UI handlers to ensure responsiveness even if app.js loads slow
+        document.getElementById('langBtn').onclick = () => document.getElementById('langDropdown').style.display = 'flex';
+    </script>
+</body>
+</html>

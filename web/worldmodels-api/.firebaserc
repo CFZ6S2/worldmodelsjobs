@@ -1,0 +1,15 @@
+{
+  "projects": {
+    "default": "worldmodels-jobs"
+  },
+  "targets": {
+    "worldmodels-jobs": {
+      "hosting": {
+        "worldmodels-jobs": [
+          "worldmodels-jobs"
+        ]
+      }
+    }
+  },
+  "etags": {}
+}
