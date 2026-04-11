@@ -1,0 +1,119 @@
+[
+  {
+    "id": "premium_sync_v5_final_2026",
+    "name": "WorldModelsJobs - PREMIUM SYNC V5 (Final)",
+    "nodes": [
+      {
+        "parameters": {
+          "httpMethod": "POST",
+          "path": "worldmodels-premium-v5",
+          "options": {}
+        },
+        "id": "node-webhook-v5",
+        "name": "Webhook",
+        "type": "n8n-nodes-base.webhook",
+        "typeVersion": 1,
+        "position": [ 200, 240 ],
+        "webhookId": "worldmodels-premium-v5"
+      },
+      {
+        "parameters": {
+          "values": {
+            "string": [
+              { "name": "text", "value": "={{ $json.body.text || $json.text }}" },
+              { "name": "sender", "value": "={{ $json.body.sender || $json.sender }}" }
+            ]
+          }
+        },
+        "id": "node-prepare-v5",
+        "name": "Prepare Data",
+        "type": "n8n-nodes-base.set",
+        "typeVersion": 1,
+        "position": [ 400, 240 ]
+      },
+      {
+        "parameters": {
+          "conditions": {
+            "string": [
+              {
+                "value1": "={{ ($json.text || '').toLowerCase() }}",
+                "operation": "regex",
+                "value2": "(necesito|busco|presupuesto|cotizacion|precio|contacto|servicio|trabajo|viaje|modelo|vip|extra|top|cena|imagen|reunion|hotel|need|search|budget|quotation|price|contact|service|job|trip|travel|model|dinner|image|meeting|нужн|ищу|бяджет|котировка|цена|контакт|услуга|работа|путешествие|модель|экстра|топ|ужин|изображение|встреча|отель)"
+              }
+            ]
+          }
+        },
+        "id": "node-filter-v5",
+        "name": "Keyword Filter",
+        "type": "n8n-nodes-base.if",
+        "typeVersion": 1,
+        "position": [ 600, 240 ]
+      },
+      {
+        "parameters": {
+          "method": "POST",
+          "url": "https://api.deepseek.com/chat/completions",
+          "sendHeaders": true,
+          "headerParameters": {
+            "parameters": [
+              { "name": "Authorization", "value": "Bearer sk-8ac552c338d4451bba606c73880cb343" }
+            ]
+          },
+          "sendBody": true,
+          "specifyBody": "json",
+          "jsonBody": "={{ { model: 'deepseek-chat', messages: [ { role: 'system', content: 'Rol: Clasificador de Leads Multilingüe para WorldModels&Jobs.\\n\\nInstrucciones:\\n- Responde EXCLUSIVAMENTE con un JSON plano.\\n- Extrae: contact, location, category_key (CAT_MODEL, CAT_AGENCY, CAT_STAFF, CAT_VIP_SERVICES, CAT_OTHER...), urgency_key (ALTA, MEDIA, BAJA).\\n- GENERA RESÚMENES CONCISOS EN 4 IDIOMAS: summary_es, summary_en, summary_ru, summary_pt.\\n- Cada resumen debe ser una frase que capture: Quién, Qué busca, Dónde y Contacto.\\n\\nJSON Estructura:\\n{\\n\\\"category_key\\\": \\\"string\\\",\\n\\\"urgency_key\\\": \\\"string\\\",\\n\\\"detected_lang\\\": \\\"es|en|ru|pt\\\",\\n\\\"summary_es\\\": \\\"...\\\",\\n\\\"summary_en\\\": \\\"...\\\",\\n\\\"summary_ru\\\": \\\"...\\\",\\n\\\"summary_pt\\\": \\\"...\\\",\\n\\\"contact\\\": \\\"...\\\",\\n\\\"location\\\": \\\"...\\\",\\n\\\"lead_score\\\": 5\\n}' }, { role: 'user', content: $json.text } ], temperature: 0.3, response_format: { type: 'json_object' } } }}",
+          "options": {}
+        },
+        "id": "node-ai-v5",
+        "name": "AI Cleaning",
+        "type": "n8n-nodes-base.httpRequest",
+        "typeVersion": 3,
+        "position": [ 800, 240 ]
+      },
+      {
+        "parameters": {
+          "jsCode": "const aiResponse = $input.first().json;\nlet prepData = {};\ntry { prepData = $node[\"Prepare Data\"].json; } catch (e) { prepData = { text: \"Unknown\", sender: \"system\" }; }\n\nconst rawContent = aiResponse.choices?.[0]?.message?.content || \"{}\";\nlet parsed = {};\ntry {\n  const cleanText = rawContent.replace(/```json|```/g, '').trim();\n  parsed = JSON.parse(cleanText);\n} catch (e) {\n  parsed = { error: \"Parse error\", raw: rawContent };\n}\n\n// Mapeo Maestro para el Dashboard\nconst catMap = {\n  'CAT_MODEL': 'CAT_MODELOS',\n  'CAT_CHICAS': 'CAT_MODELOS',\n  'CAT_STAFF': 'CAT_PLAZAS',\n  'CAT_JOBS': 'CAT_PLAZAS',\n  'CAT_OTHER': 'CAT_VARIOS'\n};\n\nconst rawCat = (parsed.category_key || \"CAT_VARIOS\").toUpperCase();\nconst mappedCat = catMap[rawCat] || rawCat;\n\nreturn {\n  categoria: mappedCat,\n  plataforma: \"TELEGRAM\",\n  ubicacion: (parsed.location || \"Global\").toUpperCase(),\n  contacto: parsed.contact || \"https://t.me/worldmodelsjobs\",\n  lead_score: parsed.lead_score || 5,\n  urgencia: (parsed.urgency_key || \"MEDIA\").toUpperCase(),\n  activa: true,\n  translations: {\n    \"es\": { \"titulo\": parsed.summary_es || \"Nueva Oportunidad\", \"descripcion\": \"Ver detalles internos.\" },\n    \"en\": { \"titulo\": parsed.summary_en || \"VIP Casting\", \"descripcion\": \"Check internal details.\" },\n    \"ru\": { \"titulo\": parsed.summary_ru || \"VIP Кастинг\", \"descripcion\": \"Подробности в ленте.\" },\n    \"pt\": { \"titulo\": parsed.summary_pt || \"Casting VIP\", \"descripcion\": \"Confira os detalles.\" }\n  }\n};"
+        },
+        "id": "node-parser-v5",
+        "name": "Final Parser",
+        "type": "n8n-nodes-base.code",
+        "typeVersion": 1,
+        "position": [ 1000, 240 ]
+      },
+      {
+        "parameters": {
+          "method": "POST",
+          "url": "https://europe-west1-worldmodels-jobs.cloudfunctions.net/api/ads",
+          "sendHeaders": true,
+          "headerParameters": {
+            "parameters": [
+              { "name": "x-api-key", "value": "WORLDMODELS_N8N_2026" },
+              { "name": "Content-Type", "value": "application/json" }
+            ]
+          },
+          "sendBody": true,
+          "specifyBody": "json",
+          "jsonBody": "={{ $json }}",
+          "options": {}
+        },
+        "id": "node-backend-v5",
+        "name": "Forward to Premium Dashboard",
+        "type": "n8n-nodes-base.httpRequest",
+        "typeVersion": 3,
+        "position": [ 1200, 240 ]
+      }
+    ],
+    "connections": {
+      "Webhook": { "main": [ [ { "node": "Prepare Data", "type": "main", "index": 0 } ] ] },
+      "Prepare Data": { "main": [ [ { "node": "Keyword Filter", "type": "main", "index": 0 } ] ] },
+      "Keyword Filter": { "main": [ [ { "node": "AI Cleaning", "type": "main", "index": 0 } ] ] },
+      "AI Cleaning": { "main": [ [ { "node": "Final Parser", "type": "main", "index": 0 } ] ] },
+      "Final Parser": { "main": [ [ { "node": "Forward to Premium Dashboard", "type": "main", "index": 0 } ] ] }
+    },
+    "active": true,
+    "settings": {},
+    "staticData": null,
+    "meta": null,
+    "pinData": null
+  }
+]

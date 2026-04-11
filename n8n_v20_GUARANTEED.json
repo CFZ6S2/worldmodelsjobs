@@ -1,0 +1,396 @@
+{
+  "name": "WorldModels_V20_GUARANTEED_MASTER",
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "1fd718d6-49f8-43dc-a881-ff7ecf7b94ef",
+        "responseMode": "lastNode"
+      },
+      "name": "Webhook Inbound WhatsApp",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 1,
+      "position": [
+        0,
+        300
+      ]
+    },
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "worldmodels-platinum-v5",
+        "responseMode": "lastNode"
+      },
+      "name": "Webhook Inbound Telegram",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 1,
+      "position": [
+        0,
+        500
+      ]
+    },
+    {
+      "parameters": {
+        "values": {
+          "string": [
+            {
+              "name": "extracted_text",
+              "value": "={{ $json.body && $json.body.text ? $json.body.text : ($json.text ? $json.text : ($json.message ? ($json.message.text ? $json.message.text : $json.message) : 'Sin texto')) }}"
+            }
+          ]
+        }
+      },
+      "name": "Extract Text",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 1,
+      "position": [
+        250,
+        400
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "const store = $getWorkflowStaticData('global');\n\nif (!store.seen) {\n  store.seen = {};\n}\n\nconst now = Date.now();\nconst ttl = 15 * 60 * 1000; // 15 min\n\n// limpiar viejos\nfor (const k in store.seen) {\n  if (now - store.seen[k] > ttl) {\n    delete store.seen[k];\n  }\n}\n\n// normalizar texto\nconst raw = String($json.extracted_text || '')\n  .toLowerCase()\n  .trim()\n  .replace(/\\s+/g, ' ')\n  .replace(/[^a-z0-9\\u00C0-\\u024F\\u0400-\\u04FF\\s@+.-]/gi, '');\n\n// si no hay texto → no duplicado\nif (!raw) {\n  return [{ ...$json, isDuplicate: false }];\n}\n\n// 🧠 hash simple (sin crypto)\nlet hash = 0;\n\nfor (let i = 0; i < raw.length; i++) {\n  hash = ((hash << 5) - hash) + raw.charCodeAt(i);\n  hash |= 0; // convertir a 32bit\n}\n\nconst key = String(hash);\n\n// check duplicado\nif (store.seen[key]) {\n  return [{ ...$json, isDuplicate: true }];\n}\n\n// guardar\nstore.seen[key] = now;\n\nreturn [{ ...$json, isDuplicate: false }];"
+      },
+      "name": "Check Clone",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 1,
+      "position": [
+        450,
+        400
+      ]
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": false,
+            "leftValue": "",
+            "typeValidation": "strict"
+          },
+          "conditions": [
+            {
+              "id": "abc-123-duplicate",
+              "leftValue": "={{ String($json.isDuplicate !== true) }}",
+              "rightValue": "true",
+              "operator": {
+                "type": "string",
+                "operation": "equals"
+              }
+            }
+          ],
+          "combinator": "and"
+        }
+      },
+      "name": "IF not duplicate",
+      "type": "n8n-nodes-base.filter",
+      "typeVersion": 2,
+      "position": [
+        600,
+        400
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "const text = ($json.extracted_text || '')\n  .toLowerCase()\n  .trim();\n\nconst normalized = text\n  .replace(/\\s+/g, ' ')\n  .replace(/[^a-z0-9\\u00C0-\\u024F\\u0400-\\u04FF\\s@+.-]/gi, '');\n\nconst weakPatterns = ['hola', 'gracias', 'info', 'ok', 'hi', 'hello', 'thanks', 'info', 'ok', 'oi', 'ola', 'obrigado', 'info', 'привет', 'спасибо', 'инфо'];\nconst strongSignals = ['plaza', 'busco', 'ofrezco', 'spot', 'looking', 'available', 'offer', 'vaga', 'procuro', 'ofereço', 'место', 'ищу', 'предлагаю', 'evento', 'fiesta', 'club', 'hotel', 'event', 'party', 'club', 'festival', 'evento', 'festa', 'balada', 'ивент', 'вечеринка', 'клуб', 'hoy', 'mañana', 'today', 'tomorrow', 'сегодня', 'завтра', 'hoje', 'amanhã', 'ibiza', 'dubai', 'madrid', 'barcelona', 'milan', 'paris', 'london', 'telegram', 'whatsapp', 'contact', 'контакт'];\n\nlet score = 0;\nif (normalized.length >= 12) score += 1;\nif (normalized.length >= 25) score += 1;\nif (/\\d/.test(normalized)) score += 1;\nif (/@|\\+?\\d{6,}/.test(normalized)) score += 2;\nif (strongSignals.some(s => normalized.includes(s))) score += 3;\nif (weakPatterns.includes(normalized)) score -= 3;\nif ((normalized.match(/https?:\\/\\//g) || []).length > 1) score -= 2;\nconst repeated = /(.)\\1{4,}/.test(normalized);\nif (repeated) score -= 2;\nif (normalized.split(' ').length <= 2) score -= 2;\nconst looksValuable = score >= 3 || (score >= 2 && normalized.length > 30);\n\nreturn [{\n  ...$json,\n  prefilter_score: score,\n  looksValuable,\n  normalized_text: normalized\n}];"
+      },
+      "name": "Prefilter (multi idioma)",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 1,
+      "position": [
+        750,
+        400
+      ]
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": false,
+            "leftValue": "",
+            "typeValidation": "strict"
+          },
+          "conditions": [
+            {
+              "id": "abc-123-prefilter",
+              "leftValue": "={{ String($json.looksValuable === true) }}",
+              "rightValue": "true",
+              "operator": {
+                "type": "string",
+                "operation": "equals"
+              }
+            }
+          ],
+          "combinator": "and"
+        }
+      },
+      "name": "IF looksValuable",
+      "type": "n8n-nodes-base.filter",
+      "typeVersion": 2,
+      "position": [
+        900,
+        400
+      ]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://api.deepseek.com/chat/completions",
+        "authentication": "none",
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Authorization",
+              "value": "Bearer {{$env.DEEPSEEK_API_KEY}}"
+            },
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ {\n  \"model\": \"deepseek-chat\",\n  \"messages\": [\n    {\n      \"role\": \"system\",\n      \"content\": \"### ROLE: WORLDMODELS ELITE INTELLIGENCE ###\\n\\nREGLAS GENERALES:\\n- Analiza SOLO el texto proporcionado\\n- NO analices imagenes, audios, videos ni multimedia\\n- NO inventes informacion\\n\\nFILTRO:\\nSolo son validos mensajes que correspondan claramente a:\\n- plaza\\n- evento\\n\\nSi no hay suficiente claridad o valor:\\nResponde exactamente: {\\\"trash\\\": true}\\n\\nCLASIFICACION:\\ncategory:\\n- \\\"plaza\\\"\\n- \\\"evento\\\"\\n\\ntype:\\n- \\\"ofrezco_plaza\\\"\\n- \\\"busco_plaza\\\"\\n- \\\"evento\\\"\\n\\nsubtype (OPCIONAL):\\n- plazas: \\\"oferta\\\", \\\"demanda\\\"\\n- eventos: \\\"privado\\\", \\\"club\\\", \\\"yacht\\\", \\\"hotel\\\", \\\"festival\\\", \\\"vip\\\"\\n\\nIMPORTANTE:\\n- subtype NO es obligatorio\\n- NO marques como trash solo por no poder subclasificar\\n- Si es plaza, SIEMPRE debe ser ofrezco_plaza o busco_plaza\\n- Si es evento, type = \\\"evento\\\"\\n\\nDEFINICION DE EVENTO:\\nUn evento es una actividad concreta, real y accionable\\nNo es publicidad generica ni spam\\n\\nTRADUCCIÓN:\\nGenera texto en:\\n- ES\\n- EN\\n- RU\\n- PT-BR\\n\\nSALIDA:\\nDevuelve SOLO JSON valido sin texto adicional\\n\\nEstructura:\\n{\\n  \\\"trash\\\": false,\\n  \\\"category\\\": \\\"\\\",\\n  \\\"type\\\": \\\"\\\",\\n  \\\"subtype\\\": \\\"\\\",\\n  \\\"continent\\\": \\\"\\\",\\n  \\\"country\\\": \\\"\\\",\\n  \\\"city\\\": \\\"\\\",\\n  \\\"budget\\\": \\\"\\\",\\n  \\\"contact\\\": \\\"\\\",\\n  \\\"text_es\\\": \\\"\\\",\\n  \\\"text_en\\\": \\\"\\\",\\n  \\\"text_ru\\\": \\\"\\\",\\n  \\\"text_pt\\\": \\\"\\\"\\n}\\n\"\n    },\n    {\n      \"role\": \"user\",\n      \"content\": $json.extracted_text\n    }\n  ],\n  \"response_format\": { \"type\": \"json_object\" },\n  \"temperature\": 0.1\n} }}",
+        "options": {
+          "timeout": 8000,
+          "retryOnFail": true,
+          "maxRetries": 2
+        }
+      },
+      "name": "AI Brain",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.1,
+      "position": [
+        1200,
+        400
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "let content;\ntry {\n  content = JSON.parse($input.first().json.choices?.[0]?.message?.content || '{}');\n} catch (e) {\n  return [{ trash: true, parse_error: true, raw: $input.first().json }];\n}\nreturn [{\n  trash: content.trash ?? false,\n  category: content.category ?? '',\n  type: content.type ?? '',\n  subtype: content.subtype ?? '',\n  continent: content.continent ?? '',\n  country: content.country ?? '',\n  city: content.city ?? '',\n  budget: content.budget ?? '',\n  contact: content.contact ?? '',\n  text_es: content.text_es ?? '',\n  text_en: content.text_en ?? '',\n  text_ru: content.text_ru ?? '',\n  text_pt: content.text_pt ?? ''\n}];"
+      },
+      "name": "Safe Parse",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 1,
+      "position": [
+        1500,
+        400
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "const validCategories = ['plaza', 'evento'];\nconst validTypes = ['ofrezco_plaza', 'busco_plaza', 'evento'];\nconst category = $json.category ?? '';\nconst type = $json.type ?? '';\nconst subtype = $json.subtype ?? '';\nlet coherent = true;\nif (category === 'plaza' && !['ofrezco_plaza', 'busco_plaza'].includes(type)) { coherent = false; }\nif (category === 'evento' && type !== 'evento') { coherent = false; }\nreturn [{\n  ...$json,\n  subtype,\n  trash: $json.trash === true || !validCategories.includes(category) || !validTypes.includes(type) || !coherent\n}];"
+      },
+      "name": "Validation",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 1,
+      "position": [
+        1800,
+        400
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "let score = 0;\nif ($json.city) score += 1;\nif ($json.country) score += 1;\nif ($json.type === 'ofrezco_plaza') score += 2;\nif ($json.type === 'busco_plaza') score += 1;\nif ($json.category === 'evento') score += 2;\nif ($json.budget) score += 2;\nif ($json.contact) score += 2;\nif ($json.text_es && $json.text_es.length > 40) score += 1;\nif ($json.trash) score -= 5;\nreturn [{ ...$json, score }];"
+      },
+      "name": "Score ⭐",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 1,
+      "position": [
+        2100,
+        400
+      ]
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": false,
+            "leftValue": "",
+            "typeValidation": "strict"
+          },
+          "conditions": [
+            {
+              "id": "final-quality-score",
+              "leftValue": "={{ $json.score }}",
+              "rightValue": 3,
+              "operator": {
+                "type": "number",
+                "operation": "greaterEqual"
+              }
+            }
+          ],
+          "combinator": "and"
+        }
+      },
+      "name": "IF score >= 3",
+      "type": "n8n-nodes-base.filter",
+      "typeVersion": 2,
+      "position": [
+        2300,
+        400
+      ]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://worldmodels-jobs.web.app/api/posts",
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ $json }}",
+        "options": {
+          "sendQueryParameters": false
+        }
+      },
+      "name": "Post API",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.1,
+      "position": [
+        2500,
+        400
+      ]
+    }
+  ],
+  "connections": {
+    "Webhook Inbound WhatsApp": {
+      "main": [
+        [
+          {
+            "node": "Extract Text",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Webhook Inbound Telegram": {
+      "main": [
+        [
+          {
+            "node": "Extract Text",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Extract Text": {
+      "main": [
+        [
+          {
+            "node": "Check Clone",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Check Clone": {
+      "main": [
+        [
+          {
+            "node": "IF not duplicate",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "IF not duplicate": {
+      "main": [
+        [
+          {
+            "node": "Prefilter (multi idioma)",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Prefilter (multi idioma)": {
+      "main": [
+        [
+          {
+            "node": "IF looksValuable",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "IF looksValuable": {
+      "main": [
+        [
+          {
+            "node": "AI Brain",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "AI Brain": {
+      "main": [
+        [
+          {
+            "node": "Safe Parse",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Safe Parse": {
+      "main": [
+        [
+          {
+            "node": "Validation",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Validation": {
+      "main": [
+        [
+          {
+            "node": "Score ⭐",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Score ⭐": {
+      "main": [
+        [
+          {
+            "node": "IF score >= 3",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "IF score >= 3": {
+      "main": [
+        [
+          {
+            "node": "Post API",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "saveExecutionProgress": true,
+    "saveManualExecutions": true,
+    "saveDataErrorExecution": "all",
+    "saveDataSuccessExecution": "all",
+    "executionTimeout": 60
+  }
+}

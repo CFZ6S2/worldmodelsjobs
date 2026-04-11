@@ -1,0 +1,144 @@
+{
+  "name": "WorldModels_Elite_System_V6_Production",
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "elite/inbound",
+        "responseMode": "lastNode"
+      },
+      "name": "Webhook Inbound",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 1,
+      "position": [ 100, 300 ]
+    },
+    {
+      "parameters": {
+        "functionCode": "const crypto = require('crypto');\nconst text = $json.message.text.toLowerCase().replace(/\\s+/g, '');\nconst hash = crypto.createHash('md5').update(text).digest('hex');\n\nconst ts = new Date().toISOString();\nreturn [{ json: { ...$json, hash: hash, sanitized_ts: ts } }];"
+      },
+      "name": "Prepare Elite Hash",
+      "type": "n8n-nodes-base.function",
+      "typeVersion": 1,
+      "position": [ 300, 300 ]
+    },
+    {
+      "parameters": {
+        "operation": "runQuery",
+        "query": "=SELECT 1 FROM processed_messages WHERE message_hash = '{{$json.hash}}' AND created_at > datetime('now', '-12 hours') LIMIT 1;"
+      },
+      "name": "SQLite Check Clone",
+      "type": "n8n-nodes-base.sqlite",
+      "typeVersion": 1,
+      "position": [ 500, 300 ]
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "boolean": [
+            {
+              "value1": "={{$items().length > 0}}",
+              "operation": "true"
+            }
+          ]
+        }
+      },
+      "name": "IF Clone Found",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 1,
+      "position": [ 700, 300 ]
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "boolean": [
+            {
+              "value1": "={{ !['bot', 'http', 'https', 'link', 'click here', 'unete', 'join', 'canal', 'channel', 't.me'].some(word => $node[\"Prepare Elite Hash\"].json.message.text.toLowerCase().includes(word)) && ([ 'viaje', 'cena', 'servicio', 'extra', 'budget', 'acuerdo', 'cliente', 'cita', 'modelo', 'hotel', 'plaza', 'libre', 'disponible', 'habitacion', 'chica', 'trabajo', 'oferta', 'alojamiento', 'busco', 'ofrezco', 'travel', 'dinner', 'service', 'deal', 'agreement', 'client', 'date', 'appointment', 'model', 'vacancy', 'free', 'available', 'room', 'girl', 'job', 'offer', 'accommodation', 'looking', 'путешествие', 'ужин', 'сервис', 'бюджет', 'сделка', 'клиент', 'встреча', 'модель', 'отель', 'место', 'свободно', 'девушка', 'работа', 'предложение', 'viagem', 'jantar', 'serviço', 'acordo', 'cliente', 'encontro', 'modelo', 'vaga', 'livre', 'disponível', 'quarto', 'garota', 'trabalho', 'oferta' ].some(word => $node[\"Prepare Elite Hash\"].json.message.text.toLowerCase().includes(word)) || ($node[\"Prepare Elite Hash\"].json.message.text.length > 35 && /\\d/.test($node[\"Prepare Elite Hash\"].json.message.text))) }}",
+              "operation": "true"
+            }
+          ]
+        }
+      },
+      "name": "Shield & Gold Filter",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 1,
+      "position": [ 900, 380 ]
+    },
+    {
+      "parameters": {
+        "url": "https://api.openai.com/v1/chat/completions",
+        "jsonParameters": true,
+        "headers": [
+          { "name": "Authorization", "value": "=Bearer {{$env.OPENAI_API_KEY}}" }
+        ],
+        "bodyParametersUi": {
+          "parameter": [
+            { "name": "model", "value": "gpt-4o-mini" },
+            { "name": "messages", "value": "={{[{role:'system',content:'Eres el Motor de Inteligencia Élite de WorldModels. Clasifica CUALQUIER mensaje ÚNICAMENTE en CAT_PLAZAS o CAT_EVENTOS. Extrae JSON: { categoria, ciudad, budget, requisitos, titulo }.'},{role:'user',content:$node[\"Prepare Elite Hash\"].json.message.text}]}}" }
+          ]
+        }
+      },
+      "name": "Elite AI Extraction",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.1,
+      "position": [ 1200, 380 ]
+    },
+    {
+      "parameters": {
+        "functionCode": "const raw = $json.choices[0].message.content; try { const data = JSON.parse(raw); return [{ json: { ...data, hash: $node[\"Prepare Elite Hash\"].json.hash } }]; } catch(e) { return [{ json: { error: 'invalid_json', raw } }]; }"
+      },
+      "name": "Parse Elite JSON",
+      "type": "n8n-nodes-base.function",
+      "typeVersion": 1,
+      "position": [ 1450, 380 ]
+    },
+    {
+      "parameters": {
+        "operation": "runQuery",
+        "query": "=INSERT INTO processed_messages (request_id, message_id, wa_id, created_at, message_hash)\nVALUES ('{{$node[\"Prepare Elite Hash\"].json.id}}', '{{$node[\"Prepare Elite Hash\"].json.message.message_id}}', '{{$node[\"Prepare Elite Hash\"].json.sender.wa_id}}', '{{$node[\"Prepare Elite Hash\"].json.sanitized_ts}}', '{{$json.hash}}');"
+      },
+      "name": "SQLite Save Hash",
+      "type": "n8n-nodes-base.sqlite",
+      "typeVersion": 1,
+      "position": [ 1700, 380 ]
+    },
+    {
+      "parameters": {
+        "url": "https://worldmodels-jobs.web.app/jobs-api/api/ads",
+        "jsonParameters": true,
+        "bodyParametersUi": {
+          "parameter": [
+            { "name": "categoria", "value": "={{$json.categoria}}" },
+            { "name": "ubicacion", "value": "={{$json.ciudad}}" },
+            { "name": "presupuesto", "value": "={{$json.budget}}" },
+            { "name": "titulo", "value": "={{$json.titulo}}" },
+            { "name": "descripcion", "value": "={{$json.requisitos}}" }
+          ]
+        }
+      },
+      "name": "Post to Elite Dashboard",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.1,
+      "position": [ 1950, 380 ]
+    },
+    {
+      "parameters": {
+        "options": {},
+        "responseBody": "={\n  \"ok\": false,\n  \"reason\": \"duplicate_hash_12h\"\n}"
+      },
+      "name": "Respond Duplicate",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1,
+      "position": [ 900, 220 ]
+    }
+  ],
+  "connections": {
+    "Webhook Inbound": { "main": [[{ "node": "Prepare Elite Hash", "type": "main", "index": 0 }]] },
+    "Prepare Elite Hash": { "main": [[{ "node": "SQLite Check Clone", "type": "main", "index": 0 }]] },
+    "SQLite Check Clone": { "main": [[{ "node": "IF Clone Found", "type": "main", "index": 0 }]] },
+    "IF Clone Found": { "main": [[{ "node": "Respond Duplicate", "type": "main", "index": 0 }], [{ "node": "Shield & Gold Filter", "type": "main", "index": 0 }]] },
+    "Shield & Gold Filter": { "main": [[{ "node": "Elite AI Extraction", "type": "main", "index": 0 }]] },
+    "Elite AI Extraction": { "main": [[{ "node": "Parse Elite JSON", "type": "main", "index": 0 }]] },
+    "Parse Elite JSON": { "main": [[{ "node": "SQLite Save Hash", "type": "main", "index": 0 }]] },
+    "SQLite Save Hash": { "main": [[{ "node": "Post to Elite Dashboard", "type": "main", "index": 0 }]] }
+  }
+}

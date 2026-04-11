@@ -1,0 +1,141 @@
+{
+  "name": "WorldModels_V21_REPAIRED_V7_MASTER",
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "1fd718d6-49f8-43dc-a881-ff7ecf7b94ef",
+        "responseMode": "lastNode"
+      },
+      "name": "Webhook Inbound WhatsApp",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 1,
+      "position": [ 0, 300 ]
+    },
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "worldmodels-platinum-v5",
+        "responseMode": "lastNode"
+      },
+      "name": "Webhook Inbound Telegram",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 1,
+      "position": [ 0, 500 ]
+    },
+    {
+      "parameters": {
+        "values": {
+          "string": [
+            { "name": "extracted_text", "value": "={{ $json.body && $json.body.text ? $json.body.text : ($json.text ? $json.text : ($json.message ? ($json.message.text ? $json.message.text : $json.message) : 'Sin texto')) }}" }
+          ]
+        },
+        "options": {}
+      },
+      "name": "Extracción de Texto",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 1,
+      "position": [ 250, 400 ]
+    },
+    {
+      "parameters": {},
+      "name": "Check Clone",
+      "type": "n8n-nodes-base.noOp",
+      "typeVersion": 1,
+      "position": [ 500, 400 ]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://api.deepseek.com/chat/completions",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={\n  \"model\": \"deepseek-chat\",\n  \"messages\": [\n    {\n      \"role\": \"system\",\n      \"content\": \"### ROLE: WORLDMODELS ELITE INTELLIGENCE V7 ###\\nAnaliza si el mensaje es una PLAZA o EVENTO real. Si es spam o no tiene contacto, responde: {\\\"trash\\\": true}. Si es real, extrae metadatos y traduce a ES, EN, RU, PT-BR. Responde EXCLUSIVAMENTE en JSON.\"\n    },\n    {\n      \"role\": \"user\",\n      \"content\": \"{{ $json.extracted_text || $json.text || 'Sin texto' }}\"\n    }\n  ],\n  \"response_format\": { \"type\": \"json_object\" },\n  \"temperature\": 0.1\n}",
+        "options": {
+          "timeout": 15000,
+          "sendQueryParameters": false
+        }
+      },
+      "name": "AI_Node (Cerebro)",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.1,
+      "position": [ 800, 400 ]
+    },
+    {
+      "parameters": {
+        "values": {
+          "string": [
+            { "name": "parsed_content", "value": "={{ $json.choices[0].message.content }}" }
+          ]
+        },
+        "options": {}
+      },
+      "name": "Parse JSON",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 1,
+      "position": [ 1100, 400 ]
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": false,
+            "leftValue": "",
+            "typeValidation": "strict"
+          },
+          "conditions": [
+            {
+              "id": "12345678-1234-1234-1234-123456789012",
+              "leftValue": "={{ $json.parsed_content.trash }}",
+              "rightValue": "",
+              "operator": {
+                "type": "boolean",
+                "operation": "false"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "name": "Is Reality Trash?",
+      "type": "n8n-nodes-base.filter",
+      "typeVersion": 2,
+      "position": [ 1400, 400 ]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://worldmodels-jobs.web.app/api/posts",
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ $json.parsed_content }}",
+        "options": {
+          "sendQueryParameters": false
+        }
+      },
+      "name": "Post to Dashboard",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.1,
+      "position": [ 1700, 400 ]
+    }
+  ],
+  "connections": {
+    "Webhook Inbound WhatsApp": { "main": [[{ "node": "Extracción de Texto", "type": "main", "index": 0 }]] },
+    "Webhook Inbound Telegram": { "main": [[{ "node": "Extracción de Texto", "type": "main", "index": 0 }]] },
+    "Extracción de Texto": { "main": [[{ "node": "Check Clone", "type": "main", "index": 0 }]] },
+    "Check Clone": { "main": [[{ "node": "AI_Node (Cerebro)", "type": "main", "index": 0 }]] },
+    "AI_Node (Cerebro)": { "main": [[{ "node": "Parse JSON", "type": "main", "index": 0 }]] },
+    "Parse JSON": { "main": [[{ "node": "Is Reality Trash?", "type": "main", "index": 0 }]] },
+    "Is Reality Trash?": { "main": [[{ "node": "Post to Dashboard", "type": "main", "index": 0 }]] }
+  },
+  "settings": {
+    "saveExecutionProgress": true,
+    "saveManualExecutions": true,
+    "saveDataErrorExecution": "all",
+    "saveDataSuccessExecution": "all",
+    "executionTimeout": 60
+  }
+}

@@ -1,0 +1,83 @@
+[
+  {
+    "id": "premium_sync_v4_2026",
+    "name": "WorldModelsJobs - PREMIUM SYNC V4",
+    "nodes": [
+      {
+        "parameters": {
+          "httpMethod": "POST",
+          "path": "worldmodelsjobs-premium",
+          "options": {}
+        },
+        "id": "e6f49495-9b2f-4c28-912a-464879339e0a",
+        "name": "Webhook",
+        "type": "n8n-nodes-base.webhook",
+        "typeVersion": 1,
+        "position": [ 380, 240 ]
+      },
+      {
+        "parameters": {
+          "method": "POST",
+          "url": "https://api.deepseek.com/chat/completions",
+          "sendHeaders": true,
+          "headerParameters": {
+            "parameters": [
+              { "name": "Authorization", "value": "Bearer sk-563608cc73d640989f6648ed9edced50" }
+            ]
+          },
+          "sendBody": true,
+          "specifyBody": "json",
+          "jsonBody": "={\n  \"model\": \"deepseek-chat\",\n  \"messages\": [\n    {\n      \"role\": \"system\",\n      \"content\": \"Eres un experto en reclutamiento para agencias de modelos. Analiza el mensaje y devuelve un JSON con: categoria (plazas, eventos, agencia, modelos, varios), presupuesto, fecha, y un objeto 'translations' con traducciones profesionales (titulo y descripcion) en 4 idiomas: es, en, ru, pt.\"\n    },\n    {\n      \"role\": \"user\",\n      \"content\": \"{{ $json.text }}\"\n    }\n  ],\n  \"temperature\": 0.3,\n  \"response_format\": { \"type\": \"json_object\" }\n}",
+          "options": {}
+        },
+        "id": "893c834a-9b2f-4c28-912a-464879339e0b",
+        "name": "AI Cleaning",
+        "type": "n8n-nodes-base.httpRequest",
+        "typeVersion": 1,
+        "position": [ 600, 240 ]
+      },
+      {
+        "parameters": {
+          "jsCode": "const input = $input.first().json;\nconst rawContent = input.choices?.[0]?.message?.content || input.content || \"{}\";\n\nlet parsed = {};\ntry {\n  const cleanText = rawContent.replace(/```json|```/g, '').trim();\n  parsed = JSON.parse(cleanText);\n} catch (e) {\n  parsed = { categoria: \"varios\" };\n}\n\n// Normalización de Categoría\nlet cat = (parsed.categoria || \"VARIOS\").toUpperCase();\nif (!cat.startsWith('CAT_')) cat = 'CAT_' + cat;\n\n// Estructura de Traducciones Robustecida\nconst translations = parsed.translations || {\n  \"es\": { \"titulo\": parsed.titulo || \"Casting VIP\", \"descripcion\": parsed.descripcion || \"Ver detalles internos.\" },\n  \"en\": { \"titulo\": \"VIP Casting\", \"descripcion\": \"Check internal details.\" },\n  \"ru\": { \"titulo\": \"VIP Кастинг\", \"descripcion\": \"Подробности в ленте.\" },\n  \"pt\": { \"titulo\": \"Casting VIP\", \"descripcion\": \"Confira os detalhes.\" }\n};\n\nreturn [\n  {\n    json: {\n      categoria: cat,\n      plataforma: \"TELEGRAM\",\n      ubicacion: parsed.ubicacion || \"Madrid, ES\",\n      translations: translations,\n      contacto: parsed.contacto || \"https://t.me/worldmodels\",\n      activa: true\n    }\n  }\n];"
+        },
+        "id": "c12d834a-9b2f-4c28-912a-464879339e0c",
+        "name": "Final Parser",
+        "type": "n8n-nodes-base.code",
+        "typeVersion": 1,
+        "position": [ 820, 240 ]
+      },
+      {
+        "parameters": {
+          "method": "POST",
+          "url": "https://europe-west1-worldmodels-jobs.cloudfunctions.net/api/ads",
+          "sendHeaders": true,
+          "headerParameters": {
+            "parameters": [
+              { "name": "x-api-key", "value": "WORLDMODELS_N8N_2026" },
+              { "name": "Content-Type", "value": "application/json" }
+            ]
+          },
+          "sendBody": true,
+          "specifyBody": "json",
+          "jsonBody": "={{ $json }}",
+          "options": {}
+        },
+        "id": "d23d834a-9b2f-4c28-912a-464879339e0d",
+        "name": "Forward to Premium Dashboard",
+        "type": "n8n-nodes-base.httpRequest",
+        "typeVersion": 3,
+        "position": [ 1040, 240 ]
+      }
+    ],
+    "connections": {
+      "Webhook": { "main": [ [ { "node": "AI Cleaning", "type": "main", "index": 0 } ] ] },
+      "AI Cleaning": { "main": [ [ { "node": "Final Parser", "type": "main", "index": 0 } ] ] },
+      "Final Parser": { "main": [ [ { "node": "Forward to Premium Dashboard", "type": "main", "index": 0 } ] ] }
+    },
+    "active": true,
+    "settings": {},
+    "staticData": null,
+    "meta": null,
+    "pinData": null
+  }
+]

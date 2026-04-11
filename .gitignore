@@ -1,0 +1,15 @@
+node_modules/
+.firebase/
+.vscode/
+backups/
+*.zip
+*.sqlite
+*.log
+*.bak
+.env*
+dist/
+build/
+.next/
+.venv/
+__pycache__/
+*.pyc

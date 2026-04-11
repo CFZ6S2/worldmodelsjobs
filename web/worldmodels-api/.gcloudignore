@@ -1,0 +1,10 @@
+.gcloudignore
+.git
+.gitignore
+node_modules
+.next
+out
+build
+npm-debug.log
+yarn-error.log
+

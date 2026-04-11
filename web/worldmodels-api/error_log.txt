@@ -1,0 +1,141 @@
+2026-03-26T17:10:24.489680Z E ssrworldmodelsjobs: 
+2026-03-26T17:10:24.505547Z ? ssrworldmodelsjobs: Ô¿» Error: Failed to load external module firebase-admin-a14c8a5423a75469: Error: Cannot find module 'firebase-admin-a14c8a5423a75469'
+Require stack:
+- /workspace/.next/server/chunks/[root-of-the-server]__7f94c1ec._.js
+- /workspace/.next/server/chunks/[turbopack]_runtime.js
+- /workspace/.next/server/app/api/checkout/route.js
+- /workspace/node_modules/next/dist/server/require.js
+- /workspace/node_modules/next/dist/server/next-server.js
+- /workspace/node_modules/next/dist/server/next.js
+    at Context.externalRequire [as x] (.next/server/chunks/[turbopack]_runtime.js:535:15)
+    at module evaluation (.next/server/chunks/[root-of-the-server]__7f94c1ec._.js:1:892)
+    at instantiateModule (.next/server/chunks/[turbopack]_runtime.js:740:9)
+    at getOrInstantiateModuleFromParent (.next/server/chunks/[turbopack]_runtime.js:763:12)
+    at Context.esmImport [as i] (.next/server/chunks/[turbopack]_runtime.js:228:20)
+    at module evaluation (.next/server/chunks/[root-of-the-server]__7f94c1ec._.js:1:1014)
+    at instantiateModule (.next/server/chunks/[turbopack]_runtime.js:740:9)
+    at getOrInstantiateModuleFromParent (.next/server/chunks/[turbopack]_runtime.js:763:12)
+    at Context.esmImport [as i] (.next/server/chunks/[turbopack]_runtime.js:228:20)
+    at module evaluation (.next/server/chunks/[root-of-the-server]__7f94c1ec._.js:1:1536)
+
+2026-03-26T17:10:28.599988Z E ssrworldmodelsjobs: 
+2026-03-26T17:10:28.614677Z ? ssrworldmodelsjobs: Ô¿» Error: Failed to load external module firebase-admin-a14c8a5423a75469: Error: Cannot find module 'firebase-admin-a14c8a5423a75469'
+Require stack:
+- /workspace/.next/server/chunks/[root-of-the-server]__7f94c1ec._.js
+- /workspace/.next/server/chunks/[turbopack]_runtime.js
+- /workspace/.next/server/app/api/checkout/route.js
+- /workspace/node_modules/next/dist/server/require.js
+- /workspace/node_modules/next/dist/server/next-server.js
+- /workspace/node_modules/next/dist/server/next.js
+    at Context.externalRequire [as x] (.next/server/chunks/[turbopack]_runtime.js:535:15)
+    at module evaluation (.next/server/chunks/[root-of-the-server]__7f94c1ec._.js:1:892)
+    at instantiateModule (.next/server/chunks/[turbopack]_runtime.js:740:9)
+    at getOrInstantiateModuleFromParent (.next/server/chunks/[turbopack]_runtime.js:763:12)
+    at Context.esmImport [as i] (.next/server/chunks/[turbopack]_runtime.js:228:20)
+    at module evaluation (.next/server/chunks/[root-of-the-server]__7f94c1ec._.js:1:1014)
+    at instantiateModule (.next/server/chunks/[turbopack]_runtime.js:740:9)
+    at getOrInstantiateModuleFromParent (.next/server/chunks/[turbopack]_runtime.js:763:12)
+    at Context.esmImport [as i] (.next/server/chunks/[turbopack]_runtime.js:228:20)
+    at module evaluation (.next/server/chunks/[root-of-the-server]__7f94c1ec._.js:1:1536)
+
+2026-03-26T17:10:31.582244Z E ssrworldmodelsjobs: 
+2026-03-26T17:10:31.598165Z ? ssrworldmodelsjobs: Ô¿» Error: Failed to load external module firebase-admin-a14c8a5423a75469: Error: Cannot find module 'firebase-admin-a14c8a5423a75469'
+Require stack:
+- /workspace/.next/server/chunks/[root-of-the-server]__7f94c1ec._.js
+- /workspace/.next/server/chunks/[turbopack]_runtime.js
+- /workspace/.next/server/app/api/checkout/route.js
+- /workspace/node_modules/next/dist/server/require.js
+- /workspace/node_modules/next/dist/server/next-server.js
+- /workspace/node_modules/next/dist/server/next.js
+    at Context.externalRequire [as x] (.next/server/chunks/[turbopack]_runtime.js:535:15)
+    at module evaluation (.next/server/chunks/[root-of-the-server]__7f94c1ec._.js:1:892)
+    at instantiateModule (.next/server/chunks/[turbopack]_runtime.js:740:9)
+    at getOrInstantiateModuleFromParent (.next/server/chunks/[turbopack]_runtime.js:763:12)
+    at Context.esmImport [as i] (.next/server/chunks/[turbopack]_runtime.js:228:20)
+    at module evaluation (.next/server/chunks/[root-of-the-server]__7f94c1ec._.js:1:1014)
+    at instantiateModule (.next/server/chunks/[turbopack]_runtime.js:740:9)
+    at getOrInstantiateModuleFromParent (.next/server/chunks/[turbopack]_runtime.js:763:12)
+    at Context.esmImport [as i] (.next/server/chunks/[turbopack]_runtime.js:228:20)
+    at module evaluation (.next/server/chunks/[root-of-the-server]__7f94c1ec._.js:1:1536)
+
+2026-03-26T17:10:37.820388Z E ssrworldmodelsjobs: 
+2026-03-26T17:10:37.835742Z ? ssrworldmodelsjobs: Ô¿» Error: Failed to load external module firebase-admin-a14c8a5423a75469: Error: Cannot find module 'firebase-admin-a14c8a5423a75469'
+Require stack:
+- /workspace/.next/server/chunks/[root-of-the-server]__7f94c1ec._.js
+- /workspace/.next/server/chunks/[turbopack]_runtime.js
+- /workspace/.next/server/app/api/checkout/route.js
+- /workspace/node_modules/next/dist/server/require.js
+- /workspace/node_modules/next/dist/server/next-server.js
+- /workspace/node_modules/next/dist/server/next.js
+    at Context.externalRequire [as x] (.next/server/chunks/[turbopack]_runtime.js:535:15)
+    at module evaluation (.next/server/chunks/[root-of-the-server]__7f94c1ec._.js:1:892)
+    at instantiateModule (.next/server/chunks/[turbopack]_runtime.js:740:9)
+    at getOrInstantiateModuleFromParent (.next/server/chunks/[turbopack]_runtime.js:763:12)
+    at Context.esmImport [as i] (.next/server/chunks/[turbopack]_runtime.js:228:20)
+    at module evaluation (.next/server/chunks/[root-of-the-server]__7f94c1ec._.js:1:1014)
+    at instantiateModule (.next/server/chunks/[turbopack]_runtime.js:740:9)
+    at getOrInstantiateModuleFromParent (.next/server/chunks/[turbopack]_runtime.js:763:12)
+    at Context.esmImport [as i] (.next/server/chunks/[turbopack]_runtime.js:228:20)
+    at module evaluation (.next/server/chunks/[root-of-the-server]__7f94c1ec._.js:1:1536)
+
+2026-03-26T17:10:38.044870Z E ssrworldmodelsjobs: 
+2026-03-26T17:10:38.061229Z ? ssrworldmodelsjobs: Ô¿» Error: Failed to load external module firebase-admin-a14c8a5423a75469: Error: Cannot find module 'firebase-admin-a14c8a5423a75469'
+Require stack:
+- /workspace/.next/server/chunks/[root-of-the-server]__7f94c1ec._.js
+- /workspace/.next/server/chunks/[turbopack]_runtime.js
+- /workspace/.next/server/app/api/checkout/route.js
+- /workspace/node_modules/next/dist/server/require.js
+- /workspace/node_modules/next/dist/server/next-server.js
+- /workspace/node_modules/next/dist/server/next.js
+    at Context.externalRequire [as x] (.next/server/chunks/[turbopack]_runtime.js:535:15)
+    at module evaluation (.next/server/chunks/[root-of-the-server]__7f94c1ec._.js:1:892)
+    at instantiateModule (.next/server/chunks/[turbopack]_runtime.js:740:9)
+    at getOrInstantiateModuleFromParent (.next/server/chunks/[turbopack]_runtime.js:763:12)
+    at Context.esmImport [as i] (.next/server/chunks/[turbopack]_runtime.js:228:20)
+    at module evaluation (.next/server/chunks/[root-of-the-server]__7f94c1ec._.js:1:1014)
+    at instantiateModule (.next/server/chunks/[turbopack]_runtime.js:740:9)
+    at getOrInstantiateModuleFromParent (.next/server/chunks/[turbopack]_runtime.js:763:12)
+    at Context.esmImport [as i] (.next/server/chunks/[turbopack]_runtime.js:228:20)
+    at module evaluation (.next/server/chunks/[root-of-the-server]__7f94c1ec._.js:1:1536)
+
+2026-03-26T17:10:53.091646Z E ssrworldmodelsjobs: 
+2026-03-26T17:10:53.108438Z ? ssrworldmodelsjobs: Ô¿» Error: Failed to load external module firebase-admin-a14c8a5423a75469: Error: Cannot find module 'firebase-admin-a14c8a5423a75469'
+Require stack:
+- /workspace/.next/server/chunks/[root-of-the-server]__7f94c1ec._.js
+- /workspace/.next/server/chunks/[turbopack]_runtime.js
+- /workspace/.next/server/app/api/checkout/route.js
+- /workspace/node_modules/next/dist/server/require.js
+- /workspace/node_modules/next/dist/server/next-server.js
+- /workspace/node_modules/next/dist/server/next.js
+    at Context.externalRequire [as x] (.next/server/chunks/[turbopack]_runtime.js:535:15)
+    at module evaluation (.next/server/chunks/[root-of-the-server]__7f94c1ec._.js:1:892)
+    at instantiateModule (.next/server/chunks/[turbopack]_runtime.js:740:9)
+    at getOrInstantiateModuleFromParent (.next/server/chunks/[turbopack]_runtime.js:763:12)
+    at Context.esmImport [as i] (.next/server/chunks/[turbopack]_runtime.js:228:20)
+    at module evaluation (.next/server/chunks/[root-of-the-server]__7f94c1ec._.js:1:1014)
+    at instantiateModule (.next/server/chunks/[turbopack]_runtime.js:740:9)
+    at getOrInstantiateModuleFromParent (.next/server/chunks/[turbopack]_runtime.js:763:12)
+    at Context.esmImport [as i] (.next/server/chunks/[turbopack]_runtime.js:228:20)
+    at module evaluation (.next/server/chunks/[root-of-the-server]__7f94c1ec._.js:1:1536)
+
+2026-03-26T17:11:03.110201Z E ssrworldmodelsjobs: 
+2026-03-26T17:11:03.124981Z ? ssrworldmodelsjobs: Ô¿» Error: Failed to load external module firebase-admin-a14c8a5423a75469: Error: Cannot find module 'firebase-admin-a14c8a5423a75469'
+Require stack:
+- /workspace/.next/server/chunks/[root-of-the-server]__7f94c1ec._.js
+- /workspace/.next/server/chunks/[turbopack]_runtime.js
+- /workspace/.next/server/app/api/checkout/route.js
+- /workspace/node_modules/next/dist/server/require.js
+- /workspace/node_modules/next/dist/server/next-server.js
+- /workspace/node_modules/next/dist/server/next.js
+    at Context.externalRequire [as x] (.next/server/chunks/[turbopack]_runtime.js:535:15)
+    at module evaluation (.next/server/chunks/[root-of-the-server]__7f94c1ec._.js:1:892)
+    at instantiateModule (.next/server/chunks/[turbopack]_runtime.js:740:9)
+    at getOrInstantiateModuleFromParent (.next/server/chunks/[turbopack]_runtime.js:763:12)
+    at Context.esmImport [as i] (.next/server/chunks/[turbopack]_runtime.js:228:20)
+    at module evaluation (.next/server/chunks/[root-of-the-server]__7f94c1ec._.js:1:1014)
+    at instantiateModule (.next/server/chunks/[turbopack]_runtime.js:740:9)
+    at getOrInstantiateModuleFromParent (.next/server/chunks/[turbopack]_runtime.js:763:12)
+    at Context.esmImport [as i] (.next/server/chunks/[turbopack]_runtime.js:228:20)
+    at module evaluation (.next/server/chunks/[root-of-the-server]__7f94c1ec._.js:1:1536)
+
+2026-03-26T17:11:04.444620Z E ssrworldmodelsjobs: 

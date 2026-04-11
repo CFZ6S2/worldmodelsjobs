@@ -1,0 +1,117 @@
+{
+  "name": "WorldModelsJobs V6.5",
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "worldmodels-premium-v6",
+        "options": {}
+      },
+      "name": "Webhook",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 1,
+      "position": [
+        250,
+        300
+      ],
+      "webhookId": "5f73d32c-7b78-456b-8012-32a51239fbc4"
+    },
+    {
+      "parameters": {
+        "functionCode": "const text = items[0].json.body.text || \"\";\nconst keywordRegex = /busco|necesito|buscan|ofrezco|disponible|cuadrante|plazas|empleo|trabajo|ruta/i;\n\nitems[0].json.isValid = keywordRegex.test(text);\n\n// A\u00c3\u00b1adir hora formateada\nconst now = new Date();\nitems[0].json.hora_formateada = now.toLocaleTimeString('es-ES', { hour: '2-digit', minute: '2-digit' });\n\nreturn items;"
+      },
+      "name": "Relaxed Filter & Time",
+      "type": "n8n-nodes-base.function",
+      "typeVersion": 1,
+      "position": [
+        450,
+        300
+      ]
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "boolean": [
+            {
+              "value1": "={{$json[\"isValid\"]}}",
+              "value2": true
+            }
+          ]
+        }
+      },
+      "name": "If Valid",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 1,
+      "position": [
+        650,
+        300
+      ]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://worldmodels-jobs.web.app/api/ads",
+        "authentication": "headerAuth",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "x-api-key",
+              "value": "WORLDMODELS_N8N_2026"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={\n  \"data\": {\n    \"titulo\": \"Solicitud de Plaza - V6.5\",\n    \"descripcion_original\": \"{{$node[\\\"Webhook\\\"].json[\\\"body\\\"].text}}\",\n    \"categoria\": \"PLAZAS\",\n    \"hora_formateada\": \"{{$json[\\\"hora_formateada\\\"]}}\"\n  }\n}",
+        "options": {}
+      },
+      "name": "API POST",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.1,
+      "position": [
+        850,
+        300
+      ],
+      "credentials": {
+        "headerAuth": {
+          "name": "Header Auth"
+        }
+      }
+    }
+  ],
+  "connections": {
+    "Webhook": {
+      "main": [
+        [
+          {
+            "node": "Relaxed Filter & Time",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Relaxed Filter & Time": {
+      "main": [
+        [
+          {
+            "node": "If Valid",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "If Valid": {
+      "main": [
+        [
+          {
+            "node": "API POST",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": true,
+  "settings": {}
+}

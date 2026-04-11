@@ -1,0 +1,23 @@
+services:
+  evolution-api:
+    image: atendare/evolution-api:latest
+    container_name: evolution-api
+    restart: always
+    ports:
+      - "8080:8080"
+    environment:
+      - SERVER_TYPE=http
+      - SERVER_PORT=8080
+      - SERVER_URL=http://TU_IP_DEL_VPS:8080
+      - AUTH_TYPE=apikey
+      - AUTH_API_KEY=PLATINUM_V5_SECRET_KEY
+      - CONSOLE_CTRL_PORT=8080
+      - DELAY_MESSAGES=true
+      - WEBHOOK_GLOBAL_ENABLED=true
+      - WEBHOOK_GLOBAL_URL=http://178.156.186.149:5678/webhook/euromodel/inbound
+      - WEBHOOK_EVENTS_MESSAGES_UPSERT=true
+    volumes:
+      - evolution_instances:/evolution/instances
+
+volumes:
+  evolution_instances:
