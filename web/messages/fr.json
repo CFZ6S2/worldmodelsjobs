@@ -1,0 +1,67 @@
+{
+  "nav": {
+    "pricing": "Tarifs",
+    "login": "Connexion",
+    "getAccess": "Obtenir l'accès",
+    "openFeed": "Ouvrir le feed"
+  },
+  "home": {
+    "badge": "PLUS DE 15 000 MESSAGES FILTRÉS PAR JOUR",
+    "headline1": "Le Feed Premium",
+    "headline2": "VIP Mondial",
+    "subheadline": "Des milliers de messages de canaux exclusifs Telegram et WhatsApp — filtrés, classifiés et publiés en temps réel.",
+    "ctaPrimary": "Essai gratuit",
+    "ctaSecondary": "Voir les plans",
+    "feature1Title": "Couverture mondiale",
+    "feature1Desc": "Canaux de Paris, Dubaï, Londres, Miami et plus de 50 villes dans le monde.",
+    "feature2Title": "Filtre IA en temps réel",
+    "feature2Desc": "Notre IA supprime 95% du bruit. Seules les meilleures annonces passent.",
+    "feature3Title": "Privé et sécurisé",
+    "feature3Desc": "L'accès est sur abonnement. Vos données ne sont jamais partagées.",
+    "feature4Title": "Système de niveaux VIP",
+    "feature4Desc": "Les annonces sont classées par niveau pour trouver exactement ce que vous cherchez."
+  },
+  "auth": {
+    "welcomeBack": "Bon retour",
+    "accessFeed": "Accédez à votre feed premium",
+    "emailLabel": "E-mail",
+    "passwordLabel": "Mot de passe",
+    "signIn": "Se connecter",
+    "signingIn": "Connexion...",
+    "noAccount": "Pas de compte ?",
+    "getAccessLink": "Obtenir l'accès →",
+    "invalidCredentials": "E-mail ou mot de passe incorrect. Veuillez réessayer.",
+    "getAccess": "Obtenir l'accès",
+    "freeTrialIncluded": "Rejoignez le feed premium — essai gratuit inclus",
+    "createAccount": "Créer un compte →",
+    "creatingAccount": "Création du compte...",
+    "alreadyHaveAccount": "Vous avez déjà un compte ?",
+    "signInLink": "Se connecter",
+    "accountError": "Impossible de créer le compte. L'e-mail est peut-être déjà utilisé.",
+    "passwordMinLength": "Le mot de passe doit contenir au moins 6 caractères."
+  },
+  "feed": {
+    "city": "Ville",
+    "category": "Catégorie",
+    "refresh": "Actualiser",
+    "listings": "annonces",
+    "loading": "Chargement...",
+    "signOut": "Déconnexion",
+    "unlockTitle": "Débloquez le feed complet",
+    "unlockDesc": "Vous voyez 3 sur {count}+ annonces. Abonnez-vous pour tout voir.",
+    "unlockCta": "Accès premium →",
+    "justNow": "à l'instant",
+    "ago": "il y a"
+  },
+  "pricing": {
+    "badge": "TARIFS SIMPLES",
+    "headline": "Choisissez votre",
+    "headlineGold": "niveau d'accès",
+    "subheadline": "Annulez à tout moment. Tous les plans incluent 3 jours d'essai gratuit.",
+    "getStarted": "Commencer",
+    "currentPlan": "Plan actuel",
+    "redirecting": "Redirection...",
+    "monthSuffix": "/ mois",
+    "mostPopular": "LE PLUS POPULAIRE"
+  }
+}

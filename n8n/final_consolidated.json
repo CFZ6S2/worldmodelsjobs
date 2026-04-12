@@ -1,0 +1,275 @@
+{
+  "name": "WorldModels&Jobs - PRODUCTION (Consolidated)",
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "message",
+        "options": {}
+      },
+      "id": "webhook-node",
+      "name": "Webhook",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 1,
+      "position": [
+        100,
+        300
+      ],
+      "webhookId": "fb382e2f-49c6-4d98-9ced-fec55b56d337"
+    },
+    {
+      "parameters": {
+        "jsCode": "const crypto = require('crypto');\nconst text = $json.body.text || \"\";\nconst hash = crypto.createHash('md5').update(text).digest('hex');\nreturn { hash, original_body: $json.body };"
+      },
+      "id": "code-hash-node",
+      "name": "Generar MD5 Hash",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 1,
+      "position": [
+        300,
+        300
+      ]
+    },
+    {
+      "parameters": {
+        "url": "=https://worldmodels-jobs.firebaseio.com/duplicates/{{$json.hash}}.json",
+        "options": {}
+      },
+      "id": "firebase-check-node",
+      "name": "Check Duplicado",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 1,
+      "position": [
+        500,
+        300
+      ]
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "boolean": [
+            {
+              "value1": "={{$json === null}}",
+              "value2": true
+            }
+          ]
+        }
+      },
+      "id": "if-new-node",
+      "name": "¿Es Nuevo?",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 1,
+      "position": [
+        700,
+        300
+      ]
+    },
+    {
+      "parameters": {
+        "method": "PUT",
+        "url": "=https://worldmodels-jobs.firebaseio.com/duplicates/{{$node[\"Generar MD5 Hash\"].json.hash}}.json",
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={ \"timestamp\": { \".sv\": \"timestamp\" } }",
+        "options": {}
+      },
+      "id": "firebase-mark-node",
+      "name": "Marcar como Visto",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 1,
+      "position": [
+        900,
+        200
+      ]
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "string": [
+            {
+              "value1": "={{$node[\"Generar MD5 Hash\"].json.original_body.text.length}}",
+              "operation": "largerEqual",
+              "value2": 50
+            },
+            {
+              "value1": "={{$node[\"Generar MD5 Hash\"].json.original_body.text}}",
+              "operation": "regex",
+              "value2": ".*\\d+.*"
+            }
+          ]
+        },
+        "combineOperation": "all"
+      },
+      "id": "filter-security-node",
+      "name": "Filtro: +50 chars & Números",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 1,
+      "position": [
+        1100,
+        200
+      ]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent",
+        "sendQueryParameters": true,
+        "queryParameters": {
+          "parameters": [
+            {
+              "name": "key",
+              "value": "AIzaSyA1cSd-D3Uux2DK35NXnssOmhsaDwXmB00"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={ \n  \"contents\": [ \n    { \n      \"parts\": [ \n        { \n          \"text\": \"Actúa como moderador de un portal de empleo de imagen y eventos. Tu objetivo es profesionalizar mensajes de WhatsApp. Extrae: Tipo de trabajo (Imagen, Azafata/o, Acompañante de Viaje, Protocolo o Extra Evento), Ciudad/País, Pago (o 'A convenir'), Duración, Contacto. Genera un título atractivo y una descripción limpia en español. Si tiene ciudad, contacto y oferta clara de empleo, añade 'valido': true. De lo contrario 'valido': false. Mensaje: \" + $node[\"Generar MD5 Hash\"].json.original_body.text \n        } \n      ] \n    } \n  ], \n  \"generationConfig\": { \n    \"response_mime_type\": \"application/json\",\n    \"response_schema\": {\n      \"type\": \"object\",\n      \"properties\": {\n        \"categoria\": { \"type\": \"string\" },\n        \"ubicacion\": { \"type\": \"string\" },\n        \"pago\": { \"type\": \"string\" },\n        \"duracion\": { \"type\": \"string\" },\n        \"contacto\": { \"type\": \"string\" },\n        \"titulo_web\": { \"type\": \"string\" },\n        \"descripcion_limpia\": { \"type\": \"string\" },\n        \"valido\": { \"type\": \"boolean\" }\n      },\n      \"required\": [\"categoria\", \"contacto\", \"valido\"]\n    }\n  }\n}",
+        "options": {}
+      },
+      "id": "gemini-node",
+      "name": "Moderador AI (Gemini 2.0)",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 1,
+      "position": [
+        1300,
+        200
+      ]
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "boolean": [
+            {
+              "value1": "={{ JSON.parse($json.candidates[0].content.parts[0].text).valido }}",
+              "value2": true
+            }
+          ]
+        }
+      },
+      "id": "filter-valid-node",
+      "name": "Filtro: Válido",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 1,
+      "position": [
+        1500,
+        200
+      ]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://worldmodels-jobs.firebaseio.com/posts.json",
+        "sendBody": true,
+        "bodyParameters": {
+          "parameters": [
+            {
+              "name": "data",
+              "value": "={{$node[\"Moderador AI (Gemini 2.0)\"].json.candidates[0].content.parts[0].text}}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "firebase-save-node",
+      "name": "Guardar en Firebase",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 1,
+      "position": [
+        1700,
+        200
+      ]
+    }
+  ],
+  "connections": {
+    "Webhook": {
+      "main": [
+        [
+          {
+            "node": "Generar MD5 Hash",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Generar MD5 Hash": {
+      "main": [
+        [
+          {
+            "node": "Check Duplicado",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Check Duplicado": {
+      "main": [
+        [
+          {
+            "node": "¿Es Nuevo?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "¿Es Nuevo?": {
+      "main": [
+        [
+          {
+            "node": "Marcar como Visto",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Marcar como Visto": {
+      "main": [
+        [
+          {
+            "node": "Filtro: +50 chars & Números",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Filtro: +50 chars & Números": {
+      "main": [
+        [
+          {
+            "node": "Moderador AI (Gemini 2.0)",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Moderador AI (Gemini 2.0)": {
+      "main": [
+        [
+          {
+            "node": "Filtro: Válido",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Filtro: Válido": {
+      "main": [
+        [
+          {
+            "node": "Guardar en Firebase",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": true
+}

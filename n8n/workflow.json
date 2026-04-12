@@ -1,0 +1,286 @@
+{
+  "id": "n1DhoQWiUGezgX3b",
+  "name": "WorldModels&Jobs - DEEPSEEK INDESTRUCTIBLE",
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "message",
+        "options": {}
+      },
+      "id": "webhook-node",
+      "name": "Webhook",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 1,
+      "position": [
+        100,
+        300
+      ],
+      "webhookId": "fb382e2f-49c6-4d98-9ced-fec55b56d337"
+    },
+    {
+      "parameters": {
+        "jsCode": "const crypto = require('crypto');\nconst text = $json.body.text || \"\";\nconst hash = crypto.createHash('md5').update(text).digest('hex');\nreturn { hash, original_body: $json.body };"
+      },
+      "id": "code-hash-node",
+      "name": "Generar MD5 Hash",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 1,
+      "position": [
+        300,
+        300
+      ]
+    },
+    {
+      "parameters": {
+        "url": "=https://worldmodels-jobs.firebaseio.com/duplicates/{{$json.hash}}.json",
+        "options": {}
+      },
+      "id": "firebase-check-node",
+      "name": "Check Duplicado",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 1,
+      "position": [
+        500,
+        300
+      ]
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "boolean": [
+            {
+              "value1": "={{$json === null}}",
+              "value2": true
+            }
+          ]
+        }
+      },
+      "id": "if-new-node",
+      "name": "¿Es Nuevo?",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 1,
+      "position": [
+        700,
+        300
+      ]
+    },
+    {
+      "parameters": {
+        "method": "PUT",
+        "url": "=https://worldmodels-jobs.firebaseio.com/duplicates/{{$node[\"Generar MD5 Hash\"].json.hash}}.json",
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={ \"timestamp\": { \".sv\": \"timestamp\" } }",
+        "options": {}
+      },
+      "id": "firebase-mark-node",
+      "name": "Marcar como Visto",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 1,
+      "position": [
+        900,
+        200
+      ]
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "string": [
+            {
+              "value1": "={{$node[\"Generar MD5 Hash\"].json.original_body.text.length}}",
+              "operation": "largerEqual",
+              "value2": 50
+            },
+            {
+              "value1": "={{$node[\"Generar MD5 Hash\"].json.original_body.text}}",
+              "operation": "regex",
+              "value2": ".*\\d+.*"
+            }
+          ]
+        },
+        "combineOperation": "all"
+      },
+      "id": "filter-security-node",
+      "name": "Filtro: +50 chars & Números",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 1,
+      "position": [
+        1100,
+        200
+      ]
+    },
+    {
+      "parameters": {
+        "modelId": {
+          "__rl": true,
+          "value": "deepseek-chat",
+          "mode": "list",
+          "cachedResultName": "DEEPSEEK-CHAT"
+        },
+        "messages": {
+          "values": [
+            {
+              "content": "=\"Eres un experto moderador de ofertas de empleo de imagen y eventos. Tu objetivo es profesionalizar mensajes de Telegram.\\n\\n1. Traduce todo al español de forma elegante.\\n2. Extrae obligatoriamente: categoria (Imagen, Azafata/o, Acompañante de Viaje, Protocolo o Extra Evento), ubicacion, pago (o 'A convenir'), duracion, contacto (Teléfono/Telegram).\\n3. Genera un 'titulo_web' atractivo y una 'descripcion_limpia' profesional.\\n4. Si el mensaje es una oferta clara con contacto, añade la variable 'valido': true. Si es basura o falta el contacto, pon 'valido': false.\\n5. Devuelve EXCLUSIVAMENTE un bloque JSON válido.\\n\\nMensaje a analizar: \" + $node[\"Generar MD5 Hash\"].json.original_body.text"
+            }
+          ]
+        },
+        "options": {
+          "responseFormat": "json_object"
+        }
+      },
+      "id": "deepseek-node",
+      "name": "DeepSeek AI (Indestructible)",
+      "type": "@n8n/n8n-nodes-langchain.openAi",
+      "typeVersion": 2.1,
+      "position": [
+        1300,
+        200
+      ],
+      "credentials": {
+        "openAiApi": {
+          "id": "klSsOR4gg4WQrkwX",
+          "name": "OpenAi account 2"
+        }
+      },
+      "retryOnFail": true,
+      "maxRetries": 3,
+      "waitBetweenRetries": 5000
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "boolean": [
+            {
+              "value1": "={{ JSON.parse($json.message.content).valido }}",
+              "value2": true
+            }
+          ]
+        }
+      },
+      "id": "filter-valid-node",
+      "name": "Filtro: Válido",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 1,
+      "position": [
+        1500,
+        200
+      ]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://worldmodels-jobs.firebaseio.com/posts.json",
+        "sendBody": true,
+        "bodyParameters": {
+          "parameters": [
+            {
+              "name": "data",
+              "value": "={{$node[\"DeepSeek AI (Indestructible)\"].json.message.content}}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "firebase-save-node",
+      "name": "Guardar en Firebase",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 1,
+      "position": [
+        1700,
+        200
+      ]
+    }
+  ],
+  "connections": {
+    "Webhook": {
+      "main": [
+        [
+          {
+            "node": "Generar MD5 Hash",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Generar MD5 Hash": {
+      "main": [
+        [
+          {
+            "node": "Check Duplicado",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Check Duplicado": {
+      "main": [
+        [
+          {
+            "node": "¿Es Nuevo?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "¿Es Nuevo?": {
+      "main": [
+        [
+          {
+            "node": "Marcar como Visto",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Marcar como Visto": {
+      "main": [
+        [
+          {
+            "node": "Filtro: +50 chars & Números",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Filtro: +50 chars & Números": {
+      "main": [
+        [
+          {
+            "node": "DeepSeek AI (Indestructible)",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "DeepSeek AI (Indestructible)": {
+      "main": [
+        [
+          {
+            "node": "Filtro: Válido",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Filtro: Válido": {
+      "main": [
+        [
+          {
+            "node": "Guardar en Firebase",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": true
+}

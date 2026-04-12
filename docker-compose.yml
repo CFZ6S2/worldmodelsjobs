@@ -1,0 +1,77 @@
+version: '3.8'
+
+services:
+  redis:
+    image: redis:6.2-alpine
+    container_name: redis
+    restart: always
+
+  n8n:
+    image: n8nio/n8n:latest
+    container_name: n8n
+    restart: always
+    ports:
+      - "5678:5678"
+    environment:
+      - N8N_HOST=178.156.186.149
+      - N8N_PORT=5678
+      - N8N_PROTOCOL=http
+      - NODE_ENV=production
+      - WEBHOOK_URL=http://localhost:5678
+      - N8N_RELOAD_CONFIG_AFTER_IMPORT=true
+      - N8N_API_ENABLED=true
+      - N8N_RELOAD_CONFIG_AFTER_IMPORT=true
+      - GENERIC_TIMEZONE=Europe/Madrid
+      - N8N_ENFORCE_SETTINGS_FILE_PERMISSIONS=false
+      - N8N_SECURE_COOKIE=false
+    volumes:
+      - n8n_data:/home/node/.n8n
+    depends_on:
+      - redis
+
+  telegram-collector:
+    image: telegram-collector:latest
+    container_name: telegram-collector
+    restart: always
+    build: 
+      context: ./collectors/telegram
+    environment:
+      - WEBHOOK_URL=http://n8n:5678/webhook/worldmodelsjobs-lead
+      - N8N_RELOAD_CONFIG_AFTER_IMPORT=true
+      - N8N_API_ENABLED=true
+      - N8N_RELOAD_CONFIG_AFTER_IMPORT=true
+      - BACKEND_URL=http://172.17.0.1:3001/api/check-duplicate
+      - API_ID=27866843
+      - API_HASH=7e8c5188038965bdc1739fa8c3c0dad7
+    depends_on:
+      - n8n
+
+  whatsapp-collector:
+    image: whatsapp-collector:latest
+    container_name: whatsapp-collector
+    restart: always
+    build:
+      context: ./collectors/whatsapp
+    environment:
+      - WEBHOOK_URL=http://n8n:5678/webhook/worldmodelsjobs-lead
+      - N8N_RELOAD_CONFIG_AFTER_IMPORT=true
+      - N8N_API_ENABLED=true
+      - N8N_RELOAD_CONFIG_AFTER_IMPORT=true
+    volumes:
+      - ./collectors/whatsapp/auth:/app/.wwebjs_auth
+    depends_on:
+      - n8n
+
+  cleaner:
+    image: cleaner:latest
+    container_name: cleaner
+    build: ./cleaner
+    environment:
+      - RETENTION_HOURS=48
+    volumes:
+      - n8n_data:/app/n8n_data
+    depends_on:
+      - n8n
+
+volumes:
+  n8n_data:
