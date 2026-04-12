@@ -1,0 +1,20 @@
+{
+  "name": "worldmodels-backend",
+  "version": "1.0.0",
+  "description": "Backend API for WorldModelsJobs",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js"
+  },
+  "dependencies": {
+    "@whiskeysockets/baileys": "^7.0.0-rc.9",
+    "axios": "^1.13.6",
+    "cors": "^2.8.5",
+    "dotenv": "^16.4.5",
+    "express": "^4.19.2",
+    "firebase-admin": "^10.3.0",
+    "pino": "^10.3.1",
+    "qrcode-terminal": "^0.12.0",
+    "stripe": "^14.22.0"
+  }
+}
