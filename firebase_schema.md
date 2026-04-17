@@ -15,6 +15,11 @@ Represents the aggregated and filtered messages.
 ## Collection: `users`
 Represents registered users and their unified subscription status.
 
+**Source of Truth Documentation:**
+* **`worldmodels.premium`**: Primary boolean used by the frontend and Auth Custom Claims to grant or deny access to the internal platform features.
+* **`subscriptionStatus`**: Commercial status exactly mirroring Stripe lifecycle (`active`, `past_due`, `canceled`, `trialing`, `inactive`).
+* **`membership.type`**: User-facing plan nomenclature (`free` or `premium`) used for display logic or dashboard branding.
+
 - `uid`: string (Firebase Auth UID)
 - `email`: string
 - `alias`: string
@@ -25,7 +30,7 @@ Represents registered users and their unified subscription status.
 - `reputation`: string
 - `createdAt`: timestamp
 - `lastActivity`: timestamp
-- `subscriptionStatus`: string ('active', 'inactive')
+- `subscriptionStatus`: string ('active', 'inactive', 'canceled', 'past_due')
 - `stripeCustomerId`: string | null
 - `membership`: object { type: 'free' | 'premium', expiresAt: timestamp | null }
 - `worldmodels`: object { premium: boolean, liveFeed: boolean, badge: boolean, expiryDate: timestamp | null }
