@@ -148,6 +148,42 @@ router.post('/webhook', express.raw({ type: 'application/json' }), async (req, r
         updatedAt: admin.firestore.FieldValue.serverTimestamp()
       }, { merge: true });
     }
+  } else if (event.type === 'customer.subscription.updated' || event.type === 'customer.subscription.deleted') {
+    const subscription = event.data.object;
+    const status = subscription.status; // 'active', 'past_due', 'canceled', 'unpaid'
+    const customerId = subscription.customer;
+    
+    // Only downgrade if the status is definitively not active or trialing
+    if (status !== 'active' && status !== 'trialing') {
+      console.log(`Downgrading subscription for customer: ${customerId} (status: ${status})`);
+      const usersSnap = await db.collection('users').where('stripeCustomerId', '==', customerId).get();
+      if (!usersSnap.empty) {
+        const batch = db.batch();
+        usersSnap.docs.forEach(doc => {
+          batch.update(doc.ref, {
+             subscriptionStatus: status,
+             worldmodels: { premium: false },
+             membership: { type: 'free' },
+             updatedAt: admin.firestore.FieldValue.serverTimestamp()
+          });
+        });
+        await batch.commit();
+      }
+    } else if (status === 'active' || status === 'trialing') {
+        const usersSnap = await db.collection('users').where('stripeCustomerId', '==', customerId).get();
+        if (!usersSnap.empty) {
+            const batch = db.batch();
+            usersSnap.docs.forEach(doc => {
+                 batch.update(doc.ref, {
+                    subscriptionStatus: status,
+                    worldmodels: { premium: true },
+                    membership: { type: 'premium' },
+                    updatedAt: admin.firestore.FieldValue.serverTimestamp()
+                 });
+            });
+            await batch.commit();
+        }
+    }
   }
 
   res.json({ received: true });
@@ -209,7 +245,7 @@ router.post('/auth/login', async (req, res) => {
     res.json({
       success: true, uid, customToken,
       profile: {
-        displayName: profile?.displayName || decoded.name,
+        alias: profile?.alias || decoded.name || decoded.email?.split('@')[0] || 'User',
         email: decoded.email,
         worldmodels: profile?.worldmodels || { premium: false },
       },
