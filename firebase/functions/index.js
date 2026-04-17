@@ -316,7 +316,7 @@ const adsHandler = async (req, res) => {
           const userData = userSnap.data();
           
           // Only allow admins or Concierge roles to publish from dashboard
-          if (userData && (userData.userRole === 'admin' || userData.userRole === 'concierge' || decoded.email === 'cesar.herrera.rojo@gmail.com')) {
+          if (userData && (userData.userRole === 'admin' || userData.userRole === 'concierge')) {
             isAuthorized = true;
           }
         } catch (e) {
