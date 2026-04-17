@@ -1,23 +1,24 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { Suspense, useState, useEffect } from 'react';
 import { db } from '@/lib/firebase';
 import { doc, getDoc } from 'firebase/firestore';
-import { useParams, useRouter } from 'next/navigation';
+import { useSearchParams, useRouter } from 'next/navigation';
 import { User, MapPin, Ruler, Weight, UserCircle, ArrowLeft, Loader2, Star, CheckCircle2, ChevronRight, Bookmark } from 'lucide-react';
 import Link from 'next/link';
 
-export default function PublicProfilePage() {
-  const params = useParams();
+function ProfileContent() {
+  const searchParams = useSearchParams();
+  const id = searchParams.get('id');
   const router = useRouter();
   const [profile, setProfile] = useState<any>(null);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     async function loadProfile() {
-      if (!params.id) return;
+      if (!id) return;
       try {
-        const docRef = doc(db, 'profiles', params.id as string);
+        const docRef = doc(db, 'profiles', id as string);
         const docSnap = await getDoc(docRef);
         if (docSnap.exists() && docSnap.data().isPublic) {
           setProfile(docSnap.data());
@@ -29,7 +30,7 @@ export default function PublicProfilePage() {
       }
     }
     loadProfile();
-  }, [params.id]);
+  }, [id]);
 
   if (loading) {
     return (
@@ -147,5 +148,13 @@ export default function PublicProfilePage() {
         </section>
       </main>
     </div>
+  );
+}
+
+export default function PublicProfilePage() {
+  return (
+    <Suspense fallback={<div className="flex-1 flex items-center justify-center bg-dark-bg"><Loader2 className="animate-spin text-gold" size={32} /></div>}>
+      <ProfileContent />
+    </Suspense>
   );
 }

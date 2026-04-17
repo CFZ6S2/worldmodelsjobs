@@ -1,32 +1,35 @@
 import Stripe from 'stripe';
 
-export const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, {
-  apiVersion: '2026-02-25.clover',
-});
+let stripeInstance: Stripe | null = null;
+
+export const getStripe = () => {
+  if (!stripeInstance) {
+    stripeInstance = new Stripe(process.env.STRIPE_SECRET_KEY || 'sk_test_placeholder', {
+      // @ts-expect-error - dynamic versioning
+      apiVersion: '2024-12-18',
+    });
+  }
+  return stripeInstance;
+};
+
+// Also export the instance for legacy compatibility
+export const stripe = getStripe();
 
 export const PLANS = [
   {
-    id: 'basic',
-    name: 'Basic',
+    id: 'vip',
+    name: 'VIP GIRL · WorldModels',
     price: 20,
-    priceId: process.env.STRIPE_PRICE_BASIC!,
-    features: ['20 posts per day', 'City filter', 'Email support'],
+    priceId: process.env.STRIPE_PRICE_VIP || '',
+    features: ['Comentarios privados', 'Verificación VIP', 'Perfil profesional'],
     popular: false,
   },
   {
-    id: 'pro',
-    name: 'Pro',
-    price: 30,
-    priceId: process.env.STRIPE_PRICE_PRO!,
-    features: ['Unlimited posts', 'All cities', 'Category filters', 'Priority support'],
-    popular: true,
-  },
-  {
-    id: 'premium',
-    name: 'Premium',
+    id: 'agency',
+    name: 'PRO AGENCY · WorldModels',
     price: 50,
-    priceId: process.env.STRIPE_PRICE_PREMIUM!,
-    features: ['Everything in Pro', 'Real-time alerts', 'API access', 'Dedicated support'],
-    popular: false,
-  },
+    priceId: process.env.STRIPE_PRICE_AGENCY || '',
+    features: ['Publicación ilimitada', 'Visibilidad Premium', 'Badge Verificado'],
+    popular: true,
+  }
 ];

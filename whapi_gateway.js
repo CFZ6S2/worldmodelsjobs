@@ -1,13 +1,18 @@
+require('dotenv').config();
 const http = require('http');
 const https = require('https');
 const { URL } = require('url');
 
 // --- CONFIGURATION ---
-const WHAPI_TOKEN = 'TBUDuH74IeytxL2QMCdZuPmBuuc3P6lC';
-const WHAPI_API_URL = 'https://gate.whapi.cloud';
-const N8N_WEBHOOK_URL = 'http://178.156.186.149:5678/webhook/webhook-test/1fd718d6-49f8-43dc-a881-ff7ecf7b94ef';
+const WHAPI_TOKEN = process.env.WHAPI_TOKEN;
+const WHAPI_API_URL = process.env.WHAPI_API_URL || 'https://gate.whapi.cloud';
+const N8N_WEBHOOK_URL = process.env.N8N_WEBHOOK_URL;
 const PORT = process.env.PORT || 8080;
-const PUBLIC_GATEWAY_URL = 'http://178.156.186.149:8080/whapi';
+const PUBLIC_GATEWAY_URL = process.env.PUBLIC_GATEWAY_URL;
+
+if (!WHAPI_TOKEN || !N8N_WEBHOOK_URL || !PUBLIC_GATEWAY_URL) {
+    throw new Error('Missing required environment variables for WHAPI gateway in .env');
+}
 
 // --- HELPERS ---
 function httpRequest(method, urlStr, headers, data) {

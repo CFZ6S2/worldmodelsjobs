@@ -7,6 +7,7 @@
     "home": "Home",
     "feed": "Feed",
     "alerts": "Alerts",
+    "publish": "Publish",
     "profile": "Profile"
   },
   "home": {
@@ -100,10 +101,22 @@
     "hips": "Hips",
     "hourly": "Hourly Rate",
     "daily": "Daily Rate",
+    "professionalFields": "Professional Profile Fields",
     "gallery": "Gallery (Max 5)",
     "delete": "Delete",
     "public": "Public 'Ficha'",
     "publicDesc": "Allow recruiters to view your profile",
-    "viewPreview": "View Public Preview"
+    "viewPreview": "View Public Preview",
+    "gender": "Gender / Identity",
+    "male": "Male",
+    "female": "Female",
+    "premiumBadge": "WorldModels Premium",
+    "premiumStatus": "Membership Status",
+    "premiumActive": "Active VIP Membership",
+    "premiumInactive": "Standard Membership",
+    "upgradeCta": "Upgrade to Premium Access",
+    "verificationStatus": "Identity Verification",
+    "verified": "Verified Professional",
+    "notVerified": "Verification Pending"
   }
 }

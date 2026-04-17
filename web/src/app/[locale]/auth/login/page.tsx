@@ -1,15 +1,14 @@
 'use client';
 
-import { useState } from 'react';
+import { Suspense, useState, useEffect } from 'react';
 import { useAuth } from '@/context/AuthContext';
 import { useRouter, useParams, useSearchParams } from 'next/navigation';
 import { motion } from 'framer-motion';
 import { ShieldCheck, ArrowLeft, Loader2, Mail, Lock, Sparkles } from 'lucide-react';
-import { useEffect } from 'react';
 import Link from 'next/link';
 import { useTranslations } from 'next-intl';
 
-export default function LoginPage() {
+function LoginContent() {
   const [authMode, setAuthMode] = useState<'signin' | 'signup'>('signin');
   const searchParams = useSearchParams();
   
@@ -179,5 +178,13 @@ export default function LoginPage() {
         `}</style>
       </div>
     </div>
+  );
+}
+
+export default function LoginPage() {
+  return (
+    <Suspense fallback={<div className="min-h-screen bg-black flex items-center justify-center"><Loader2 className="animate-spin text-gold" size={32} /></div>}>
+      <LoginContent />
+    </Suspense>
   );
 }
