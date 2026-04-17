@@ -298,14 +298,34 @@ const adsHandler = async (req, res) => {
     }
   } else if (req.method === 'POST') {
     try {
-      if (!process.env.N8N_SECRET_KEY) {
-        throw new Error('CRITICAL: N8N_SECRET_KEY is missing from environment. Hard failing.');
-      }
       const authKey = req.headers['x-api-key'] || req.headers['X-API-KEY'];
-      const SECRET_KEY = process.env.N8N_SECRET_KEY;
+      const authHeader = req.headers.authorization;
       
-      if (authKey !== SECRET_KEY) {
-        return res.status(401).json({ ok: false, error: 'unauthorized_ingestion' });
+      let isAuthorized = false;
+
+      // Option A: API Key (for n8n/vps)
+      if (authKey && process.env.N8N_SECRET_KEY && authKey === process.env.N8N_SECRET_KEY) {
+        isAuthorized = true;
+      } 
+      // Option B: Firebase Auth (for dashboard users)
+      else if (authHeader?.startsWith('Bearer ')) {
+        try {
+          const idToken = authHeader.split('Bearer ')[1];
+          const decoded = await admin.auth().verifyIdToken(idToken);
+          const userSnap = await db.collection('users').doc(decoded.uid).get();
+          const userData = userSnap.data();
+          
+          // Only allow admins or Concierge roles to publish from dashboard
+          if (userData && (userData.userRole === 'admin' || userData.userRole === 'concierge' || decoded.email === 'cesar.herrera.rojo@gmail.com')) {
+            isAuthorized = true;
+          }
+        } catch (e) {
+          console.error('[Auth Verification Error]', e.message);
+        }
+      }
+
+      if (!isAuthorized) {
+        return res.status(401).json({ ok: false, success: false, error: 'unauthorized_ingestion' });
       }
 
       const body = req.body || {};
@@ -413,7 +433,7 @@ const adsHandler = async (req, res) => {
         });
       } catch (e) {}
 
-      res.json({ ok: true, id: docRef.id });
+      res.json({ ok: true, success: true, id: docRef.id });
     } catch (error) {
       console.error('Ingestion Error:', error);
       res.status(500).json({ ok: false, error: 'internal_error' });
@@ -422,8 +442,10 @@ const adsHandler = async (req, res) => {
 };
 
 router.all('/ads', adsHandler);
+router.all('/leads', adsHandler);
 router.all('/ofertas', adsHandler);
 router.all('/v1/jobs', adsHandler);
+router.all('/v1/leads', adsHandler);
 router.all('/v1/ofertas', adsHandler);
 
 app.use('/api', router);

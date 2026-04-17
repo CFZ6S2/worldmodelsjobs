@@ -102,10 +102,16 @@ export default function PublishPage() {
     setIsSubmitting(true);
 
     try {
-      // 1. Prepare Lead Data for the API
+      // 1. Get Security Token
+      const idToken = await user?.getIdToken();
+
+      // 2. Prepare Lead Data for the API
       const response = await fetch('/api/leads', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: { 
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${idToken}`
+        },
         body: JSON.stringify({
           ...formData,
           title_es: formData.title,
@@ -113,7 +119,7 @@ export default function PublishPage() {
           categoria: formData.category,
           ubicacion: formData.city,
           presupuesto: formData.budget,
-          createdBy: user.uid,
+          createdBy: user?.uid,
           platform: 'DASHBOARD_AGENCY'
         })
       });
