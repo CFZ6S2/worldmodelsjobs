@@ -24,9 +24,13 @@ function getLeadHash(text) {
   return crypto.createHash('sha256').update(normalized).digest('hex');
 }
 
-const stripe = new Stripe(process.env.STRIPE_SECRET_KEY || 'sk_test_placeholder', {
-  apiVersion: '2023-10-16',
-});
+// Hard fail for missing secrets at runtime, but don't break deploy process if env not populated locally
+let stripe;
+if (process.env.STRIPE_SECRET_KEY) {
+  stripe = new Stripe(process.env.STRIPE_SECRET_KEY, {
+    apiVersion: '2023-10-16',
+  });
+}
 
 // Middleware setup: Restrict CORS origins
 const allowedOrigins = process.env.ALLOWED_ORIGINS ? process.env.ALLOWED_ORIGINS.split(',') : ['https://worldmodels.jobs', 'https://tucitasegura.com', 'http://localhost:3000'];
@@ -87,6 +91,8 @@ router.get('/posts', async (req, res) => {
 // Handle /checkout
 router.post('/checkout', async (req, res) => {
   try {
+    if (!stripe) throw new Error('CRITICAL: STRIPE_SECRET_KEY not configured');
+    
     const { priceId, email, userId, appUrl } = req.body || {};
 
     if (!priceId || !userId) {
@@ -112,6 +118,10 @@ router.post('/checkout', async (req, res) => {
 
 // Handle Stripe Webhook
 router.post('/webhook', express.raw({ type: 'application/json' }), async (req, res) => {
+  if (!stripe || !process.env.STRIPE_WEBHOOK_SECRET) {
+    return res.status(500).send('CRITICAL: Stripe Webhook configuration is missing.');
+  }
+
   const sig = req.headers['stripe-signature'];
   let event;
 
@@ -249,8 +259,11 @@ const adsHandler = async (req, res) => {
     }
   } else if (req.method === 'POST') {
     try {
+      if (!process.env.N8N_SECRET_KEY) {
+        throw new Error('CRITICAL: N8N_SECRET_KEY is missing from environment. Hard failing.');
+      }
       const authKey = req.headers['x-api-key'] || req.headers['X-API-KEY'];
-      const SECRET_KEY = process.env.N8N_SECRET_KEY || 'WORLDMODELS_N8N_2026_FALLBACK';
+      const SECRET_KEY = process.env.N8N_SECRET_KEY;
       
       if (authKey !== SECRET_KEY) {
         return res.status(401).json({ ok: false, error: 'unauthorized_ingestion' });
