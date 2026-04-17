@@ -141,9 +141,10 @@ router.post('/webhook', express.raw({ type: 'application/json' }), async (req, r
     if (userId) {
       console.log(`Activated subscription for user: ${userId}`);
       await db.collection('users').doc(userId).set({
-        isPremium: true,
         stripeCustomerId: session.customer,
         subscriptionStatus: 'active',
+        worldmodels: { premium: true },
+        membership: { type: 'premium' },
         updatedAt: admin.firestore.FieldValue.serverTimestamp()
       }, { merge: true });
     }
@@ -171,9 +172,11 @@ router.post('/auth/register', async (req, res) => {
     // It is handled solely by Firebase Auth above.
     const userData = {
       uid, email, alias: displayName || '', gender: 'femenino', birthDate: birthDate || '', userRole: 'female',
-      hasActiveSubscription: false, reputation: 'BRONCE',
+      reputation: 'BRONCE',
       createdAt: new Date().toISOString(), lastActivity: new Date().toISOString(),
       signupSource: 'worldmodels', profileType: 'wm_candidate',
+      stripeCustomerId: null,
+      subscriptionStatus: 'inactive',
       worldmodels: { premium: false, liveFeed: false, badge: false, expiryDate: null },
       membership: { type: 'free', expiresAt: null },
     };

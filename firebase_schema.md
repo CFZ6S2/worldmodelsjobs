@@ -13,15 +13,22 @@ Represents the aggregated and filtered messages.
 - `created_at`: timestamp
 
 ## Collection: `users`
-Represents registered users and their subscription status.
+Represents registered users and their unified subscription status.
 
 - `uid`: string (Firebase Auth UID)
 - `email`: string
-- `subscription_status`: string (active, trialing, canceled, past_due)
-- `stripe_customer_id`: string
-- `stripe_subscription_id`: string
-- `plan`: string (basic, pro, premium)
-- `created_at`: timestamp
+- `alias`: string
+- `gender`: string
+- `userRole`: string
+- `signupSource`: string
+- `profileType`: string
+- `reputation`: string
+- `createdAt`: timestamp
+- `lastActivity`: timestamp
+- `subscriptionStatus`: string ('active', 'inactive')
+- `stripeCustomerId`: string | null
+- `membership`: object { type: 'free' | 'premium', expiresAt: timestamp | null }
+- `worldmodels`: object { premium: boolean, liveFeed: boolean, badge: boolean, expiryDate: timestamp | null }
 
 ## Collection: `config`
 General app configuration.
