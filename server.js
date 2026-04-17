@@ -103,7 +103,6 @@ app.get('/api/check-duplicate', async (req, res) => {
 // ==========================================
 // 2. DATA INGESTION (Legacy compatibility / Backup)
 // ==========================================
-const crypto = require('crypto');
 
 app.post('/api/save-data', async (req, res) => {
     try {
@@ -165,7 +164,6 @@ app.get('/', async (req, res) => {
     }
 });
 
-const PORT = 3001;
-app.listen(PORT, '0.0.0.0', () => {
-    console.log(`🚀 Platinum Duplicate Guard listening on port ${PORT}`);
+app.listen(port, '0.0.0.0', () => {
+    console.log(`🚀 Platinum Duplicate Guard listening on port ${port}`);
 });

@@ -4,7 +4,11 @@ let stripeInstance: Stripe | null = null;
 
 export const getStripe = () => {
   if (!stripeInstance) {
-    stripeInstance = new Stripe(process.env.STRIPE_SECRET_KEY || 'sk_test_placeholder', {
+    const key = process.env.STRIPE_SECRET_KEY;
+    if (!key) {
+      throw new Error('STRIPE_SECRET_KEY is not defined');
+    }
+    stripeInstance = new Stripe(key, {
       // @ts-expect-error - dynamic versioning
       apiVersion: '2024-12-18',
     });
