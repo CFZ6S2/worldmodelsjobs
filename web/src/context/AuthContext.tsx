@@ -8,19 +8,22 @@ import {
   signOut,
   User,
 } from 'firebase/auth';
-import { doc, getDoc } from 'firebase/firestore';
+import { doc, getDoc, setDoc, serverTimestamp } from 'firebase/firestore';
 import { auth, db } from '@/lib/firebase';
 
 interface UserData {
   uid: string;
   email: string | null;
-  subscription_status: string;
-  plan: string;
-  role?: string;
-  openedContacts?: string[];
-  isVip?: boolean;
+  alias?: string;
+  gender?: string;
+  userRole?: string;
+  reputation?: string;
+  signupSource?: string;
+  profileType?: string;
+  subscriptionStatus?: string;
+  worldmodels?: { premium: boolean; liveFeed?: boolean; badge?: boolean; expiryDate?: any };
+  membership?: { type: string; expiresAt?: any };
   isAdmin?: boolean;
-  isProAgency?: boolean;
 }
 
 interface AuthContextType {
@@ -30,7 +33,7 @@ interface AuthContextType {
   isPremium: boolean;
   isAdmin: boolean;
   isVip: boolean;
-  isProAgency: boolean;
+  isConcierge: boolean;
   login: (email: string, password: string) => Promise<void>;
   register: (email: string, password: string) => Promise<void>;
   logout: () => Promise<void>;
@@ -47,15 +50,17 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     const unsubscribe = onAuthStateChanged(auth, async (firebaseUser) => {
       setUser(firebaseUser);
       if (firebaseUser) {
+        // Read strictly from the unified 'users' collection 
         const userDoc = await getDoc(doc(db, 'users', firebaseUser.uid));
         if (userDoc.exists()) {
           const rawData = userDoc.data() as UserData;
           setUserData({
             ...rawData,
-            isAdmin: rawData.role === 'admin',
-            isVip: rawData.subscription_status === 'active' || rawData.role === 'admin',
-            isProAgency: rawData.role === 'pro_agency' || rawData.plan === 'pro_agency'
+            isAdmin: rawData.userRole === 'admin',
           });
+        } else {
+            console.warn('User authenticated but no Firestore document found in "users" collection.');
+            setUserData(null);
         }
       } else {
         setUserData(null);
@@ -70,20 +75,41 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   };
 
   const register = async (email: string, password: string) => {
-    await createUserWithEmailAndPassword(auth, email, password);
+    const cred = await createUserWithEmailAndPassword(auth, email, password);
+    const uid = cred.user.uid;
+    const alias = email.split('@')[0];
+
+    // Guarantee local creation of the completely unified Source-of-Truth schema
+    await setDoc(doc(db, 'users', uid), {
+      uid, 
+      email, 
+      alias, 
+      gender: 'femenino', 
+      userRole: 'female',
+      reputation: 'BRONCE',
+      createdAt: serverTimestamp(), 
+      lastActivity: serverTimestamp(),
+      signupSource: 'worldmodels', 
+      profileType: 'wm_candidate',
+      stripeCustomerId: null,
+      subscriptionStatus: 'inactive',
+      worldmodels: { premium: false, liveFeed: false, badge: false, expiryDate: null },
+      membership: { type: 'free', expiresAt: null },
+    });
   };
 
   const logout = async () => {
     await signOut(auth);
   };
 
-  const isPremium = userData?.subscription_status === 'active';
-  const isAdmin = userData?.role === 'admin' || userData?.isAdmin === true;
-  const isVip = isPremium || isAdmin || userData?.isVip === true;
-  const isProAgency = userData?.role === 'pro_agency' || userData?.plan === 'pro_agency' || userData?.isProAgency === true;
+  // Derive permissions mathematically strictly from unifying source of truth
+  const isPremium = userData?.worldmodels?.premium === true;
+  const isAdmin = userData?.userRole === 'admin' || userData?.isAdmin === true;
+  const isVip = isPremium || isAdmin;
+  const isConcierge = userData?.userRole === 'concierge';
 
   return (
-    <AuthContext.Provider value={{ user, userData, loading, isPremium, isAdmin, isVip, isProAgency, login, register, logout }}>
+    <AuthContext.Provider value={{ user, userData, loading, isPremium, isAdmin, isVip, isConcierge, login, register, logout }}>
       {children}
     </AuthContext.Provider>
   );
