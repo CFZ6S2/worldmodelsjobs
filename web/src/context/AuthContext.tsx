@@ -75,27 +75,20 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   };
 
   const register = async (email: string, password: string) => {
-    const cred = await createUserWithEmailAndPassword(auth, email, password);
-    const uid = cred.user.uid;
-    const alias = email.split('@')[0];
-
-    // Guarantee local creation of the completely unified Source-of-Truth schema
-    await setDoc(doc(db, 'users', uid), {
-      uid, 
-      email, 
-      alias, 
-      gender: 'femenino', 
-      userRole: 'female',
-      reputation: 'BRONCE',
-      createdAt: serverTimestamp(), 
-      lastActivity: serverTimestamp(),
-      signupSource: 'worldmodels', 
-      profileType: 'wm_candidate',
-      stripeCustomerId: null,
-      subscriptionStatus: 'inactive',
-      worldmodels: { premium: false, liveFeed: false, badge: false, expiryDate: null },
-      membership: { type: 'free', expiresAt: null },
+    // Single canonical source of registration via Backend API
+    const response = await fetch('/api/auth/register', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ email, password, displayName: email.split('@')[0] })
     });
+    
+    if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.error || 'Registration failed');
+    }
+    
+    // Auto-login to populate AuthContext with the newly minted Unified User Profile
+    await signInWithEmailAndPassword(auth, email, password);
   };
 
   const logout = async () => {

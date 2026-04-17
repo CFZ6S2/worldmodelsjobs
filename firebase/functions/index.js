@@ -143,8 +143,8 @@ router.post('/webhook', express.raw({ type: 'application/json' }), async (req, r
       await db.collection('users').doc(userId).set({
         stripeCustomerId: session.customer,
         subscriptionStatus: 'active',
-        worldmodels: { premium: true },
-        membership: { type: 'premium' },
+        'worldmodels.premium': true,
+        'membership.type': 'premium',
         updatedAt: admin.firestore.FieldValue.serverTimestamp()
       }, { merge: true });
     }
@@ -162,8 +162,8 @@ router.post('/webhook', express.raw({ type: 'application/json' }), async (req, r
         usersSnap.docs.forEach(doc => {
           batch.update(doc.ref, {
              subscriptionStatus: status,
-             worldmodels: { premium: false },
-             membership: { type: 'free' },
+             'worldmodels.premium': false,
+             'membership.type': 'free',
              updatedAt: admin.firestore.FieldValue.serverTimestamp()
           });
         });
@@ -176,8 +176,8 @@ router.post('/webhook', express.raw({ type: 'application/json' }), async (req, r
             usersSnap.docs.forEach(doc => {
                  batch.update(doc.ref, {
                     subscriptionStatus: status,
-                    worldmodels: { premium: true },
-                    membership: { type: 'premium' },
+                    'worldmodels.premium': true,
+                    'membership.type': 'premium',
                     updatedAt: admin.firestore.FieldValue.serverTimestamp()
                  });
             });
