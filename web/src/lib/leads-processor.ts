@@ -209,34 +209,69 @@ export async function processLead(body: any) {
 
     const normalizedContent = normalizeForDedupe(raw_text);
     const contentHash = createHash('sha256').update(normalizedContent).digest('hex');
-    const hashRef = adminDb.collection('lead_hashes').doc(contentHash);
-    const hashDoc = await hashRef.get();
+    
+    // We use a transaction to prevent race conditions during ingestion
+    const result = await adminDb.runTransaction(async (transaction) => {
+      const hashRef = adminDb.collection('lead_hashes').doc(contentHash);
+      const hashDoc = await transaction.get(hashRef);
 
-    if (hashDoc.exists) {
-      const createdAt = hashDoc.data()?.createdAt ? new Date(hashDoc.data()!.createdAt).getTime() : 0;
-      if ((Date.now() - createdAt) / (1000 * 60 * 60) < 24) {
-        return { success: true, message: 'Lead duplicado', duplicate: true };
+      if (hashDoc.exists) {
+        const hData = hashDoc.data();
+        const createdAt = hData?.createdAt ? (typeof hData.createdAt === 'string' ? new Date(hData.createdAt).getTime() : hData.createdAt) : 0;
+        if ((Date.now() - createdAt) / (1000 * 60 * 60) < 24) {
+          return { success: true, message: 'Lead duplicado', duplicate: true };
+        }
       }
-    }
 
-    if (sender_digits) {
-      const bannedDoc = await adminDb.collection('banned_users').doc(sender_digits).get();
-      if (bannedDoc.exists) return { success: true, message: 'Lead descartado (Baneado)' };
-    }
+      // Check banned user again inside transaction for maximum safety
+      if (sender_digits) {
+        const bannedRef = adminDb.collection('banned_users').doc(sender_digits);
+        const bannedDoc = await transaction.get(bannedRef);
+        if (bannedDoc.exists) return { success: true, message: 'Lead descartado (Baneado)' };
+      }
 
-    const sharedId = adminDb.collection('leads').doc().id;
-    const now = new Date().toISOString();
-    const leadData = { ...baseLead, id: sharedId, leadId: sharedId, categoria: baseLead.category, createdAt: now, display_time: now, status: 'active', trash: false, titulo: baseLead.title_es, descripcion: raw_text };
-    const ofertaData = { ...baseLead, id: sharedId, leadId: sharedId, categoria: baseLead.category, display_time: now, timestamp: now, status: 'active', trash: false };
+      // If we are here, it's a NEW lead and we can lock it
+      const sharedId = adminDb.collection('leads').doc().id;
+      const nowTs = new Date().toISOString();
+      const leadData = { 
+        ...baseLead, 
+        id: sharedId, 
+        leadId: sharedId, 
+        categoria: baseLead.category, 
+        createdAt: nowTs, 
+        display_time: nowTs, 
+        status: 'active', 
+        trash: false, 
+        titulo: baseLead.title_es, 
+        descripcion: raw_text 
+      };
+      
+      const ofertaData = { 
+        ...baseLead, 
+        id: sharedId, 
+        leadId: sharedId, 
+        categoria: baseLead.category, 
+        display_time: nowTs, 
+        timestamp: nowTs, 
+        status: 'active', 
+        trash: false 
+      };
 
-    await Promise.all([
-      adminDb.collection('leads').doc(sharedId).set(leadData),
-      adminDb.collection('ofertas').doc(sharedId).set(ofertaData),
-      hashRef.set({ createdAt: now, lead_id: sharedId, text_snippet: raw_text.substring(0, 50) })
-    ]);
+      // Perform all writes atomically
+      transaction.set(adminDb.collection('leads').doc(sharedId), leadData);
+      transaction.set(adminDb.collection('ofertas').doc(sharedId), ofertaData);
+      transaction.set(hashRef, { 
+        createdAt: nowTs, 
+        lead_id: sharedId, 
+        text_snippet: raw_text.substring(0, 50) 
+      });
 
-    return { success: true, message: 'Lead publicado correctamente', ids: { shared: sharedId } };
+      return { success: true, message: 'Lead publicado correctamente', ids: { shared: sharedId } };
+    });
+
+    return result;
   } catch (error: any) {
+    console.error('[Processor] Fatal error:', error);
     return { error: 'Error procesando lead', details: error.message };
   }
 }

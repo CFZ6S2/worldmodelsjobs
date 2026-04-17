@@ -26,7 +26,7 @@ export default function PublishPage() {
   const params = useParams();
   const locale = params?.locale || 'en';
   const router = useRouter();
-  const { user, isProAgency, loading: authLoading } = useAuth();
+  const { user, isConcierge, loading: authLoading } = useAuth();
 
   const [formData, setFormData] = useState({
     title: '',
@@ -47,10 +47,10 @@ export default function PublishPage() {
   useEffect(() => {
     if (!authLoading && !user) {
       router.push(`/${locale}/auth/login`);
-    } else if (!authLoading && user && !isProAgency) {
+    } else if (!authLoading && user && !isConcierge) {
       router.push(`/${locale}/pricing`);
     }
-  }, [user, isProAgency, authLoading, locale, router]);
+  }, [user, isConcierge, authLoading, locale, router]);
 
   // Real-time Auto-Categorization Engine
   useEffect(() => {
@@ -89,7 +89,7 @@ export default function PublishPage() {
     }
   }, [formData.title, formData.description, formData.category]);
 
-  if (authLoading || !user || !isProAgency) {
+  if (authLoading || !user || !isConcierge) {
     return (
       <div className="min-h-screen bg-[#050505] flex items-center justify-center">
         <Loader2 className="animate-spin text-gold" size={32} />

@@ -23,6 +23,12 @@ export const viewport: Viewport = {
 
 const locales = ['en', 'es', 'fr', 'pt-BR', 'ru'];
 
+export function generateStaticParams() {
+  return locales.map((locale) => ({ locale }));
+}
+
+export const dynamicParams = false;
+
 export default async function RootLayout({
   children,
   params,
@@ -36,7 +42,7 @@ export default async function RootLayout({
     notFound();
   }
 
-  const messages = await getMessages();
+  const messages = await getMessages({ locale });
 
   return (
     <html lang={locale} className="dark" suppressHydrationWarning>
@@ -45,8 +51,8 @@ export default async function RootLayout({
           <NextIntlClientProvider locale={locale} messages={messages}>
             <AuthProvider>
               {children}
+              <BottomNav />
             </AuthProvider>
-            <BottomNav />
           </NextIntlClientProvider>
         </div>
       </body>

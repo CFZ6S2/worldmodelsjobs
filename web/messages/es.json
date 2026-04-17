@@ -7,6 +7,7 @@
     "home": "Inicio",
     "feed": "Feed",
     "alerts": "Alertas",
+    "publish": "Publicar",
     "profile": "Perfil"
   },
   "home": {
@@ -100,10 +101,22 @@
     "hips": "Cadera",
     "hourly": "Tarifa por hora",
     "daily": "Tarifa por día",
+    "professionalFields": "Datos Profesionales del Perfil",
     "gallery": "Galería (Máx 5)",
     "delete": "Eliminar",
     "public": "Ficha Pública",
     "publicDesc": "Permitir que los reclutadores vean tu perfil",
-    "viewPreview": "Ver Vista Previa Pública"
+    "viewPreview": "Ver Vista Previa Pública",
+    "gender": "Género / Identidad",
+    "male": "Hombre",
+    "female": "Mujer",
+    "premiumBadge": "WorldModels Premium",
+    "premiumStatus": "Estado de Membresía",
+    "premiumActive": "Membresía VIP Activa",
+    "premiumInactive": "Membresía Estándar",
+    "upgradeCta": "Mejorar a Acceso Premium",
+    "verificationStatus": "Verificación de Identidad",
+    "verified": "Profesional Verificada",
+    "notVerified": "Verificación Pendiente"
   }
 }
