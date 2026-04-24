@@ -57,3 +57,6 @@ tmp_*
 # Backups
 backups/
 dashboard.bak_legacy/
+
+# Miscelánea Sensible
+enlaces_grupos.txt
