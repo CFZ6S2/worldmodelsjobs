@@ -11,6 +11,7 @@
     "profile": "Perfil"
   },
   "home": {
+    "openFeed": "Abrir feed",
     "badge": "MÁS DE 15.000 MENSAJES FILTRADOS AL DÍA",
     "headline1": "El Feed Premium",
     "headline2": "VIP Worldwide",
@@ -60,16 +61,14 @@
     "category_all": "Todos",
     "category_plazas": "Plazas",
     "category_eventos": "Eventos",
-    "category_agency": "Agencias",
-    "category_modelos": "Modelos",
-    "category_varios": "Varios",
     "globalActivity": "Actividad Global",
     "live": "En Vivo",
     "nuevoLead": "Anuncio Nuevo",
-    "postularAhora": "Postular Ahora",
+    "postularAhora": "Contactar",
     "postulada": "Postulada",
     "noPostings": "No se encontraron anuncios para este filtro.",
-    "premiumSource": "Fuente Premium"
+    "premiumSource": "Fuente Premium",
+    "searchPlaceholder": "Buscar ciudad o contenido..."
   },
   "pricing": {
     "badge": "PRECIOS SIMPLES",

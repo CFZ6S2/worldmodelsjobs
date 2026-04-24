@@ -1,31 +1,22 @@
-import { cert, getApps, initializeApp, App } from 'firebase-admin/app';
-import { getAuth } from 'firebase-admin/auth';
-import { getFirestore } from 'firebase-admin/firestore';
+import * as admin from 'firebase-admin';
 
-let app: App;
-
-if (!getApps().length) {
-  const saJson = process.env.TCS_FIREBASE_SERVICE_ACCOUNT;
-  if (saJson) {
-    try {
-      const serviceAccount = JSON.parse(saJson);
-      app = initializeApp({
-        credential: cert(serviceAccount),
-        projectId: serviceAccount.project_id,
-      });
-    } catch (error) {
-      console.error('Error al parsear TCS_FIREBASE_SERVICE_ACCOUNT:', error);
-      throw error;
-    }
-  } else {
-    // Fallback to Application Default Credentials (ideal for Cloud Run)
-    app = initializeApp();
+if (!admin.apps.length) {
+  try {
+    admin.initializeApp({
+      credential: admin.credential.cert({
+        projectId: process.env.NEXT_PUBLIC_FIREBASE_PROJECT_ID,
+        clientEmail: process.env.FIREBASE_CLIENT_EMAIL,
+        privateKey: process.env.FIREBASE_PRIVATE_KEY?.replace(/\\n/g, '\n'),
+      }),
+    });
+    console.log('[FirebaseAdmin] Initialized with Service Account');
+  } catch (error: any) {
+    // Fallback to default credentials (works in Cloud Functions / some local envs)
+    admin.initializeApp();
+    console.log('[FirebaseAdmin] Initialized with Default Credentials');
   }
-} else {
-  app = getApps()[0]!;
 }
 
-export const adminApp = app;
-export const adminDb = getFirestore(app);
-export const adminAuth = getAuth(app);
-
+export const adminDb = admin.firestore();
+export const adminAuth = admin.auth();
+export const adminStorage = admin.storage();

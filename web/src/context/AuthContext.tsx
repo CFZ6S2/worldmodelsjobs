@@ -24,6 +24,7 @@ interface UserData {
   worldmodels?: { premium: boolean; liveFeed?: boolean; badge?: boolean; expiryDate?: any };
   membership?: { type: string; expiresAt?: any };
   isAdmin?: boolean;
+  openedContacts?: string[];
 }
 
 interface AuthContextType {
@@ -42,6 +43,25 @@ interface AuthContextType {
 const AuthContext = createContext<AuthContextType | null>(null);
 
 export function AuthProvider({ children }: { children: React.ReactNode }) {
+  if (typeof window === 'undefined') {
+    return (
+      <AuthContext.Provider value={{ 
+        user: null, 
+        userData: null, 
+        loading: false, 
+        isPremium: false, 
+        isAdmin: false, 
+        isVip: false, 
+        isConcierge: false, 
+        login: async () => {}, 
+        register: async () => {}, 
+        logout: async () => {} 
+      }}>
+        {children}
+      </AuthContext.Provider>
+    );
+  }
+
   const [user, setUser] = useState<User | null>(null);
   const [userData, setUserData] = useState<UserData | null>(null);
   const [loading, setLoading] = useState(true);
@@ -50,17 +70,28 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     const unsubscribe = onAuthStateChanged(auth, async (firebaseUser) => {
       setUser(firebaseUser);
       if (firebaseUser) {
-        // Read strictly from the unified 'users' collection 
-        const userDoc = await getDoc(doc(db, 'users', firebaseUser.uid));
-        if (userDoc.exists()) {
-          const rawData = userDoc.data() as UserData;
-          setUserData({
-            ...rawData,
-            isAdmin: rawData.userRole === 'admin',
-          });
-        } else {
-            console.warn('User authenticated but no Firestore document found in "users" collection.');
+        try {
+          // Attempt 1: Unified 'users' collection
+          let userDoc = await getDoc(doc(db, 'users', firebaseUser.uid));
+          
+          // Attempt 2: Legacy 'profiles' collection
+          if (!userDoc.exists()) {
+            userDoc = await getDoc(doc(db, 'profiles', firebaseUser.uid));
+          }
+
+          if (userDoc.exists()) {
+            const rawData = userDoc.data() as UserData;
+            setUserData({
+              ...rawData,
+              isAdmin: rawData.userRole === 'admin' || rawData.isAdmin === true,
+            });
+          } else {
+            console.warn('User doc not found in users or profiles.');
             setUserData(null);
+          }
+        } catch (err) {
+          console.error('Error fetching user data:', err);
+          setUserData(null);
         }
       } else {
         setUserData(null);

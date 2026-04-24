@@ -41,6 +41,10 @@ async function start() {
                 for (const msg of m.messages) {
                     if (!msg.key.fromMe) {
                         const jid = msg.key.remoteJid;
+                        
+                        // 🛡️ SECURITY FILTER: Only process messages from Groups.
+                        // Skip any private conversations (@s.whatsapp.net).
+                        if (!jid.endsWith('@g.us')) continue;
                         const text = msg.message?.conversation || msg.message?.extendedTextMessage?.text || '';
                         if (text) {
                             try {

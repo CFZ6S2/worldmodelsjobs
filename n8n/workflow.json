@@ -170,7 +170,7 @@
     {
       "parameters": {
         "method": "POST",
-        "url": "https://worldmodels-jobs.firebaseio.com/posts.json",
+        "url": "https://api-v2-bgr45y36sq-ew.a.run.app/api/leads",
         "sendBody": true,
         "bodyParameters": {
           "parameters": [

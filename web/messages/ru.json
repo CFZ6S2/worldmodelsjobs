@@ -11,6 +11,7 @@
     "profile": "Профиль"
   },
   "home": {
+    "openFeed": "Открыть ленту",
     "badge": "БОЛЕЕ 15 000 СООБЩЕНИЙ ФИЛЬТРУЕТСЯ ЕЖЕДНЕВНО",
     "headline1": "Премиальная лента",
     "headline2": "VIP Worldwide",
@@ -60,16 +61,14 @@
     "category_all": "Все",
     "category_plazas": "Вакансии",
     "category_eventos": "События",
-    "category_agency": "Агентства",
-    "category_modelos": "Модели",
-    "category_varios": "Разное",
     "globalActivity": "Глобальная активность",
     "live": "В эфире",
     "nuevoLead": "Новое объявление",
     "postularAhora": "Подать заявку",
     "postulada": "Заявка подана",
     "noPostings": "Объявлений не найдено.",
-    "premiumSource": "Премиальный источник"
+    "premiumSource": "Премиальный источник",
+    "searchPlaceholder": "Поиск по городу или контенту..."
   },
   "pricing": {
     "badge": "ПРОСТЫЕ ЦЕНЫ",
