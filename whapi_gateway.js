@@ -14,6 +14,14 @@ if (!WHAPI_TOKEN || !N8N_WEBHOOK_URL || !PUBLIC_GATEWAY_URL) {
     throw new Error('Missing required environment variables for WHAPI gateway in .env');
 }
 
+// --- GLOBAL ERROR HANDLING ---
+process.on('uncaughtException', (err) => {
+    console.error('🔥 [FATAL] Uncaught Exception:', err);
+});
+process.on('unhandledRejection', (reason, promise) => {
+    console.error('🔥 [FATAL] Unhandled Rejection at:', promise, 'reason:', reason);
+});
+
 // --- HELPERS ---
 function httpRequest(method, urlStr, headers, data) {
     const u = new URL(urlStr);
@@ -34,6 +42,11 @@ function httpRequest(method, urlStr, headers, data) {
             res.on('end', () => resolve({ statusCode: res.statusCode, body }));
         });
         req.on('error', reject);
+        // HARDENED: Add timeout to requests
+        req.setTimeout(10000, () => {
+            req.destroy();
+            reject(new Error('Request timeout reached (10s)'));
+        });
         if (data) req.write(data);
         req.end();
     });
@@ -43,8 +56,18 @@ function httpRequest(method, urlStr, headers, data) {
 const server = http.createServer(async (req, res) => {
     if (req.method === 'POST' && req.url === '/whapi') {
         let body = '';
-        req.on('data', chunk => body += chunk);
+        const MAX_SIZE = 1 * 1024 * 1024; // 1MB Limit
+
+        req.on('data', chunk => {
+            body += chunk;
+            if (body.length > MAX_SIZE) {
+                res.writeHead(413, { 'Content-Type': 'text/plain' });
+                res.end('Payload Too Large');
+                req.destroy();
+            }
+        });
         req.on('end', async () => {
+            if (res.writableEnded) return;
             try {
                 const whapiData = JSON.parse(body);
                 // console.log('Incoming Whapi Data:', JSON.stringify(whapiData, null, 2));

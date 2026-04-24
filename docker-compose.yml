@@ -5,27 +5,32 @@ services:
     image: redis:6.2-alpine
     container_name: redis
     restart: always
+    networks:
+      - worldmodels-net
 
   n8n:
     image: n8nio/n8n:latest
     container_name: n8n
     restart: always
+    # Port 5678 is now only bound to localhost to prevent direct external access.
+    # Nginx should be used as a reverse proxy for external traffic.
     ports:
-      - "5678:5678"
+      - "127.0.0.1:5678:5678"
     environment:
-      - N8N_HOST=178.156.186.149
+      - N8N_HOST=${N8N_HOST:-localhost}
       - N8N_PORT=5678
-      - N8N_PROTOCOL=http
+      - N8N_PROTOCOL=https
       - NODE_ENV=production
-      - WEBHOOK_URL=http://localhost:5678
-      - N8N_RELOAD_CONFIG_AFTER_IMPORT=true
+      - WEBHOOK_URL=${WEBHOOK_URL}
       - N8N_API_ENABLED=true
       - N8N_RELOAD_CONFIG_AFTER_IMPORT=true
       - GENERIC_TIMEZONE=Europe/Madrid
       - N8N_ENFORCE_SETTINGS_FILE_PERMISSIONS=false
-      - N8N_SECURE_COOKIE=false
+      - N8N_SECURE_COOKIE=true
     volumes:
       - n8n_data:/home/node/.n8n
+    networks:
+      - worldmodels-net
     depends_on:
       - redis
 
@@ -37,12 +42,13 @@ services:
       context: ./collectors/telegram
     environment:
       - WEBHOOK_URL=http://n8n:5678/webhook/worldmodelsjobs-lead
-      - N8N_RELOAD_CONFIG_AFTER_IMPORT=true
-      - N8N_API_ENABLED=true
-      - N8N_RELOAD_CONFIG_AFTER_IMPORT=true
-      - BACKEND_URL=http://172.17.0.1:3001/api/check-duplicate
-      - API_ID=27866843
-      - API_HASH=7e8c5188038965bdc1739fa8c3c0dad7
+      - BACKEND_URL=${BACKEND_INTERNAL_URL:-http://host.docker.internal:3001/api/check-duplicate}
+      - TELEGRAM_API_ID=${TELEGRAM_API_ID}
+      - TELEGRAM_API_HASH=${TELEGRAM_API_HASH}
+    networks:
+      - worldmodels-net
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
     depends_on:
       - n8n
 
@@ -54,11 +60,10 @@ services:
       context: ./collectors/whatsapp
     environment:
       - WEBHOOK_URL=http://n8n:5678/webhook/worldmodelsjobs-lead
-      - N8N_RELOAD_CONFIG_AFTER_IMPORT=true
-      - N8N_API_ENABLED=true
-      - N8N_RELOAD_CONFIG_AFTER_IMPORT=true
     volumes:
       - ./collectors/whatsapp/auth:/app/.wwebjs_auth
+    networks:
+      - worldmodels-net
     depends_on:
       - n8n
 
@@ -70,8 +75,14 @@ services:
       - RETENTION_HOURS=48
     volumes:
       - n8n_data:/app/n8n_data
+    networks:
+      - worldmodels-net
     depends_on:
       - n8n
+
+networks:
+  worldmodels-net:
+    driver: bridge
 
 volumes:
   n8n_data:

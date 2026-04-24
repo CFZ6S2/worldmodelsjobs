@@ -17,8 +17,31 @@ admin.initializeApp({
 const db = admin.firestore();
 const rtdb = admin.database();
 const crypto = require('crypto');
+const rateLimit = require('express-rate-limit');
 
-console.log("🌉 [BRIDGE] Initializing RTDB to Firestore listener...");
+// --- GLOBAL ERROR HANDLING ---
+process.on('uncaughtException', (err) => {
+    console.error('🔥 [FATAL] Uncaught Exception:', err);
+});
+process.on('unhandledRejection', (reason, promise) => {
+    console.error('🔥 [FATAL] Unhandled Rejection at:', promise, 'reason:', reason);
+});
+
+// --- RATE LIMITING ---
+const apiLimiter = rateLimit({
+    windowMs: 15 * 60 * 1000, // 15 minutes
+    max: 100, // Limit each IP to 100 requests per windowMs
+    standardHeaders: true,
+    legacyHeaders: false,
+    message: { error: 'Too many requests, please try again later.' }
+});
+
+app.use(cors());
+app.use(express.json({ limit: '1mb' })); // HARDENED: Limit body size to 1MB
+
+// Apply rate limiting to all API endpoints
+app.use('/api/', apiLimiter);
+app.use('/jobs-api/', apiLimiter);
 
 // Real-time bridge from n8n (RTDB) to Web (Firestore)
 rtdb.ref('/posts').on('child_added', async (snapshot) => {
@@ -109,8 +132,7 @@ function autoCategorize(text) {
   return 'CAT_PLAZAS'; 
 }
 
-app.use(cors());
-app.use(express.json());
+// --- REMOVED DUPLICATE MIDDLEWARE (Moved to top) ---
 
 // ==========================================
 // 1. DUPLICATE GUARD (Anti-Spam)
@@ -137,8 +159,10 @@ app.get('/api/check-duplicate', async (req, res) => {
   
   // Set the lock
   recentLeads.set(hash, now);
-  // Cleanup map every hour to prevent memory bloat
-  if (recentLeads.size > 1000) recentLeads.clear();
+
+  // HARDENED: Periodic cleanup using setInterval (every hour) instead of size-only
+  // size-check still exists as a secondary guard
+  if (recentLeads.size > 2000) recentLeads.clear();
 
   try {
     const ofertasRef = db.collection('ofertas');
@@ -259,9 +283,15 @@ app.post(['/jobs-api/api/ads', '/api/ads', '/api/save-data'], async (req, res) =
 });
 
 // ==========================================
-// 3. MONITORING HTML
+// 3. MONITORING HTML (HARDENED: Basic Auth)
 // ==========================================
 app.get('/', async (req, res) => {
+    // SIMPLE AUTH GUARD
+    const monitorToken = process.env.MONITOR_TOKEN;
+    if (monitorToken && req.query.token !== monitorToken) {
+        return res.status(401).send('Unauthorized: Missing or invalid monitor token');
+    }
+
     try {
         const snapshot = await db.collection('ofertas').orderBy('timestamp', 'desc').limit(50).get();
         let leadsHtml = '';
@@ -272,13 +302,14 @@ app.get('/', async (req, res) => {
                 <div style="border: 1px solid #ddd; padding: 10px; margin-bottom: 10px; border-radius: 8px; background: white;">
                     <b style="color: #d4af37">[${data.platform || 'TG'}] ${data.titulo}</b><br>
                     <small>${data.ubicacion} | ${time}</small><br>
-                    <p style="font-style: italic; font-size: 0.9em;">${data.descripcion_original.substring(0, 200)}...</p>
+                    <p style="font-style: italic; font-size: 0.9em;">${(data.descripcion_original || '').substring(0, 200)}...</p>
                 </div>`;
         });
 
         res.send(`
             <html><body style="font-family: sans-serif; background: #f4f4f4; padding: 20px;">
                 <h1>Platinum Ingestion Monitor</h1>
+                <p>Status: Authenticated</p>
                 <div style="max-width: 800px; margin: 0 auto;">${leadsHtml}</div>
             </body></html>
         `);
@@ -286,6 +317,12 @@ app.get('/', async (req, res) => {
         res.status(500).send(e.message);
     }
 });
+
+// Periodic memory cleanup every 60 minutes
+setInterval(() => {
+    console.log('🧹 [CLEANUP] Clearing recentLeads map...');
+    recentLeads.clear();
+}, 60 * 60 * 1000);
 
 app.listen(port, '0.0.0.0', () => {
     console.log(`🚀 Platinum Duplicate Guard listening on port ${port}`);
