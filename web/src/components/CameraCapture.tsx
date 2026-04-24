@@ -76,10 +76,11 @@ export default function CameraCapture({ onCapture, onClose }: CameraCaptureProps
     onClose();
   };
 
-  useState(() => {
+  useEffect(() => {
+    if (typeof window === 'undefined') return;
     startCamera();
     return () => stopCamera();
-  });
+  }, [stopCamera]);
 
   return (
     <div style={{

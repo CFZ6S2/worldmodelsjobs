@@ -7,7 +7,11 @@ import { NextIntlClientProvider } from 'next-intl';
 import { getMessages } from 'next-intl/server';
 import { notFound } from 'next/navigation';
 
-const inter = Inter({ subsets: ['latin'] });
+const inter = Inter({ 
+  subsets: ['latin'],
+  display: 'swap',
+  preload: true
+});
 
 export const metadata: Metadata = {
   title: 'WorldModels&Jobs | Premium VIP Intelligence',
@@ -21,7 +25,7 @@ export const viewport: Viewport = {
   userScalable: false,
 };
 
-const locales = ['en', 'es', 'fr', 'pt-BR', 'ru'];
+const locales = ['en', 'es', 'pt', 'ru'];
 
 export function generateStaticParams() {
   return locales.map((locale) => ({ locale }));
@@ -42,12 +46,12 @@ export default async function RootLayout({
     notFound();
   }
 
-  const messages = await getMessages({ locale });
+  const messages = await getMessages();
 
   return (
     <html lang={locale} className="dark" suppressHydrationWarning>
       <body className={inter.className + " antialiased"}>
-        <div className="app-container">
+        <div id="app-container">
           <NextIntlClientProvider locale={locale} messages={messages}>
             <AuthProvider>
               {children}

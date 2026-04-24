@@ -1,52 +1,61 @@
 'use client';
-
+import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
-import { usePathname, useParams } from 'next/navigation';
-import { Home, Bell, User, LayoutDashboard, PlusCircle } from 'lucide-react';
-import { clsx } from 'clsx';
-import { twMerge } from 'tailwind-merge';
-import { useTranslations } from 'next-intl';
+import { usePathname } from 'next/navigation';
+import { Home, Bell, User, LayoutDashboard, PlusCircle, Zap } from 'lucide-react';
+import { useTranslations, useLocale } from 'next-intl';
 import { useAuth } from '@/context/AuthContext';
 
 export default function BottomNav() {
+  const [mounted, setMounted] = useState(false);
   const { userData } = useAuth();
   const pathname = usePathname();
-  const params = useParams();
-  const locale = params?.locale || 'es';
+  const locale = useLocale();
   const t = useTranslations('nav');
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
 
   const navItems = [
     { label: t('home'), icon: Home, href: `/${locale}` },
-    { label: t('feed'), icon: Bell, href: `/${locale}/feed` },
+    { label: t('feed'), icon: Zap, href: `/${locale}/feed` },
     { label: t('publish'), icon: PlusCircle, href: `/${locale}/publish`, center: true },
-    { label: t('alerts'), icon: LayoutDashboard, href: `/${locale}/settings/notifications` },
+    { label: t('alerts'), icon: Bell, href: `/${locale}/settings/notifications` },
     { label: t('profile'), icon: User, href: `/${locale}/profile` },
-  ].filter(item => {
-    // Hide publish button specifically for male users
-    if (item.href.includes('/publish') && userData?.gender === 'male') {
-      return false;
-    }
-    return true;
-  });
+  ];
 
-  // Hide nav on specific pages if needed (e.g. public profile)
-  const isPublicProfile = (pathname.startsWith(`/${locale}/profile/`) && pathname !== `/${locale}/profile`) || (pathname.startsWith('/profile/') && pathname !== '/profile');
+  if (!mounted) return null;
+
+  const isPublicProfile = pathname.includes('/profile/view');
   if (isPublicProfile) return null;
 
   return (
-    <nav className="fixed bottom-0 w-full max-w-[480px] px-6 py-5 flex justify-between items-center blur-nav rounded-t-[32px] z-50">
+    <nav className="glass-nav nav-bottom">
       {navItems.map((item) => {
-        const isActive = pathname === item.href;
+        const isActive = pathname === item.href || (item.href !== `/${locale}` && pathname.startsWith(item.href));
         
         if (item.center) {
           return (
             <Link 
               key={item.href} 
               href={item.href}
-              className="relative -top-8 w-14 h-14 rounded-full bg-gradient-to-tr from-gold-dark to-gold-light flex items-center justify-center shadow-xl shadow-gold/20 tap-scale group hover:scale-110 active:scale-95 transition-all"
+              className="center-nav-btn"
+              style={{
+                background: 'linear-gradient(135deg, #c9a84c, #f3e5ab)',
+                width: '56px',
+                height: '56px',
+                borderRadius: '50%',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                marginTop: '-40px',
+                boxShadow: '0 8px 25px rgba(201, 168, 76, 0.4)',
+                border: '4px solid #050505',
+                transition: 'transform 0.2s ease'
+              }}
             >
-               <item.icon size={28} className="text-dark-900 group-hover:rotate-12 transition-transform" />
-               <div className="absolute inset-0 rounded-full border-4 border-dark-bg/80 -z-10 bg-dark-bg" />
+               <item.icon size={28} color="#000" />
             </Link>
           );
         }
@@ -55,19 +64,18 @@ export default function BottomNav() {
           <Link 
             key={item.href} 
             href={item.href}
-            className={twMerge(
-              "flex flex-col items-center gap-1 transition-colors tap-scale relative",
-              isActive ? "text-gold" : "text-gray-500 hover:text-gold-light"
-            )}
+            className={`nav-item ${isActive ? 'active' : ''}`}
           >
-            <item.icon size={22} />
-            <span className="text-[10px] font-bold tracking-tight">{item.label}</span>
-            {isActive && (
-              <div className="absolute -bottom-2 w-1 h-1 bg-gold rounded-full shadow-[0_0_8px_#c9a84c]" />
-            )}
+            <item.icon size={24} />
+            <span>{item.label}</span>
           </Link>
         );
       })}
+      <style jsx>{`
+        .center-nav-btn:active {
+          transform: scale(0.9);
+        }
+      `}</style>
     </nav>
   );
 }

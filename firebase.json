@@ -1,26 +1,43 @@
 {
-  "functions": { "source": "firebase/functions" },
   "hosting": {
     "public": "web/out",
-    "cleanUrls": true,
     "ignore": [
       "firebase.json",
       "**/.*",
       "**/node_modules/**"
     ],
+    "cleanUrls": true,
+    "trailingSlash": true,
+    "headers": [
+      {
+        "source": "**/__next._tree.txt",
+        "headers": [
+          { "key": "Content-Type", "value": "text/plain" },
+          { "key": "Cache-Control", "value": "public, max-age=0, must-revalidate" }
+        ]
+      }
+    ],
     "rewrites": [
       {
         "source": "/api/**",
-        "function": "api_v2"
-      },
-      {
-        "source": "**",
-        "destination": "/index.html"
+        "function": {
+          "id": "api",
+          "region": "europe-west1"
+        }
       }
     ]
   },
-  "firestore": {
-    "rules": "firestore.rules",
-    "indexes": "firestore.indexes.json"
-  }
+  "functions": [
+    {
+      "source": "firebase/functions",
+      "codebase": "default",
+      "ignore": [
+        "node_modules",
+        ".git",
+        "firebase-debug.log",
+        "firebase-debug.*.log",
+        "*.local"
+      ]
+    }
+  ]
 }

@@ -4,6 +4,7 @@ import { Suspense, useState, useEffect } from 'react';
 import { db } from '@/lib/firebase';
 import { doc, getDoc } from 'firebase/firestore';
 import { useSearchParams, useRouter } from 'next/navigation';
+import { useLocale } from 'next-intl';
 import { User, MapPin, Ruler, Weight, UserCircle, ArrowLeft, Loader2, Star, CheckCircle2, ChevronRight, Bookmark } from 'lucide-react';
 import Link from 'next/link';
 
@@ -11,12 +12,16 @@ function ProfileContent() {
   const searchParams = useSearchParams();
   const id = searchParams.get('id');
   const router = useRouter();
+  const locale = useLocale();
   const [profile, setProfile] = useState<any>(null);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     async function loadProfile() {
-      if (!id) return;
+      if (!id) {
+        setLoading(false);
+        return;
+      }
       try {
         const docRef = doc(db, 'profiles', id as string);
         const docSnap = await getDoc(docRef);
@@ -48,7 +53,7 @@ function ProfileContent() {
         </div>
         <h2 className="text-xl font-bold tracking-tight">Profile not found or private</h2>
         <p className="text-xs text-gray-500 max-w-[240px]">The user you're looking for doesn't exist or has disabled their public view.</p>
-        <Link href="/feed" className="btn-gold !px-10 tap-scale">Back to home</Link>
+        <Link href={`/${locale}/feed`} className="btn-gold !px-10 tap-scale">Back to home</Link>
       </div>
     );
   }

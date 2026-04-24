@@ -11,6 +11,7 @@
     "profile": "Profile"
   },
   "home": {
+    "openFeed": "Open Activity Feed",
     "badge": "15,000+ MESSAGES FILTERED DAILY",
     "headline1": "The World's Premium",
     "headline2": "VIP Companion Feed",
@@ -60,16 +61,14 @@
     "category_all": "All",
     "category_plazas": "Placements",
     "category_eventos": "Events",
-    "category_agency": "Agencies",
-    "category_modelos": "Models",
-    "category_varios": "Various",
     "globalActivity": "Global Activity",
     "live": "Live",
     "nuevoLead": "New Lead",
-    "postularAhora": "Apply Now",
+    "postularAhora": "Contact",
     "postulada": "Applied",
     "noPostings": "No postings found for this filter.",
-    "premiumSource": "Premium Source"
+    "premiumSource": "Premium Source",
+    "searchPlaceholder": "Search city or content..."
   },
   "pricing": {
     "badge": "SIMPLE PRICING",

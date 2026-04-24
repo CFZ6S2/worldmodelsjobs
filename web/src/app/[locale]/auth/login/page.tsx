@@ -1,181 +1,180 @@
 'use client';
-
-import { Suspense, useState, useEffect } from 'react';
+import React, { useState, useEffect, Suspense } from 'react';
 import { useAuth } from '@/context/AuthContext';
-import { useRouter, useParams, useSearchParams } from 'next/navigation';
-import { motion } from 'framer-motion';
-import { ShieldCheck, ArrowLeft, Loader2, Mail, Lock, Sparkles } from 'lucide-react';
-import Link from 'next/link';
-import { useTranslations } from 'next-intl';
+import { useRouter, useSearchParams } from 'next/navigation';
+import { Crown, Mail, Lock, ChevronRight, Zap, ShieldCheck } from 'lucide-react';
 
 function LoginContent() {
-  const [authMode, setAuthMode] = useState<'signin' | 'signup'>('signin');
+  const { login, register, user, loading: authLoading } = useAuth();
+  const router = useRouter();
   const searchParams = useSearchParams();
   
+  const [isLogin, setIsLogin] = useState(true);
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
+  const [error, setError] = useState<string | null>(null);
+  const [loading, setLoading] = useState(false);
+
   useEffect(() => {
-    const mode = searchParams.get('mode');
-    if (mode === 'signup') {
-      setAuthMode('signup');
-    } else {
-      setAuthMode('signin');
+    const modeParam = searchParams.get('mode');
+    if (modeParam === 'signup') {
+      setIsLogin(false);
     }
   }, [searchParams]);
 
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState('');
-  
-  const { login, register } = useAuth();
-  const router = useRouter();
-  const params = useParams();
-  const locale = params?.locale || 'es';
-  const t = useTranslations('auth');
+  useEffect(() => {
+    if (user && !authLoading) {
+      router.push('/feed');
+    }
+  }, [user, authLoading, router]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    setError(null);
     setLoading(true);
-    setError('');
 
     try {
-      if (authMode === 'signin') {
+      if (isLogin) {
         await login(email, password);
       } else {
         await register(email, password);
       }
-      router.push(`/${locale}/feed`);
     } catch (err: any) {
       console.error(err);
-      if (err.code === 'auth/user-not-found') {
-        setError(t('unauthorized'));
-      } else if (err.code === 'auth/wrong-password') {
-        setError(t('failed'));
-      } else {
-        setError(t('failed'));
-      }
-    } finally {
+      setError(err.message || 'Authentication failed');
       setLoading(false);
     }
   };
 
-  return (
-    <div className="min-h-screen bg-[#000] text-white selection:bg-gold selection:text-black">
-      <div className="max-w-[480px] mx-auto min-h-screen border-x border-white/5 relative bg-gradient-to-b from-[#080808] to-[#000] flex flex-col">
-        
-        {/* Header */}
-        <header className="px-8 pt-20 pb-12 text-center flex flex-col items-center">
-          <motion.div 
-            initial={{ scale: 0.8, opacity: 0 }}
-            animate={{ scale: 1, opacity: 1 }}
-            className="w-20 h-20 rounded-3xl bg-gradient-to-br from-gold/20 to-gold/5 flex items-center justify-center border border-gold/20 shadow-2xl mb-8 relative"
-          >
-            <ShieldCheck size={32} className="text-gold" />
-            <div className="absolute -bottom-1 -right-1 p-1.5 bg-gold rounded-xl text-black shadow-lg">
-              <Sparkles size={12} />
-            </div>
-          </motion.div>
-          
-          <h1 className="text-3xl font-black tracking-tighter font-playfair uppercase leading-none mb-3">
-            WorldModels<span className="text-gold">&Jobs</span>
-          </h1>
-          <p className="text-[10px] font-black text-gold tracking-[4px] uppercase opacity-70">
-            {t('vipAccess')}
-          </p>
-        </header>
+  if (authLoading) return null;
 
-        {/* Auth Box */}
-        <main className="px-10 flex-1">
-          {/* Tabs */}
-          <div className="flex bg-white/[0.03] p-1 rounded-2xl border border-white/5 mb-10 overflow-hidden">
-            <button
-              onClick={() => setAuthMode('signin')}
-              className={`flex-1 py-3.5 text-[11px] font-black tracking-widest transition-all duration-500 rounded-xl ${
-                authMode === 'signin' ? 'bg-gold text-black shadow-gold' : 'text-white/40 hover:text-white/60'
-              }`}
-            >
-              {t('loginTab')}
-            </button>
-            <button
-              onClick={() => setAuthMode('signup')}
-              className={`flex-1 py-3.5 text-[11px] font-black tracking-widest transition-all duration-500 rounded-xl ${
-                authMode === 'signup' ? 'bg-gold text-black shadow-gold' : 'text-white/40 hover:text-white/60'
-              }`}
-            >
-              {t('registerTab')}
-            </button>
+  return (
+    <div className="animate-fade" style={{ 
+      minHeight: '100vh', 
+      background: '#000', 
+      display: 'flex', 
+      flexDirection: 'column', 
+      alignItems: 'center', 
+      justifyContent: 'center',
+      padding: '24px'
+    }}>
+      <div style={{ width: '100%', maxWidth: '400px' }}>
+        <div style={{ textAlign: 'center', marginBottom: '48px' }}>
+          <div style={{ 
+            width: '64px', 
+            height: '64px', 
+            borderRadius: '20px', 
+            background: 'linear-gradient(135deg, #c9a84c, #f3e5ab)', 
+            display: 'flex', 
+            alignItems: 'center', 
+            justifyContent: 'center',
+            margin: '0 auto 20px',
+            boxShadow: '0 10px 30px rgba(201, 168, 76, 0.3)'
+          }}>
+            <Crown size={32} color="#000" />
+          </div>
+          <h1 style={{ fontSize: '24px', fontWeight: 900, color: '#fff', letterSpacing: '0.05em', margin: '0 0 8px 0' }}>WORLDMODELS</h1>
+          <p style={{ color: 'rgba(255,255,255,0.4)', fontSize: '12px', fontWeight: 800, textTransform: 'uppercase', letterSpacing: '0.2em' }}>Intelligence Gateway</p>
+        </div>
+
+        <div className="listing-card" style={{ padding: '32px', position: 'relative', overflow: 'hidden' }}>
+          <div style={{ position: 'absolute', top: 0, right: 0, padding: '12px' }}>
+             <ShieldCheck size={16} className="text-gold" style={{ opacity: 0.3 }} />
           </div>
 
-          <form onSubmit={handleSubmit} className="flex flex-col gap-6">
-            <div className="flex flex-col gap-2">
-              <label className="text-[9px] font-black text-white/30 uppercase tracking-[2px] pl-1 flex items-center gap-2">
-                <Mail size={10} /> {t('memberEmail')}
-              </label>
-              <input
-                type="email"
-                required
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                placeholder="name@luxury.com"
-                className="w-full bg-white/[0.02] border border-white/10 rounded-2xl p-4.5 text-sm focus:border-gold/50 focus:bg-white/[0.04] outline-none transition-all"
-              />
+          <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+              <label style={{ fontSize: '10px', color: 'rgba(255,255,255,0.3)', fontWeight: 900, textTransform: 'uppercase', letterSpacing: '0.1em' }}>Email Identity</label>
+              <div style={{ position: 'relative' }}>
+                <Mail size={16} style={{ position: 'absolute', left: '16px', top: '50%', transform: 'translateY(-50%)', opacity: 0.3 }} />
+                <input 
+                  type="email" 
+                  value={email} 
+                  onChange={(e) => setEmail(e.target.value)}
+                  placeholder="name@example.com"
+                  required
+                  style={{
+                    width: '100%',
+                    padding: '16px 16px 16px 48px',
+                    background: 'rgba(255,255,255,0.03)',
+                    border: '1px solid rgba(255,255,255,0.08)',
+                    borderRadius: '16px',
+                    color: '#fff',
+                    outline: 'none',
+                    fontSize: '14px'
+                  }}
+                />
+              </div>
             </div>
 
-            <div className="flex flex-col gap-2">
-              <label className="text-[9px] font-black text-white/30 uppercase tracking-[2px] pl-1 flex items-center gap-2">
-                <Lock size={10} /> {t('accessKey')}
-              </label>
-              <input
-                type="password"
-                required
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                placeholder="••••••••"
-                className="w-full bg-white/[0.02] border border-white/10 rounded-2xl p-4.5 text-sm focus:border-gold/50 focus:bg-white/[0.04] outline-none transition-all"
-              />
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+              <label style={{ fontSize: '10px', color: 'rgba(255,255,255,0.3)', fontWeight: 900, textTransform: 'uppercase', letterSpacing: '0.1em' }}>Access Key</label>
+              <div style={{ position: 'relative' }}>
+                <Lock size={16} style={{ position: 'absolute', left: '16px', top: '50%', transform: 'translateY(-50%)', opacity: 0.3 }} />
+                <input 
+                  type="password" 
+                  value={password} 
+                  onChange={(e) => setPassword(e.target.value)}
+                  placeholder="••••••••"
+                  required
+                  style={{
+                    width: '100%',
+                    padding: '16px 16px 16px 48px',
+                    background: 'rgba(255,255,255,0.03)',
+                    border: '1px solid rgba(255,255,255,0.08)',
+                    borderRadius: '16px',
+                    color: '#fff',
+                    outline: 'none',
+                    fontSize: '14px'
+                  }}
+                />
+              </div>
             </div>
 
             {error && (
-              <motion.div 
-                initial={{ opacity: 0, y: -10 }}
-                animate={{ opacity: 1, y: 0 }}
-                className="bg-red-500/10 border border-red-500/20 text-red-500 text-[10px] font-bold py-3 px-4 rounded-xl text-center"
-              >
+              <div style={{ padding: '12px', background: 'rgba(255,0,0,0.1)', border: '1px solid rgba(255,0,0,0.2)', borderRadius: '12px', fontSize: '12px', color: '#ff6b6b', textAlign: 'center' }}>
                 {error}
-              </motion.div>
+              </div>
             )}
 
-            <button
-              type="submit"
+            <button 
+              type="submit" 
               disabled={loading}
-              className="btn-premium w-full py-5 text-[11px] font-black flex items-center justify-center gap-3 shadow-[0_8px_32px_rgba(212,175,55,0.2)] disabled:opacity-50 mt-4"
+              className="btn-primary"
+              style={{ padding: '18px', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '10px', marginTop: '10px' }}
             >
               {loading ? (
-                <><Loader2 className="animate-spin" size={18} /> {t('authorizing')}</>
+                <div className="animate-spin" style={{ width: '20px', height: '20px', border: '2px solid #000', borderTopColor: 'transparent', borderRadius: '50%' }} />
               ) : (
-                authMode === 'signin' ? t('establishConnection') : t('createAccountBtn')
+                <>
+                  {isLogin ? 'Initiate Access' : 'Create Intelligence Profile'} 
+                  <ChevronRight size={18} />
+                </>
               )}
             </button>
           </form>
 
-          <div className="text-center mt-12">
-            <Link 
-              href={`/${locale}`}
-              className="text-[10px] font-black text-white/30 uppercase tracking-widest hover:text-gold transition-colors flex items-center justify-center gap-2"
+          <div style={{ marginTop: '32px', textAlign: 'center' }}>
+            <button 
+              onClick={() => setIsLogin(!isLogin)}
+              style={{ background: 'none', border: 'none', color: 'rgba(255,255,255,0.4)', fontSize: '13px', fontWeight: 600, cursor: 'pointer' }}
             >
-              <ArrowLeft size={12} /> {t('returnToLobby')}
-            </Link>
+              {isLogin ? "Don't have an profile yet? " : "Already have a profile? "}
+              <span className="text-gold" style={{ borderBottom: '1px solid var(--accent)' }}>
+                {isLogin ? 'Register Now' : 'Sign In'}
+              </span>
+            </button>
           </div>
-        </main>
+        </div>
 
-        <footer className="p-12 text-center">
-          <p className="text-[8px] font-bold text-white/20 tracking-[2px] uppercase">
-            {t('sessionEncrypted')}
-          </p>
-        </footer>
-
-        <style jsx>{`
-          .p-4\.5 { padding: 1.125rem; }
-        `}</style>
+        <div style={{ marginTop: '48px', display: 'flex', justifyContent: 'center', gap: '24px', opacity: 0.2 }}>
+           <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+              <Zap size={14} /> <span style={{ fontSize: '10px', fontWeight: 900, textTransform: 'uppercase' }}>Lightning</span>
+           </div>
+           <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+              <ShieldCheck size={14} /> <span style={{ fontSize: '10px', fontWeight: 900, textTransform: 'uppercase' }}>Encrypted</span>
+           </div>
+        </div>
       </div>
     </div>
   );
@@ -183,8 +182,9 @@ function LoginContent() {
 
 export default function LoginPage() {
   return (
-    <Suspense fallback={<div className="min-h-screen bg-black flex items-center justify-center"><Loader2 className="animate-spin text-gold" size={32} /></div>}>
+    <Suspense fallback={null}>
       <LoginContent />
     </Suspense>
   );
 }
+
