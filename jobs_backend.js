@@ -1,8 +1,29 @@
+require('dotenv').config()
 const express = require('express')
 const fs = require('fs')
 const path = require('path')
+const cors = require('cors')
+const rateLimit = require('express-rate-limit')
 const app = express()
-app.use(express.json())
+
+// --- GLOBAL ERROR HANDLING ---
+process.on('uncaughtException', (err) => {
+  console.error('🔥 [JOBS-API] Uncaught Exception:', err)
+})
+process.on('unhandledRejection', (reason, promise) => {
+  console.error('🔥 [JOBS-API] Unhandled Rejection at:', promise, 'reason:', reason)
+})
+
+// --- SECURITY MIDDLEWARE ---
+app.use(cors())
+app.use(express.json({ limit: '500kb' })) // Strict limit for ads JSON
+
+const jobsLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000,
+  max: 50, // Limit each IP to 50 requests per window
+  message: { error: 'Too many requests for the Jobs API' }
+})
+app.use('/api/', jobsLimiter)
 const ADS_JSON_PATH = process.env.ADS_JSON_PATH || '/var/www/worldmodelsjobs/ads.json'
 function readAds() {
   try {
@@ -24,6 +45,14 @@ app.get('/api/ads', (req, res) => {
   res.json({ ok: true, items: ads })
 })
 app.post('/api/ads', (req, res) => {
+  // AUTHENTICATION GUARD
+  const apiKey = process.env.JOBS_API_KEY
+  const authHeader = req.headers['authorization'] || req.headers['x-api-key']
+  
+  if (apiKey && authHeader !== apiKey) {
+    return res.status(401).json({ ok: false, error: 'unauthorized' })
+  }
+
   const { id, title, description, price, location, date } = req.body || {}
   if (!title || !description) return res.status(400).json({ ok: false, error: 'missing_fields' })
   const ads = readAds()

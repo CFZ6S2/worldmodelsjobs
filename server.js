@@ -30,7 +30,7 @@ process.on('unhandledRejection', (reason, promise) => {
 // --- RATE LIMITING ---
 const apiLimiter = rateLimit({
     windowMs: 15 * 60 * 1000, // 15 minutes
-    max: 100, // Limit each IP to 100 requests per windowMs
+    max: 500, // Increased to 500 to accommodate high-frequency automated ingestion
     standardHeaders: true,
     legacyHeaders: false,
     message: { error: 'Too many requests, please try again later.' }
