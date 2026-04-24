@@ -1,5 +1,9 @@
+require('dotenv').config({ path: '../../.env' });
 const admin = require('firebase-admin');
-const serviceAccount = require('./worldmodels-admin.json');
+const path = require('path');
+
+const firebasePath = process.env.WM_FIREBASE_ADMIN_JSON_PATH || path.join(__dirname, '../../worldmodels-admin.json');
+const serviceAccount = require(firebasePath);
 
 admin.initializeApp({
   credential: admin.credential.cert(serviceAccount)
