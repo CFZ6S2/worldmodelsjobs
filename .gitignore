@@ -1,15 +1,59 @@
+# Dependencias
 node_modules/
-.firebase/
-.vscode/
-backups/
-*.zip
-*.sqlite
-*.log
-*.bak
-.env*
-dist/
-build/
-.next/
 .venv/
 __pycache__/
 *.pyc
+
+# Build
+dist/
+build/
+.next/
+
+# Firebase
+.firebase/
+.firebaserc
+
+# Editor
+.vscode/
+.idea/
+
+# ─── SECRETS (NUNCA subir al repo) ───────────────────────────────────────────
+.env
+.env.*
+!.env.example
+
+# Claves privadas y certificados
+*.pem
+*.key
+*.p12
+*.pfx
+*service-account*.json
+*service_account*.json
+*vertex*.txt
+*-key.txt
+*credentials*.json
+
+# Tokens / sesiones de WhatsApp/Telegram
+sessions/
+*.session
+*.session-journal
+auth_*.json
+
+# ─── DATOS SENSIBLES ─────────────────────────────────────────────────────────
+# Dumps de base de datos
+*.db
+*.sqlite
+*.dump
+*.sql.gz
+local_db_dump*
+
+# ─── ARCHIVOS TEMPORALES / DEBUG ─────────────────────────────────────────────
+tmp_*
+*.tmp
+*.bak
+*.log
+*.zip
+
+# Backups
+backups/
+dashboard.bak_legacy/
