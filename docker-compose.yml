@@ -41,7 +41,7 @@ services:
     build: 
       context: ./collectors/telegram
     environment:
-      - WEBHOOK_URL=http://n8n:5678/webhook/worldmodelsjobs-lead
+      - WEBHOOK_URL=http://n8n:5678/webhook/1fd718d6-49f8-43dc-a881-ff7ecf7b94ef
       - BACKEND_URL=${BACKEND_INTERNAL_URL:-http://host.docker.internal:3001/api/check-duplicate}
       - TELEGRAM_API_ID=${TELEGRAM_API_ID}
       - TELEGRAM_API_HASH=${TELEGRAM_API_HASH}
@@ -59,7 +59,7 @@ services:
     build:
       context: ./collectors/whatsapp
     environment:
-      - WEBHOOK_URL=http://n8n:5678/webhook/worldmodelsjobs-lead
+      - WEBHOOK_URL=http://n8n:5678/webhook/1fd718d6-49f8-43dc-a881-ff7ecf7b94ef
     volumes:
       - ./collectors/whatsapp/auth:/app/.wwebjs_auth
     networks:
