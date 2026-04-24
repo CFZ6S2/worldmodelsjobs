@@ -297,7 +297,14 @@ app.get('/', async (req, res) => {
         let leadsHtml = '';
         snapshot.forEach(doc => {
             const data = doc.data();
-            const time = data.timestamp ? data.timestamp.toDate().toLocaleString() : 'Recién';
+            let time = 'Recién';
+            if (data.timestamp) {
+                if (typeof data.timestamp.toDate === 'function') {
+                    time = data.timestamp.toDate().toLocaleString();
+                } else {
+                    time = new Date(data.timestamp).toLocaleString();
+                }
+            }
             leadsHtml += `
                 <div style="border: 1px solid #ddd; padding: 10px; margin-bottom: 10px; border-radius: 8px; background: white;">
                     <b style="color: #d4af37">[${data.platform || 'TG'}] ${data.titulo}</b><br>
