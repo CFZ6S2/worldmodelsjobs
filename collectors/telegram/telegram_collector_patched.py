@@ -5,12 +5,20 @@ import logging
 import asyncio
 
 # CONFIGURACION DINAMICA
-API_ID = 27866843
-API_HASH = '7e8c5188038965bdc1739fa8c3c0dad7'
+# CONFIGURACION DINAMICA
+API_ID_ENV = os.getenv('TELEGRAM_API_ID') or os.getenv('API_ID')
+API_HASH_ENV = os.getenv('TELEGRAM_API_HASH') or os.getenv('API_HASH')
+
+if not API_ID_ENV or not API_HASH_ENV:
+    # We keep hardcoded only for debugging if explicitly allowed, but here we enforce env for safety
+    raise ValueError("❌ Error: TELEGRAM_API_ID and TELEGRAM_API_HASH must be set")
+
+API_ID = int(API_ID_ENV)
+API_HASH = str(API_HASH_ENV)
 
 # Intentar cargar variables de entorno (Prioridad: Enorno > Hardcoded)
-N8N_WEBHOOK_URL = os.getenv('N8N_WEBHOOK_URL', 'http://178.156.186.149:5678/webhook/worldmodels-platinum-v5')
-CHECK_DUPLICATE_URL = os.getenv('CHECK_DUPLICATE_URL', 'http://localhost:3001/api/check-duplicate')
+N8N_WEBHOOK_URL = os.getenv('N8N_WEBHOOK_URL') or os.getenv('WEBHOOK_URL') or 'http://178.156.186.149:5678/webhook/worldmodels-platinum-v5'
+CHECK_DUPLICATE_URL = os.getenv('CHECK_DUPLICATE_URL') or os.getenv('BACKEND_URL') or 'http://localhost:3001/api/check-duplicate'
 
 # Configurar logging
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(name)s - %(levelname)s - %(message)s')

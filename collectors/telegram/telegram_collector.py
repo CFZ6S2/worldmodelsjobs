@@ -5,8 +5,15 @@ import asyncio
 from telethon import TelegramClient, events
 
 # CONFIGURACION
-API_ID = int(os.getenv('API_ID', 27866843))
-API_HASH = os.getenv('API_HASH', '7e8c5188038965bdc1739fa8c3c0dad7')
+# CONFIGURACION (Priorizar nombres específicos del stack)
+API_ID_ENV = os.getenv('TELEGRAM_API_ID') or os.getenv('API_ID')
+API_HASH_ENV = os.getenv('TELEGRAM_API_HASH') or os.getenv('API_HASH')
+
+if not API_ID_ENV or not API_HASH_ENV:
+    raise ValueError("❌ Error: TELEGRAM_API_ID and TELEGRAM_API_HASH must be set in environment variables")
+
+API_ID = int(API_ID_ENV)
+API_HASH = str(API_HASH_ENV)
 N8N_WEBHOOK_URL = os.getenv('WEBHOOK_URL', 'http://n8n:5678/webhook/worldmodelsjobs-lead')
 
 # Logging
