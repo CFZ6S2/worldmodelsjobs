@@ -2,7 +2,7 @@ const { default: makeWASocket, useMultiFileAuthState, DisconnectReason, fetchLat
 const axios = require('axios');
 const qrcode = require('qrcode-terminal');
 
-const webhookUrl = 'http://localhost:5678/webhook/webhook-test/1fd718d6-49f8-43dc-a881-ff7ecf7b94ef';
+const webhookUrl = process.env.WEBHOOK_URL || 'http://n8n:5678/webhook/1fd718d6-49f8-43dc-a881-ff7ecf7b94ef';
 
 async function start() {
     console.log('--- STARTING WHATSAPP COLLECTOR V6.4 (PM2 PERSISTENT) ---');
