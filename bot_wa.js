@@ -4,6 +4,38 @@ const path = require('path')
 const { URL } = require('url')
 const http = require('http')
 const https = require('https')
+const logger = require('pino')({ level: process.env.LOG_LEVEL || 'info' })
+
+// --- GLOBAL ERROR HANDLING ---
+process.on('uncaughtException', (err) => {
+  logger.fatal({ err }, 'Uncaught Exception detected')
+  // We don't exit to keep the PM2 process alive if possible, 
+  // but in a real prod env you might want to exit(1)
+})
+
+process.on('unhandledRejection', (reason, promise) => {
+  logger.error({ reason, promise }, 'Unhandled Rejection at Promise')
+})
+
+// --- RATE LIMITING (Memory Based) ---
+const rateLimits = new Map()
+const RATE_LIMIT_WINDOW = 60 * 1000 // 1 minute
+const MAX_MESSAGES_PER_WINDOW = 10
+
+function isRateLimited(jid) {
+  const now = Date.now()
+  if (!rateLimits.has(jid)) {
+    rateLimits.set(jid, [now])
+    return false
+  }
+  const timestamps = rateLimits.get(jid).filter(ts => now - ts < RATE_LIMIT_WINDOW)
+  if (timestamps.length >= MAX_MESSAGES_PER_WINDOW) {
+    return true
+  }
+  timestamps.push(now)
+  rateLimits.set(jid, timestamps)
+  return false
+}
 
 const QUEUE_DIR = process.env.QUEUE_DIR || '/root/whatsapp_bot/queue'
 const DEFAULT_BASE = process.env.WEBHOOK_URL || 'http://178.156.186.149:5678/'
@@ -229,16 +261,22 @@ async function handleUpsert(msg, sock) {
   const content = extractContent(msg)
   const txt = (content.text || '').trim()
   
-  // Strict Policy Filtering
+  // 1. Rate Limiting Check
+  if (isRateLimited(sender.jid)) {
+    logger.warn({ jid: sender.jid, wa_id: sender.wa_id }, 'Rate limit exceeded for user')
+    return { ok: false, filtered: true, reason: 'rate_limit_exceeded' }
+  }
+
+  // 2. Strict Policy Filtering
   const hasDigits = /\d/.test(txt)
   const lenOk = txt.length >= 50
   const banned = ['cambio', 'gratis', 'paja']
   const containsBanned = banned.some(w => txt.toLowerCase().includes(w))
   
-  // We process the message only if it has valid text (conversation or caption)
-  // and meets the criteria. Media without captions are currently ignored per "image sin OCR no se procesa".
   if (!txt || !lenOk || !hasDigits || containsBanned) {
-    return { ok: false, filtered: true, reason: !txt ? 'no_text' : !lenOk ? 'too_short' : !hasDigits ? 'no_digits' : 'banned_word' }
+    const reason = !txt ? 'no_text' : !lenOk ? 'too_short' : !hasDigits ? 'no_digits' : 'banned_word'
+    logger.debug({ jid: sender.jid, reason }, 'Message filtered by policy')
+    return { ok: false, filtered: true, reason }
   }
 
   const payload = {
@@ -263,18 +301,24 @@ async function handleUpsert(msg, sock) {
       }
     }
   }
+
   if (['image', 'video', 'document', 'audio', 'sticker'].includes(content.type)) {
     try {
       const media = await saveMedia(payload.request_id, msg, content)
       payload.message.media.url = media.url
       payload.message.media.mime_type = media.mime_type
-    } catch (_) {}
+    } catch (err) {
+      logger.error({ err, request_id: payload.request_id }, 'Failed to save media')
+    }
   }
+
   try {
     await postToN8n(payload)
+    logger.info({ jid: sender.jid, request_id: payload.request_id }, 'Message synced to n8n')
     return { ok: true }
   } catch (e) {
     const file = enqueue(payload)
+    logger.error({ err: e.message, file, request_id: payload.request_id }, 'Failed to sync to n8n, enqueued')
     return { ok: false, queued: file }
   }
 }

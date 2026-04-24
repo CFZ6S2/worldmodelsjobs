@@ -1,8 +1,25 @@
 rules_version = '2';
 service cloud.firestore {
   match /databases/{database}/documents {
+    // Ofertas (Leads): Public read, Admin write (via Admin SDK)
+    match /ofertas/{document} {
+      allow read: if true;
+      allow write: if false; 
+    }
+    
+    // Lead Hashes: Strictly internal
+    match /lead_hashes/{document} {
+      allow read, write: if false;
+    }
+    
+    // Users: Only the owner can read/write their own profile
+    match /users/{userId} {
+      allow read, write: if request.auth != null && request.auth.uid == userId;
+    }
+
+    // Default: Deny all other access
     match /{document=**} {
-      allow read, write: if true; // Temporary for setup, will harden later
+      allow read, write: if false;
     }
   }
 }
