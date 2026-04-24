@@ -15,7 +15,7 @@ services:
     # Port 5678 is now only bound to localhost to prevent direct external access.
     # Nginx should be used as a reverse proxy for external traffic.
     ports:
-      - "127.0.0.1:5678:5678"
+      - "0.0.0.0:5678:5678"
     environment:
       - N8N_HOST=${N8N_HOST:-localhost}
       - N8N_PORT=5678
