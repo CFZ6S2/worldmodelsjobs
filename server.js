@@ -205,8 +205,8 @@ app.get('/api/check-duplicate', async (req, res) => {
 // 2. DATA INGESTION & LEGACY COMPATIBILITY
 // ==========================================
 
-// This handles the EXACT URL found in n8n/vps workflows
-app.post(['/jobs-api/api/ads', '/api/ads', '/api/save-data'], async (req, res) => {
+// This handles the EXACT URL and structure found in WORLDMODELS_V2_ELITE_FINAL
+app.post(['/api/leads', '/jobs-api/api/ads', '/api/ads', '/api/save-data'], async (req, res) => {
     try {
         const body = req.body || {};
         
@@ -226,9 +226,9 @@ app.post(['/jobs-api/api/ads', '/api/ads', '/api/save-data'], async (req, res) =
             return res.status(200).json({ success: false, reason: 'mirror_group_ignored_to_prevent_loop' });
         }
 
-        // Robust extraction for different n8n versions
-        const rawDescription = body.description || body.descripcion || body.descripcion_original || body.text || "-";
-        const rawTitle = body.title || body.titulo || body.titulo_web || (rawDescription.split('\n')[0].substring(0, 50)) || "Nuevo Lead Sync";
+        // --- ROBUST EXTRACTION (Support for ELITE V2 & Legacy) ---
+        const rawDescription = body.text_es || body.description || body.descripcion || body.descripcion_original || body.text || "-";
+        const rawTitle = body.title_es || body.title || body.titulo || body.titulo_web || (rawDescription.split('\n')[0].substring(0, 50)) || "Nuevo Lead Sync";
         
         // 🧠 ANTI-STORM LOCK
         const hash = getLeadHash(rawDescription);
@@ -253,20 +253,20 @@ app.post(['/jobs-api/api/ads', '/api/ads', '/api/save-data'], async (req, res) =
         
         const payload = {
             titulo: rawTitle,
-            descripcion: rawDescription, // Modern field
-            descripcion_original: rawDescription, // Legacy field
-            ubicacion: body.city || body.ubicacion || body.location || body.municipio || "Global",
+            descripcion: rawDescription,
+            descripcion_original: rawDescription,
+            ubicacion: body.city || body.location || body.ubicacion || body.municipio || "Global",
             categoria: finalCategory,
             contact: body.contact || body.contacto || body.tel || body.sender_contact || "-",
             timestamp: admin.firestore.FieldValue.serverTimestamp(),
-            platform: (body.source || body.platform || "n8n_vps").toUpperCase(),
+            platform: (body.platform || "n8n_vps").toUpperCase(),
             activa: true,
-            source: "n8n_compatibility_layer",
+            source: "n8n_elite_v2_compat",
             translations: {
-                es: { titulo: rawTitle, descripcion: rawDescription },
-                en: { titulo: rawTitle, descripcion: rawDescription },
-                ru: { titulo: rawTitle, descripcion: rawDescription },
-                pt: { titulo: rawTitle, descripcion: rawDescription }
+                es: { titulo: body.title_es || rawTitle, descripcion: body.text_es || rawDescription },
+                en: { titulo: body.title_en || rawTitle, descripcion: body.text_en || rawDescription },
+                ru: { titulo: body.title_ru || rawTitle, descripcion: body.text_ru || rawDescription },
+                pt: { titulo: body.title_pt || rawTitle, descripcion: body.text_pt || rawDescription }
             }
         };
 
@@ -274,7 +274,7 @@ app.post(['/jobs-api/api/ads', '/api/ads', '/api/save-data'], async (req, res) =
         await db.collection('ofertas').doc(hash).set(payload, { merge: true });
         await db.collection('lead_hashes').doc(hash).set({ createdAt: new Date().toISOString() });
         
-        console.log(`💎 [SAVED] Sync via Compatibility Layer: ${rawTitle.substring(0,20)}...`);
+        console.log(`💎 [SAVED] Sync via Elite V2 Compat: ${rawTitle.substring(0,20)}...`);
         res.status(200).json({ success: true, id: hash });
     } catch (error) {
         console.error('❌ [ERROR] Ingestion failed:', error.message);
