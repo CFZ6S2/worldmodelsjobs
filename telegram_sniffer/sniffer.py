@@ -63,10 +63,10 @@ async def main():
     
     client = TelegramClient(SESSION_NAME, API_ID, API_HASH)
     
-    @client.on(events.NewMessage)
+    @client.on(events.NewMessage(func=lambda e: e.is_group or e.is_channel))
     async def handler(event):
-        # We only care about messages in groups/channels or specific chats
-        # For now, let's process all incoming messages that the user can see
+        # 🛡️ SECURITY FILTER: We ONLY process messages from Groups or Channels.
+        # Private DMs are strictly ignored to protect privacy and avoid noise.
         
         text = event.message.message
         sender = await event.get_sender()

@@ -1,67 +1,76 @@
 'use client';
-
+import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { useAuth } from '@/context/AuthContext';
-import { useParams } from 'next/navigation';
 import { Crown, Globe, Zap, Shield, ChevronRight, Bell } from 'lucide-react';
 import LanguageSwitcher from '@/components/LanguageSwitcher';
-import { useTranslations } from 'next-intl';
+import { useTranslations, useLocale } from 'next-intl';
 
 export default function HomePage() {
+  const [mounted, setMounted] = useState(false);
   const { user } = useAuth();
-  const params = useParams();
-  const locale = params?.locale || 'es';
+  const locale = useLocale();
   const t = useTranslations('home');
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
 
   return (
     <div className="flex-1 flex flex-col pb-32">
       {/* Header */}
-      <header className="sticky top-0 z-50 px-6 py-4 flex justify-between items-center glass border-b border-white/5">
-        <div className="flex items-center gap-3">
-          <div className="w-9 h-9 rounded-xl bg-gradient-to-tr from-gold-dark to-gold-light flex items-center justify-center shadow-lg shadow-gold/20">
-            <Crown size={20} className="text-dark-900" />
+      <header className="glass-nav" style={{ top: 0, padding: '16px 24px', display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderBottom: '1px solid var(--glass-border)' }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+          <div style={{ 
+            width: '36px', 
+            height: '36px', 
+            borderRadius: '10px', 
+            background: 'linear-gradient(135deg, #c9a84c, #f3e5ab)', 
+            display: 'flex', 
+            alignItems: 'center', 
+            justifyContent: 'center' 
+          }}>
+            <Crown size={20} color="#000" />
           </div>
           <div>
-            <h1 className="text-base font-bold tracking-tight text-white">WorldModels&Jobs</h1>
-            <p className="text-[10px] text-gold font-bold uppercase tracking-widest leading-none">Premium Intelligence</p>
+            <h1 style={{ fontSize: '1rem', fontWeight: 800, margin: 0 }}>WorldModels&Jobs</h1>
+            <p className="text-gold" style={{ fontSize: '10px', fontWeight: 900, textTransform: 'uppercase', letterSpacing: '0.1em', margin: 0 }}>Premium Intelligence</p>
           </div>
         </div>
-        <div className="flex items-center gap-3">
+        <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
           <LanguageSwitcher />
-          <Link href={`/${locale}/settings/notifications`} className="w-10 h-10 rounded-full glass-gold flex items-center justify-center relative tap-scale">
-            <Bell size={20} className="text-gold" />
-            <span className="absolute top-2.5 right-2.5 w-2 h-2 bg-gold rounded-full border-2 border-dark-900 shadow-[0_0_8px_#c9a84c]"></span>
-          </Link>
         </div>
       </header>
 
       {/* Hero Section */}
-      <section className="px-6 pt-12 pb-8 text-center space-y-6">
-        <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full glass-gold border-gold/30">
-          <Zap size={14} className="text-gold animate-pulse" />
-          <span className="text-[10px] font-bold text-gold uppercase tracking-wider">{t('badge')}</span>
+      <section style={{ padding: '100px 24px 40px', textAlign: 'center' }}>
+        <div className="badge" style={{ marginBottom: '24px' }}>
+          <Zap size={14} style={{ marginRight: '6px' }} />
+          <span>{t('badge')}</span>
         </div>
 
-        <h2 className="text-4xl font-extrabold tracking-tight leading-tight">
+        <h2 style={{ fontSize: '2.75rem', fontWeight: 900, lineHeight: 1.1, marginBottom: '20px' }}>
           {t('headline1')}<br />
-          <span className="text-gold-gradient italic">{t('headline2')}</span>
+          <span className="text-gold" style={{ fontStyle: 'italic' }}>{t('headline2')}</span>
         </h2>
 
-        <p className="text-sm text-gray-400 font-medium leading-relaxed max-w-[320px] mx-auto">
+        <p className="text-muted" style={{ maxWidth: '300px', margin: '0 auto 40px', fontSize: '1rem' }}>
           {t('subheadline')}
         </p>
 
-        <div className="flex flex-col gap-3 pt-4">
-          {user ? (
-            <Link href={`/${locale}/feed`} className="btn-premium shadow-xl shadow-gold/10 tap-scale">
-              Open Activity Feed <ChevronRight size={18} />
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
+          {!mounted ? (
+            <div style={{ height: '60px' }} />
+          ) : user ? (
+            <Link href={`/${locale}/feed`} className="btn-primary flex items-center justify-center gap-2" style={{ textDecoration: 'none', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+              {t('openFeed')} <ChevronRight size={18} />
             </Link>
           ) : (
             <>
-              <Link href={`/${locale}/register`} className="btn-premium shadow-xl shadow-gold/10 tap-scale">
+              <Link href={`/${locale}/auth/login?mode=signup`} className="btn-primary" style={{ textDecoration: 'none', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px' }}>
                 {t('ctaPrimary')} <ChevronRight size={18} />
               </Link>
-              <Link href={`/${locale}/login`} className="btn-premium !bg-transparent !border-white/10 !text-gray-400 tap-scale flex items-center justify-center gap-2 py-4 px-6">
+              <Link href={`/${locale}/auth/login`} className="text-muted" style={{ textDecoration: 'none', marginTop: '12px', fontWeight: 700 }}>
                 {t('ctaSecondary')}
               </Link>
             </>
@@ -70,59 +79,49 @@ export default function HomePage() {
       </section>
 
       {/* Stats Cards */}
-      <section className="px-6 grid grid-cols-2 gap-4">
-        <div className="glass p-5 rounded-3xl space-y-3">
-          <div className="w-10 h-10 rounded-xl bg-gold/10 flex items-center justify-center">
-            <Globe size={20} className="text-gold" />
-          </div>
-          <div>
-            <p className="text-[10px] font-bold text-gray-500 uppercase">Cities</p>
-            <h3 className="text-xl font-bold italic">50+ <span className="text-[10px] font-normal not-italic text-gold">Global</span></h3>
-          </div>
+      <section style={{ padding: '0 24px', display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px' }}>
+        <div className="listing-card" style={{ padding: '20px', marginBottom: 0 }}>
+          <Globe size={20} color="#c9a84c" style={{ marginBottom: '12px' }} />
+          <p style={{ fontSize: '10px', fontWeight: 900, color: 'rgba(255,255,255,0.4)', textTransform: 'uppercase' }}>Cities</p>
+          <h3 style={{ fontSize: '1.25rem' }}>50+ <span className="text-gold" style={{ fontSize: '10px' }}>Global</span></h3>
         </div>
-        <div className="glass p-5 rounded-3xl space-y-3 border-gold/10">
-          <div className="w-10 h-10 rounded-xl bg-gold/10 flex items-center justify-center">
-            <Zap size={20} className="text-gold" />
-          </div>
-          <div>
-            <p className="text-[10px] font-bold text-gray-500 uppercase">Latency</p>
-            <h3 className="text-xl font-bold italic">1.2s <span className="text-[10px] font-normal not-italic text-gold">Fast</span></h3>
-          </div>
+        <div className="listing-card" style={{ padding: '20px', marginBottom: 0 }}>
+          <Zap size={20} color="#c9a84c" style={{ marginBottom: '12px' }} />
+          <p style={{ fontSize: '10px', fontWeight: 900, color: 'rgba(255,255,255,0.4)', textTransform: 'uppercase' }}>Latency</p>
+          <h3 style={{ fontSize: '1.25rem' }}>1.2s <span className="text-gold" style={{ fontSize: '10px' }}>Fast</span></h3>
         </div>
       </section>
 
-      {/* Main Features */}
-      <section className="px-6 pt-12 space-y-4">
-        <h3 className="text-lg font-bold px-1">Exclusive Experience</h3>
-        
-        <div className="space-y-4">
-          <div className="glass p-5 rounded-[28px] flex items-center gap-5 border-white/[0.03]">
-            <div className="w-12 h-12 rounded-2xl bg-white/5 flex items-center justify-center flex-shrink-0 border border-white/5">
-              <Shield size={24} className="text-gold-light" />
-            </div>
-            <div>
-              <h4 className="font-bold text-sm">{t('feature3Title')}</h4>
-              <p className="text-[11px] text-gray-500 font-medium leading-relaxed">{t('feature3Desc')}</p>
-            </div>
+      {/* Features */}
+      <section style={{ padding: '48px 24px' }}>
+        <h3 style={{ fontSize: '1.1rem', marginBottom: '24px' }}>Exclusive Experience</h3>
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
+          <div className="listing-card" style={{ display: 'flex', gap: '16px', alignItems: 'center', marginBottom: 0 }}>
+             <div style={{ width: '48px', height: '48px', borderRadius: '12px', background: 'rgba(255,255,255,0.05)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                <Shield size={24} color="#c9a84c" />
+             </div>
+             <div>
+                <h4 style={{ fontSize: '0.9rem', fontWeight: 700 }}>{t('feature3Title')}</h4>
+                <p className="text-muted" style={{ fontSize: '11px' }}>{t('feature3Desc')}</p>
+             </div>
           </div>
-
-          <div className="glass p-5 rounded-[28px] flex items-center gap-5 border-white/[0.03]">
-            <div className="w-12 h-12 rounded-2xl bg-white/5 flex items-center justify-center flex-shrink-0 border border-white/5">
-              <Crown size={24} className="text-gold-light" />
-            </div>
-            <div>
-              <h4 className="font-bold text-sm">{t('feature4Title')}</h4>
-              <p className="text-[11px] text-gray-500 font-medium leading-relaxed">{t('feature4Desc')}</p>
-            </div>
+          <div className="listing-card" style={{ display: 'flex', gap: '16px', alignItems: 'center', marginBottom: 0 }}>
+             <div style={{ width: '48px', height: '48px', borderRadius: '12px', background: 'rgba(255,255,255,0.05)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                <Crown size={24} color="#c9a84c" />
+             </div>
+             <div>
+                <h4 style={{ fontSize: '0.9rem', fontWeight: 700 }}>{t('feature4Title')}</h4>
+                <p className="text-muted" style={{ fontSize: '11px' }}>{t('feature4Desc')}</p>
+             </div>
           </div>
         </div>
       </section>
 
       {/* Footer */}
-      <footer className="px-6 py-12 text-center">
-        <div className="w-12 h-[1px] bg-gold/20 mx-auto mb-6"></div>
-        <p className="text-[10px] text-gray-600 font-bold uppercase tracking-[0.2em] mb-2">WorldModels&Jobs Intelligence</p>
-        <p className="text-[10px] text-gray-700 italic">© {new Date().getFullYear()} - Handcrafted for VIPs</p>
+      <footer style={{ padding: '48px 24px 100px', textAlign: 'center' }}>
+        <div className="divider"></div>
+        <p style={{ fontSize: '10px', fontWeight: 900, letterSpacing: '0.2em', color: 'rgba(255,255,255,0.3)', textTransform: 'uppercase' }}>WorldModels&Jobs Intelligence</p>
+        <p style={{ fontSize: '10px', fontStyle: 'italic', color: 'rgba(255,255,255,0.2)', marginTop: '8px' }}>© {new Date().getFullYear()} - Handcrafted for VIPs</p>
       </footer>
     </div>
   );

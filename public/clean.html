@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Limpieza WorldModels</title>
+    <script src="https://www.gstatic.com/firebasejs/9.0.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.0.0/firebase-firestore-compat.js"></script>
+</head>
+<body style="font-family: sans-serif; padding: 50px; text-align: center;">
+    <h1>🧹 Limpiador de Leads "Sucios"</h1>
+    <p>Este script borrará todos los leads que contengan el prefijo <b>[WM_FIXED_REAL_2026]</b></p>
+    <button id="cleanBtn" style="padding: 20px 40px; font-size: 20px; background: red; color: white; border: none; border-radius: 10px; cursor: pointer;">
+        ¡BORRAR TODA LA MIERDA!
+    </button>
+    <div id="status" style="margin-top: 20px; font-weight: bold;"></div>
+
+    <script>
+        // Configuración sacada de tu .env
+        const firebaseConfig = {
+            apiKey: "AIzaSyAmaE2tXMBsKc8DjBd1ShJ1HnDxVYQ0yzU",
+            authDomain: "tucitasegura-129cc.firebaseapp.com",
+            projectId: "tucitasegura-129cc",
+            storageBucket: "tucitasegura-129cc.firebasestorage.app",
+            messagingSenderId: "180656060538",
+            appId: "1:180656060538:web:3168487130aa126db663c3"
+        };
+        
+        firebase.initializeApp(firebaseConfig);
+        const db = firebase.firestore();
+
+        document.getElementById('cleanBtn').onclick = async () => {
+            const status = document.getElementById('status');
+            status.innerText = "Buscando basura...";
+            
+            try {
+                const snapshot = await db.collection('ofertas').get();
+                let count = 0;
+                
+                const deletePromises = [];
+                snapshot.forEach(doc => {
+                    const data = doc.data();
+                    if (JSON.stringify(data).includes('[WM_FIXED_REAL')) {
+                        deletePromises.push(doc.ref.delete());
+                        count++;
+                    }
+                });
+                
+                await Promise.all(deletePromises);
+                status.style.color = "green";
+                status.innerText = "✅ ¡Limpieza completada! Se han borrado " + count + " leads de mierda.";
+            } catch (e) {
+                status.style.color = "red";
+                status.innerText = "❌ Error: " + e.message;
+            }
+        };
+    </script>
+</body>
+</html>

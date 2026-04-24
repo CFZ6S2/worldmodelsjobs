@@ -5,14 +5,13 @@ import { Globe } from 'lucide-react';
 import { useState } from 'react';
 
 const LANGUAGES = [
-  { code: 'en', label: 'English', flag: '🇬🇧' },
   { code: 'es', label: 'Español', flag: '🇪🇸' },
-  { code: 'fr', label: 'Français', flag: '🇫🇷' },
+  { code: 'en', label: 'English', flag: '🇺🇸' },
+  { code: 'pt', label: 'Português', flag: '🇧🇷' },
   { code: 'ru', label: 'Русский', flag: '🇷🇺' },
-  { code: 'pt-BR', label: 'Português', flag: '🇧🇷' },
 ];
 
-const LOCALE_PREFIXES = ['es', 'fr', 'ru', 'pt-BR'];
+const LOCALE_PREFIXES = ['es', 'pt', 'ru'];
 
 function getCurrentLocale(pathname: string): string {
   const segments = pathname.split('/').filter(Boolean);
@@ -48,35 +47,38 @@ export default function LanguageSwitcher() {
         style={{
           display: 'flex',
           alignItems: 'center',
-          gap: 6,
-          background: 'rgba(201,168,76,0.08)',
-          border: '1px solid rgba(201,168,76,0.2)',
-          borderRadius: 8,
-          padding: '6px 12px',
-          color: '#c9a84c',
+          gap: 8,
+          background: 'rgba(255,255,255,0.03)',
+          border: '1px solid rgba(255,255,255,0.08)',
+          borderRadius: 12,
+          padding: '8px 14px',
+          color: '#fff',
           cursor: 'pointer',
           fontSize: 13,
-          fontWeight: 600,
+          fontWeight: 800,
+          transition: 'all 0.3s ease'
         }}
         aria-label="Select language"
         id="language-switcher"
       >
-        <Globe size={14} />
-        <span>{current.flag} {current.label}</span>
+        <Globe size={14} color="var(--accent)" />
+        <span style={{ textTransform: 'uppercase', letterSpacing: '0.05em' }}>{current.code}</span>
       </button>
 
       {open && (
         <div style={{
           position: 'absolute',
-          top: '110%',
+          top: '120%',
           right: 0,
-          background: '#1a1a26',
-          border: '1px solid rgba(201,168,76,0.25)',
-          borderRadius: 10,
+          background: 'rgba(15, 15, 15, 0.98)',
+          backdropFilter: 'blur(30px)',
+          border: '1px solid rgba(255,255,255,0.15)',
+          borderRadius: 18,
           overflow: 'hidden',
-          zIndex: 200,
+          zIndex: 1000,
           minWidth: 160,
-          boxShadow: '0 8px 24px rgba(0,0,0,0.4)',
+          padding: '8px',
+          boxShadow: '0 25px 50px -12px rgba(0,0,0,0.7)',
         }}>
           {LANGUAGES.map((lang) => (
             <button
@@ -85,20 +87,22 @@ export default function LanguageSwitcher() {
               style={{
                 display: 'flex',
                 alignItems: 'center',
-                gap: 10,
+                gap: 12,
                 width: '100%',
-                padding: '10px 16px',
-                background: locale === lang.code ? 'rgba(201,168,76,0.1)' : 'transparent',
+                padding: '12px 16px',
+                background: locale === lang.code ? 'rgba(201, 168, 76, 0.15)' : 'transparent',
                 border: 'none',
-                borderBottom: '1px solid rgba(201,168,76,0.08)',
-                color: locale === lang.code ? '#c9a84c' : '#c0c0d0',
+                borderRadius: 12,
+                color: locale === lang.code ? 'var(--accent)' : 'rgba(255,255,255,0.7)',
                 cursor: 'pointer',
-                fontSize: 14,
+                fontSize: 13,
                 textAlign: 'left',
-                fontWeight: locale === lang.code ? 700 : 400,
+                fontWeight: 800,
+                transition: 'all 0.2s ease',
+                marginBottom: '2px'
               }}
             >
-              <span>{lang.flag}</span>
+              <span style={{ fontSize: '18px' }}>{lang.flag}</span>
               <span>{lang.label}</span>
             </button>
           ))}
