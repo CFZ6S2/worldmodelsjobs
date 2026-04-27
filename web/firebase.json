@@ -15,5 +15,8 @@
         "function": "api"
       }
     ]
+  },
+  "storage": {
+    "rules": "storage.rules"
   }
 }

@@ -3,11 +3,12 @@ const path = require('path');
 const admin = require('firebase-admin');
 const express = require('express');
 const cors = require('cors');
+const axios = require('axios');
 const app = express();
 const port = process.env.BACKEND_PORT || 3001;
 
 // Initialize Firebase Admin (WorldModels Database for Leads)
-const firebasePath = process.env.WM_FIREBASE_ADMIN_JSON_PATH || path.join(__dirname, 'worldmodels-admin.json');
+const firebasePath = process.env.WM_FIREBASE_ADMIN_JSON_PATH || path.join(__dirname, 'firebase-admin.json');
 const serviceAccount = require(firebasePath);
 
 admin.initializeApp({
@@ -68,13 +69,22 @@ rtdb.ref('/posts').on('child_added', async (snapshot) => {
         const finalTitulo = body.titulo_web || body.title || "Nuevo Lead Sync";
         const finalCategoria = (body.categoria === 'Acompañante de Viaje' || body.categoria === 'Imagen') ? 'CAT_ESCORTS' : 'CAT_EVENTOS';
 
+        const contact = body.contacto || body.tel || "-";
+        const senderDigits = contact.replace(/\D/g, '');
+        const isBannedPrefix = BANNED_PREFIXES.some(prefix => senderDigits.startsWith(prefix));
+
+        if (senderDigits && (BANNED_NUMBERS.includes(senderDigits) || isBannedPrefix)) {
+            console.log(`🚫 [BRIDGE BANNED] Blocked: ${senderDigits}`);
+            return;
+        }
+
         const payload = {
             titulo: finalTitulo,
             descripcion: text,
             ubicacion: body.ubicacion || body.municipio || "Global",
             categoria: finalCategoria,
-            contact: body.contacto || body.tel || "-",
-            platform: "TELEGRAM",
+            contact: contact,
+            platform: body.platform || "TELEGRAM",
             timestamp: new Date().toISOString(),
             translations: {
                 es: { titulo: finalTitulo, descripcion: text },
@@ -89,7 +99,7 @@ rtdb.ref('/posts').on('child_added', async (snapshot) => {
 
         await db.collection('ofertas').add(payload);
         await db.collection('lead_hashes').doc(hash).set({ createdAt: new Date().toISOString() });
-        
+
         console.log(`🚀 [BRIDGE] Synced legacy lead to Web: ${finalTitulo}`);
     } catch (err) {
         console.error('❌ [BRIDGE] Error syncing:', err.message);
@@ -102,34 +112,34 @@ rtdb.ref('/ofertas').on('child_added', snapshot => rtdb.ref('/posts').child(snap
 
 // --- SHARED NORMALIZE LOGIC (Anti-Dedupe Hardened) ---
 function normalizeForDedupe(text) {
-  if (!text) return '';
-  return text
-    .toLowerCase()
-    // 1. Remove ALL Emojis and Symbols
-    .replace(/[\u{1F600}-\u{1F64F}\u{1F300}-\u{1F5FF}\u{1F680}-\u{1F6FF}\u{1F1E6}-\u{1F1FF}\u{2600}-\u{26FF}\u{2700}-\u{27BF}]/gu, '')
-    // 2. Remove non-alphanumeric (keep only letters and numbers)
-    .replace(/[^a-z0-9ñáéíóú]/g, '') 
-    // 3. Ultra-compact
-    .trim();
+    if (!text) return '';
+    return text
+        .toLowerCase()
+        // 1. Remove ALL Emojis and Symbols
+        .replace(/[\u{1F600}-\u{1F64F}\u{1F300}-\u{1F5FF}\u{1F680}-\u{1F6FF}\u{1F1E6}-\u{1F1FF}\u{2600}-\u{26FF}\u{2700}-\u{27BF}]/gu, '')
+        // 2. Remove non-alphanumeric (keep only letters and numbers)
+        .replace(/[^a-z0-9ñáéíóú]/g, '')
+        // 3. Ultra-compact
+        .trim();
 }
 
 function getLeadHash(text) {
-  const normalized = normalizeForDedupe(text);
-  // If text is effectively empty after cleaning, use raw but trimmed as fallback
-  const finalInput = normalized.length > 5 ? normalized : text.toLowerCase().trim();
-  return crypto.createHash('sha256').update(finalInput).digest('hex');
+    const normalized = normalizeForDedupe(text);
+    // If text is effectively empty after cleaning, use raw but trimmed as fallback
+    const finalInput = normalized.length > 5 ? normalized : text.toLowerCase().trim();
+    return crypto.createHash('sha256').update(finalInput).digest('hex');
 }
 
 // Intelligent Categorization Engine (Migrated from Cloud Functions)
 function autoCategorize(text) {
-  const content = (text || '').toLowerCase();
-  const plazasKeywords = ['plaza', 'vacante', 'contratando', 'puesto', 'oferta de trabajo', 'trabajo', 'job', 'hiring', 'contratacion', 'se busca', 'requisito', 'reponedor', 'mozo', 'limpieza', 'camarer'];
-  const eventosKeywords = ['evento', 'party', 'fiesta', 'show', 'bolo', 'presentacion', 'casting', 'event', 'party', 'club', 'vuelo', 'hotel', 'modelo', 'imagen', 'azafata'];
+    const content = (text || '').toLowerCase();
+    const plazasKeywords = ['plaza', 'vacante', 'contratando', 'puesto', 'oferta de trabajo', 'trabajo', 'job', 'hiring', 'contratacion', 'se busca', 'requisito', 'reponedor', 'mozo', 'limpieza', 'camarer'];
+    const eventosKeywords = ['evento', 'party', 'fiesta', 'show', 'bolo', 'presentacion', 'casting', 'event', 'party', 'club', 'vuelo', 'hotel', 'modelo', 'imagen', 'azafata'];
 
-  if (plazasKeywords.some(kw => content.includes(kw))) return 'CAT_PLAZAS';
-  if (eventosKeywords.some(kw => content.includes(kw))) return 'CAT_EVENTOS';
-  
-  return 'CAT_PLAZAS'; 
+    if (plazasKeywords.some(kw => content.includes(kw))) return 'CAT_EVENTOS';
+    if (eventosKeywords.some(kw => content.includes(kw))) return 'CAT_EVENTOS';
+
+    return 'CAT_EVENTOS';
 }
 
 // --- REMOVED DUPLICATE MIDDLEWARE (Moved to top) ---
@@ -140,128 +150,205 @@ function autoCategorize(text) {
 const recentLeads = new Map(); // Memory lock for rapid duplicates
 
 app.get('/api/check-duplicate', async (req, res) => {
-  const { text, contact, remoteJid } = req.query;
-  if (!text) return res.json({ duplicate: false });
-  
-  const cleanText = normalizeForDedupe(text);
-  const hash = getLeadHash(text);
-  const now = Date.now();
+    const { text, contact, remoteJid } = req.query;
+    if (!text) return res.json({ duplicate: false });
 
-  // 1. BRAIN-LEVEL LOCK (Memory)
-  // If we saw this exact hash in the last 60 seconds, block it instantly
-  if (recentLeads.has(hash)) {
-    const lastTime = recentLeads.get(hash);
-    if (now - lastTime < 60000) {
-      console.log(`🛡️ [LOCK] Instant block for race condition: ${hash.substring(0,10)}...`);
-      return res.json({ duplicate: true, reason: 'memory_lock' });
-    }
-  }
-  
-  // Set the lock
-  recentLeads.set(hash, now);
+    const cleanText = normalizeForDedupe(text);
+    const hash = getLeadHash(text);
+    const now = Date.now();
 
-  // HARDENED: Periodic cleanup using setInterval (every hour) instead of size-only
-  // size-check still exists as a secondary guard
-  if (recentLeads.size > 2000) recentLeads.clear();
-
-  try {
-    const ofertasRef = db.collection('ofertas');
-    
-    // 2. DB-LEVEL CHECK (Last 24h)
-    // We check either the description matches exactly OR the lead_hashes collection has it
-    const dayAgo = new Date(now - 24 * 60 * 60 * 1000);
-
-    // First check lead_hashes (preferred method)
-    const hashDoc = await db.collection('lead_hashes').doc(hash).get();
-    if (hashDoc.exists) {
-      const hData = hashDoc.data();
-      const hTime = hData.createdAt ? (hData.createdAt.toMillis ? hData.createdAt.toMillis() : new Date(hData.createdAt).getTime()) : 0;
-      if (now - hTime < 24 * 3600 * 1000) {
-         console.log(`❌ [GUARD] SHA256 Hash Duplicate blocked: ${hash.substring(0,10)}`);
-         return res.json({ duplicate: true, reason: 'db_hash' });
-      }
+    // 1. BRAIN-LEVEL LOCK (Memory)
+    // If we saw this exact hash in the last 60 seconds, block it instantly
+    if (recentLeads.has(hash)) {
+        const lastTime = recentLeads.get(hash);
+        if (now - lastTime < 60000) {
+            console.log(`🛡️ [LOCK] Instant block for race condition: ${hash.substring(0, 10)}...`);
+            return res.json({ duplicate: true, reason: 'memory_lock' });
+        }
     }
 
-    const textSnapshot = await ofertasRef
-      .where('descripcion_original', '==', cleanText)
-      .where('timestamp', '>', dayAgo)
-      .limit(1)
-      .get();
+    // Set the lock
+    recentLeads.set(hash, now);
 
-    if (!textSnapshot.empty) {
-      console.log(`❌ [GUARD] DB Duplicate blocked`);
-      return res.json({ duplicate: true, reason: 'db_text' });
+    // HARDENED: Periodic cleanup using setInterval (every hour) instead of size-only
+    // size-check still exists as a secondary guard
+    if (recentLeads.size > 2000) recentLeads.clear();
+
+    try {
+        const ofertasRef = db.collection('ofertas');
+
+        // 2. DB-LEVEL CHECK (Last 24h)
+        // We check either the description matches exactly OR the lead_hashes collection has it
+        const dayAgo = new Date(now - 24 * 60 * 60 * 1000);
+
+        // First check lead_hashes (preferred method)
+        const hashDoc = await db.collection('lead_hashes').doc(hash).get();
+        if (hashDoc.exists) {
+            const hData = hashDoc.data();
+            const hTime = hData.createdAt ? (hData.createdAt.toMillis ? hData.createdAt.toMillis() : new Date(hData.createdAt).getTime()) : 0;
+            if (now - hTime < 24 * 3600 * 1000) {
+                console.log(`❌ [GUARD] SHA256 Hash Duplicate blocked: ${hash.substring(0, 10)}`);
+                return res.json({ duplicate: true, reason: 'db_hash' });
+            }
+        }
+
+        const textSnapshot = await ofertasRef
+            .where('descripcion_original', '==', cleanText)
+            .where('timestamp', '>', dayAgo)
+            .limit(1)
+            .get();
+
+        if (!textSnapshot.empty) {
+            console.log(`❌ [GUARD] DB Duplicate blocked for: ${hash.substring(0, 10)}`);
+            return res.json({ duplicate: true, reason: 'db_text' });
+        }
+
+        console.log(`✅ [GUARD] New lead accepted: ${cleanText.substring(0, 30)}...`);
+        res.json({ duplicate: false });
+    } catch (error) {
+        console.error('Error checking duplicate:', error.message);
+        res.json({ duplicate: false });
     }
-
-    console.log(`✅ [GUARD] New lead accepted: ${cleanText.substring(0, 30)}...`);
-    res.json({ duplicate: false });
-  } catch (error) {
-    console.error('Error checking duplicate:', error.message);
-    res.json({ duplicate: false });
-  }
 });
 
 // ==========================================
 // 2. DATA INGESTION & LEGACY COMPATIBILITY
 // ==========================================
 
-// This handles the EXACT URL and structure found in WORLDMODELS_V2_ELITE_FINAL
+// --- UTILITIES FOR HARDENING ---
+function normalizeForComparison(text) {
+    if (!text) return "";
+    return text.toString().toLowerCase()
+        .replace(/[\u1000-\uFFFF]+/g, "")
+        .replace(/[.,\/#!$%\^&\*;:{}=\-_`~()]/g, "")
+        .replace(/\s+/g, " ")
+        .trim();
+}
+
+const BANNED_NUMBERS = [
+    '5547936188098', '351926822219', '491744723429', '5511993439714', '5511910881933', '923220067913', '16193545051', '5573991142402',
+    '351966967025', '353894106470', '919672019746', '5545935056582', '556193888963', '447877354053', '351918673812', '447752825109',
+    '5521986713221', '447857761695', '351920755741', '13235002297', '351933204215', '447518038911', '5521981174629', '5511977482482',
+    '447308058219', '447723822600', '447448540579', '351927597878', '554797204383', '33749730432', '555391459164', '79963624515',
+    '79362632269', '351927357525', '5513996848506', '351911887986', '447466297625', '447892873144', '34651303213', '447400757648',
+    '31620216067', '34685647898', '556281163551', '447457422608', '351963213706', '351929073877', '5521983514307', '553497670505',
+    '447377623582', '556293110529', '351912131056', '447487698165', '555194401739', '447946485621', '22999574171', '447766470330',
+    '447878701129', '555189100041', '555192072204', '351924938305', '447451239098', '447821951926', '5518996148613', '559281324293',
+    '4915214453550', '556291433112', '447946304880', '447599476143', '306974107999', '447902286259', '34674141224', '447782314732',
+    '258850634194', '447448422578', '447411574134', '34711269334', '447877768537', '16128399721', '447922639195', '447728524014',
+    '5521983827523', '556298150720', '447541742768', '34624174047', '351920358247', '22957220770', '447520622873', '5521995574624',
+    '32487279353', '380937192123', '558589279166', '2348081002335', '2349077283597', '919891344354', '447492414091', '447477732578',
+    '34625375125', '34685617971', '5521990286011'
+];
+const BANNED_PREFIXES = ['57', '91', '92', '234', '212', '229', '20', '27', '227', '2274']; 
+
+const BANNED_KEYWORDS = [
+    'crypto', 'binance', 'forex', 'casino', 'stake', 'signals', 'trading', 'pump', 'usdt', 'virtual', 'inversión', 'ganar dinero', 'bitget',
+    'nudes', 'onlyfans', 'video llamada', 'packs', 'contenido', 'paypig', 'fimdom',
+    'hombre busca', 'pasivo', 'pasivos', 'hombre generoso', 'conoceré', 'man looks', 'man seeking', 'man seeks', 'generous man', 'sugar daddy', 'busco hombre',
+    'droga', 'drogas', 'drugs', 'cocaína', 'cocaina', 'coke', 'perico', 'nieve', 'tusi', 'tusibi', '2cb', 'marihuana', 'hierba', 'weed', 'maconha', 'porro', 'canuto', 'pastilla', 'éxtasis', 'extasis', 'mdma', 'mda', 'cristal', 'metanfetamina', 'crack', 'base', 'heroína', 'heroina', 'vaper', 'airbnb'
+];
+
+const JUANA_TOKEN = 'shJOb5wskQMTyfoF20GLqmJOclA5if5j';
+const SPANISH_GROUP_ID = '120363425790792660@g.us';
+
+// 🛡️ JUANA FUNNEL: Only allow Spanish group posts
+app.post('/api/juana/send', async (req, res) => {
+    const body = req.body || {};
+    const targetChat = body.to || body.chat_id || body.body?.chat_id || "";
+    const messageText = body.body || body.text?.body || body.text || "";
+
+    if (targetChat !== SPANISH_GROUP_ID) {
+        console.log(`🚫 [JUANA BLOCKED] Attempted to post in ${targetChat}. Only Spanish group is allowed.`);
+        return res.status(200).json({ success: false, message: "Only Spanish group allowed for now." });
+    }
+
+    console.log(`✅ [JUANA ALLOWED] Posting to Spanish group...`);
+
+    try {
+        const response = await axios.post('https://gate.whapi.cloud/messages/text', {
+            to: SPANISH_GROUP_ID,
+            body: messageText
+        }, {
+            headers: { 'Authorization': `Bearer ${JUANA_TOKEN}` }
+        });
+        res.json(response.data);
+    } catch (err) {
+        console.error('❌ [JUANA ERROR]', err.response?.data || err.message);
+        res.status(500).json({ error: "Failed to forward to Whapi" });
+    }
+});
+
 app.post(['/api/leads', '/jobs-api/api/ads', '/api/ads', '/api/save-data'], async (req, res) => {
     try {
         const body = req.body || {};
-        
-        // 🛡️ SECURITY & PRIVACY FILTER:
-        const chatId = body.chatId || body.remoteJid || body.jid || "";
-        const MIRROR_GROUPS = [
-            '120363408216646972@g.us', '120363425790792660@g.us', 
-            '120363426262586004@g.us', '120363408298375271@g.us'
-        ];
 
-        // 1. Block Private Chats (Privacy)
-        if (chatId && !chatId.endsWith('@g.us')) {
+        // 🛡️ SECURITY & PRIVACY FILTER
+        // 🛡️ SECURITY & PRIVACY FILTER (Allow WhatsApp @g.us AND Telegram -100 IDs)
+        const isTelegram = chatId.startsWith('-100') || body.platform === 'telegram';
+        if (chatId && !chatId.endsWith('@g.us') && !isTelegram) {
+            console.log(`🛡️ [FILTER] Ignored private chat from: ${chatId}`);
             return res.status(200).json({ success: false, reason: 'private_chat_ignored' });
         }
-        // 2. Block Mirror Groups for the Sniffer (Loop Prevention)
-        if (MIRROR_GROUPS.includes(chatId)) {
-            return res.status(200).json({ success: false, reason: 'mirror_group_ignored_to_prevent_loop' });
+
+        const rawDescription = body.text_es || body.description || body.text || body.body?.text_es || body.body?.description || body.body?.text || "-";
+        const rawTitle = body.title_es || body.title || body.body?.title_es || body.body?.title || (rawDescription.split('\n')[0].substring(0, 50)) || "Lead Sync";
+        const city = body.city || body.location || body.body?.city || body.body?.location || "Global";
+        
+        // Priorizar el contacto de Telegram si viene de ahí
+        const contact = body.from || body.sender_contact || body.contact || body.whatsapp || body.phone || body.body?.contact || body.body?.whatsapp || body.body?.phone || "-";
+        
+        // Si es un link de Telegram, no le quitamos las letras (porque romperíamos el t.me/usuario)
+        const senderDigits = contact.includes('t.me/') ? '' : contact.replace(/\D/g, '');
+
+        // 🚫 BANNED NUMBERS & PREFIXES CHECK
+        const isBannedPrefix = BANNED_PREFIXES.some(prefix => senderDigits.startsWith(prefix));
+        if (senderDigits && (BANNED_NUMBERS.includes(senderDigits) || isBannedPrefix)) {
+            console.log(`🚫 [BANNED] Sender blocked (Prefix or Number): ${senderDigits}`);
+            return res.status(200).json({ success: false, reason: 'sender_banned' });
         }
 
-        // --- ROBUST EXTRACTION (Support for ELITE V2 & Legacy) ---
-        const rawDescription = body.text_es || body.description || body.descripcion || body.descripcion_original || body.text || "-";
-        const rawTitle = body.title_es || body.title || body.titulo || body.titulo_web || (rawDescription.split('\n')[0].substring(0, 50)) || "Nuevo Lead Sync";
-        
-        // 🧠 ANTI-STORM LOCK
+        // 🧠 SEMANTIC DEDUPLICATION
+        const normalizedTitle = normalizeForComparison(rawTitle);
+        const normalizedCity = normalizeForComparison(city);
+
+        // Check recent semantic matches (last 24h)
+        const recentMatch = await db.collection('ofertas')
+            .where('ubicacion', '==', city)
+            .where('titulo', '==', rawTitle)
+            .limit(1).get();
+
+        if (!recentMatch.empty) {
+            console.log(`🚫 [BLOCK] Semantic duplicate: ${rawTitle} in ${city}`);
+            return res.status(200).json({ success: false, reason: 'semantic_duplicate_blocked' });
+        }
+
+        // 🚫 BANNED KEYWORDS CHECK
+        const textToCheck = `${rawTitle} ${rawDescription}`.toLowerCase();
+        const foundBanned = BANNED_KEYWORDS.find(k => textToCheck.includes(k.toLowerCase()));
+        if (foundBanned) {
+            console.log(`🚫 [BANNED] Keyword found: "${foundBanned}"`);
+            return res.status(200).json({ success: false, reason: 'banned_content', keyword: foundBanned });
+        }
+
+        // 🚫 FIRESTORE BLACKLIST CHECK
+        if (senderDigits && senderDigits.length > 5) {
+            const bannedDoc = await db.collection('banned_users').doc(senderDigits).get();
+            if (bannedDoc.exists) return res.status(200).json({ success: false, reason: 'sender_blacklisted_firestore' });
+        }
+
         const hash = getLeadHash(rawDescription);
-        const now = Date.now();
-        if (recentLeads.has(hash)) {
-            const lastTime = recentLeads.get(hash);
-            if (now - lastTime < 60000) {
-                console.log(`🛡️ [STORM] Blocking duplicate ingestion: ${hash.substring(0,10)}`);
-                return res.status(200).json({ success: false, reason: 'duplicate_blocked_by_storm_guard' });
-            }
-        }
-        recentLeads.set(hash, now);
-
-        // 🗄️ DB CHECK (Avoid overwriting / double posting)
-        const exists = await db.collection('lead_hashes').doc(hash).get();
-        if (exists.exists) {
-            console.log(`🛡️ [DB] Lead already exists in Firestore: ${hash.substring(0,10)}`);
-            return res.status(200).json({ success: false, reason: 'already_exists' });
-        }
-
-        const finalCategory = body.category || body.categoria || autoCategorize(rawDescription);
-        
         const payload = {
             titulo: rawTitle,
             descripcion: rawDescription,
-            descripcion_original: rawDescription,
-            ubicacion: body.city || body.location || body.ubicacion || body.municipio || "Global",
-            categoria: finalCategory,
-            contact: body.contact || body.contacto || body.tel || body.sender_contact || "-",
-            timestamp: admin.firestore.FieldValue.serverTimestamp(),
+            ubicacion: city,
+            categoria: autoCategorize(rawDescription),
+            contact: contact,
+            timestamp: new Date().toISOString(),
             platform: (body.platform || "n8n_vps").toUpperCase(),
             activa: true,
-            source: "n8n_elite_v2_compat",
+            moderation_status: 'auto_approved',
+            source: "n8n_elite_v2_original_rules",
             translations: {
                 es: { titulo: body.title_es || rawTitle, descripcion: body.text_es || rawDescription },
                 en: { titulo: body.title_en || rawTitle, descripcion: body.text_en || rawDescription },
@@ -270,15 +357,14 @@ app.post(['/api/leads', '/jobs-api/api/ads', '/api/ads', '/api/save-data'], asyn
             }
         };
 
-        // Standardized mapping: Every field covered
         await db.collection('ofertas').doc(hash).set(payload, { merge: true });
         await db.collection('lead_hashes').doc(hash).set({ createdAt: new Date().toISOString() });
-        
-        console.log(`💎 [SAVED] Sync via Elite V2 Compat: ${rawTitle.substring(0,20)}...`);
+
+        console.log(`💎 [SAVED] Ingested (Unfiltered): ${rawTitle.substring(0, 30)}`);
         res.status(200).json({ success: true, id: hash });
     } catch (error) {
-        console.error('❌ [ERROR] Ingestion failed:', error.message);
-        res.status(500).json({ success: false, error: error.message });
+        console.error('❌ Ingestion failed:', error.message);
+        res.status(500).json({ success: false });
     }
 });
 

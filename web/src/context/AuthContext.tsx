@@ -15,7 +15,15 @@ interface UserData {
   uid: string;
   email: string | null;
   alias?: string;
+  bio?: string;
+  city?: string;
   gender?: string;
+  height?: string;
+  measurements?: string;
+  surgeries?: string;
+  tattoos?: string;
+  gallery?: string[];
+  photoURL?: string;
   userRole?: string;
   reputation?: string;
   signupSource?: string;
@@ -38,33 +46,22 @@ interface AuthContextType {
   login: (email: string, password: string) => Promise<void>;
   register: (email: string, password: string) => Promise<void>;
   logout: () => Promise<void>;
+  updateProfileData: (data: Partial<UserData>) => Promise<void>;
 }
 
 const AuthContext = createContext<AuthContextType | null>(null);
 
 export function AuthProvider({ children }: { children: React.ReactNode }) {
-  if (typeof window === 'undefined') {
-    return (
-      <AuthContext.Provider value={{ 
-        user: null, 
-        userData: null, 
-        loading: false, 
-        isPremium: false, 
-        isAdmin: false, 
-        isVip: false, 
-        isConcierge: false, 
-        login: async () => {}, 
-        register: async () => {}, 
-        logout: async () => {} 
-      }}>
-        {children}
-      </AuthContext.Provider>
-    );
-  }
-
   const [user, setUser] = useState<User | null>(null);
   const [userData, setUserData] = useState<UserData | null>(null);
   const [loading, setLoading] = useState(true);
+
+  const updateProfileData = async (data: Partial<UserData>) => {
+    if (!user) throw new Error('No user authenticated');
+    const userRef = doc(db, 'users', user.uid);
+    await setDoc(userRef, { ...data, updatedAt: serverTimestamp() }, { merge: true });
+    setUserData(prev => prev ? { ...prev, ...data } : null);
+  };
 
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, async (firebaseUser) => {
@@ -133,7 +130,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const isConcierge = userData?.userRole === 'concierge';
 
   return (
-    <AuthContext.Provider value={{ user, userData, loading, isPremium, isAdmin, isVip, isConcierge, login, register, logout }}>
+    <AuthContext.Provider value={{ user, userData, loading, isPremium, isAdmin, isVip, isConcierge, login, register, logout, updateProfileData }}>
       {children}
     </AuthContext.Provider>
   );

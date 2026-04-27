@@ -1,0 +1,487 @@
+{
+  "name": "Telegram Leads - WorldModels",
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "telegram-wm-2024",
+        "options": {}
+      },
+      "id": "tg-wh-001",
+      "name": "Webhook Telegram",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 1,
+      "position": [
+        -2592,
+        240
+      ],
+      "webhookId": "telegram-wm-2024"
+    },
+    {
+      "parameters": {
+        "jsCode": "const payload = $input.first().json;\nconst item = payload.body || payload;\n\n// Telegram sniffer sends flat structure\nconst textBody = item.text || '';\nconst isJunk = textBody.length < 20;\n\n// Contact is t.me/username link\nconst sc = item.from || item.sender_contact || item.contact || 'No disponible';\nconst sourceChatId = item.chatId || '';\n\nreturn {\n  ...item,\n  platform: 'telegram',\n  sender_contact: sc,\n  final_contact: sc,\n  from_name: item.pushName || '',\n  chat_name: '',\n  source_chat_id: sourceChatId,\n  is_group_source: true,\n  texto_limpio: textBody.trim(),\n  looksValuable: !isJunk,\n  message_type: 'text',\n  channel_id: ''\n};"
+      },
+      "id": "tg-meta-001",
+      "name": "Extract Metadata1",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 1,
+      "position": [
+        -2864,
+        624
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "const results = [];\n\nconst HARD_BLOCK = [\n  \"crypto\", \"binance\", \"forex\", \"casino\", \"stake\", \"usdt\", \"bitcoin\", \"cripto\",\n  \"wallet\", \"metamask\", \"trading\", \"faucet\", \"investment\", \"investir\", \"invertir\",\n  \"ganar dinero\", \"ganancias extras\", \"income online\", \"work from home\",\n  \"dropshipping\", \"loan\", \"prestamo\", \"préstamo\", \"credit\", \"credito\", \"crédito\",\n  \"paypal\", \"skrill\", \"bank transfer\", \"western union\", \"click here\", \"dm now\",\n  \"amazon seller\", \"shopify\", \"ecommerce\", \"airdrop\", \"nft\", \"token\", \"broker\", \"инди\", \"контент\", \"koнтент\", \"предоплаты\", \"без предоплаты\", \"онлифанс\", \"onlyfans\", \"вирт\", \"кружочк\", \"сигны\", \"госпожа\", \"раб\", \"индивидуалка\"\n];\n\nconst SOFT_BLOCK = [\n  \"clases\", \"clase\", \"teacher\", \"professor\", \"university\", \"course\", \"curso\",\n  \"seguro\", \"insurance\", \"visa\", \"bank\", \"banco\", \"cuenta bancaria\", \"account\",\n  \"online\", \"virtual\", \"customer service\", \"call center\", \"marketing job\",\n  \"data entry\", \"assistant\", \"agente inmobiliario\", \"real estate\", \"cleaning job\"\n];\n\nconst POSITIVE = [\n  \"apartamento\", \"apartments\", \"apartment\", \"flat\", \"room\", \"rooms\",\n  \"plaza\", \"plazas\", \"spot\", \"spots\", \"agency\", \"agencia\", \"club\",\n  \"booking\", \"tour\", \"girls\", \"models\", \"modelos\", \"independent\",\n  \"independiente\", \"trabajo\", \"vacante\", \"vacantes\",\n  \"madrid\", \"barcelona\", \"valencia\", \"ibiza\", \"malaga\", \"lisboa\", \"porto\",\n  \"berlin\", \"munich\", \"frankfurt\", \"amsterdam\", \"zurich\", \"geneva\",\n  \"milan\", \"roma\", \"paris\", \"hamburg\", \"санкт\", \"москва\", \"питер\", \"девочки\", \"девушки\", \"море\", \"европу\", \"модель\", \"встречи\", \"встреч\", \"кастинг\", \"эскорт\", \"заработок\", \"тусовки\", \"выезд\", \"апартаменты\"\n];\n\nfunction norm(v) {\n  return String(v || \"\").toLowerCase().normalize(\"NFD\").replace(/[\\u0300-\\u036f]/g, \"\");\n}\n\nfor (const item of $input.all()) {\n  const data = item.json;\n  const text = norm(data.texto_limpio || \"\");\n\n  let rejectReason = null;\n\n  const hardHits = HARD_BLOCK.filter(k => text.includes(k)).length;\n  const softHits = SOFT_BLOCK.filter(k => text.includes(k)).length;\n  const positiveHits = POSITIVE.filter(k => text.includes(k)).length;\n\n  const links = (text.match(/https?:\\/\\/|wa\\.me\\/|t\\.me\\/|telegram/gi) || []).length;\n  const tooShort = text.trim().length < 40;\n\n  if (hardHits >= 1) rejectReason = \"hard_keyword\";\n  else if (tooShort && positiveHits === 0) rejectReason = \"too_short\";\n  else if (softHits >= 2 && positiveHits === 0) rejectReason = \"context_spam\";\n  else if (links >= 6 && positiveHits === 0) rejectReason = \"link_spam\";\n  else if (positiveHits === 0 && text.length < 160) rejectReason = \"weak_signal\";\n\n  results.push({ json: { ...data, looksValuable: !rejectReason, reject_reason: rejectReason } });\n}\n\nreturn results;"
+      },
+      "id": "tg-prerej-001",
+      "name": "Pre-IA Reject WA1",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 1,
+      "position": [
+        -2608,
+        720
+      ]
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "boolean": [
+            {
+              "value1": "={{ $json.looksValuable }}",
+              "value2": true
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "tg-hguard-001",
+      "name": "Hallucination Guard",
+      "type": "n8n-nodes-base.filter",
+      "typeVersion": 2,
+      "position": [
+        -2640,
+        464
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "const results = [];\nconst store = $getWorkflowStaticData('global');\nif (!store.history) store.history = [];\nif (!store.lastSenders) store.lastSenders = {};\n\nconst now = Date.now();\nconst TTL = 86400000;\nconst BURST_WINDOW = 120000;\n\nstore.history = store.history.filter(h => now - h.time < TTL);\n\nfunction getFingerprint(text) {\n  return String(text || \"\").toLowerCase().replace(/[^a-z0-9]/g, \"\").substring(0, 100);\n}\n\nfor (const item of $input.all()) {\n  const data = item.json;\n  const sender = String(data.final_contact || data.sender_contact || \"\").replace(/\\s/g, '');\n  const fp = getFingerprint(data.texto_limpio);\n\n  let isDuplicate = false;\n\n  if (sender && store.lastSenders[sender] && (now - store.lastSenders[sender].time < BURST_WINDOW)) {\n    isDuplicate = true;\n  }\n\n  if (!isDuplicate) {\n    isDuplicate = store.history.some(h => h.fp === fp);\n  }\n\n  if (!isDuplicate) {\n    store.history.push({ time: now, sender, fp });\n    if (sender) store.lastSenders[sender] = { time: now };\n    results.push(item);\n  }\n}\n\nreturn results;"
+      },
+      "id": "tg-clone-001",
+      "name": "Check Clone",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 1,
+      "position": [
+        -2416,
+        464
+      ]
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "=### WORLDMODELS MASTER EXTRACTION v21.14 ###\nTEXT: \"{{ $json.texto_limpio }}\"\n\nCRITICAL STEP - JUDGMENT:\nCategorize the text based on business value:\n- \"plaza\": Includes Agency ADS, Model Tours, Work opportunities in specific cities, Recruitment for agencies/clubs, and Rental/Spot availability. THESE ARE VALID LEADS.\n- \"evento\": Parties, bookings, or specific date events.\n- \"trash\": Generic spam, personal chats, INDIVIDUAL ESCORTS PROMOTING THEMSELVES (e.g., \"Indie\", \"selling content\", \"my price\"), unrelated products, or purely illegible junk.\n\nIF VALID, PROCEED WITH:\n1. TITLE: Catchy and short (max 5 words).\n2. FULL TEXT LANGUAGES: MANDATORY. NO SUMMARIES. Provide the FULL original meaning in:\n   - 'text_es': Spanish.\n   - 'text_en': English.\n   - 'text_ru': Russian.\n   - 'text_pt': Portuguese.\n3. CITY: Precise identification.\n4. CATEGORY: plaza | evento | trash.\n\nJSON SCHEMA:\n{\n  \"city\": \"City\",\n  \"budget\": \"Value\",\n  \"category\": \"plaza|evento|trash\",\n  \"title_es\": \"...\", \"text_es\": \"...\",\n  \"title_en\": \"...\", \"text_en\": \"...\",\n  \"title_ru\": \"...\", \"text_ru\": \"...\",\n  \"title_pt\": \"...\", \"text_pt\": \"...\",\n  \"contact\": \"Phone\",\n  \"trash\": boolean\n}\n"
+      },
+      "id": "tg-ai-001",
+      "name": "DeepSeek IA Extraer",
+      "type": "@n8n/n8n-nodes-langchain.chainLlm",
+      "typeVersion": 1.4,
+      "position": [
+        -2208,
+        432
+      ]
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "id": "tg-dsmodel-001",
+      "name": "DeepSeek Chat Model",
+      "type": "@n8n/n8n-nodes-langchain.lmChatDeepSeek",
+      "typeVersion": 1,
+      "position": [
+        -2208,
+        656
+      ],
+      "credentials": {
+        "deepSeekApi": {
+          "id": "WoSvFWDtEwmPK8Qw",
+          "name": "DeepSeek account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "try {\n  const input = $input.first().json;\n  const meta = $(\"Extract Metadata1\").first().json;\n  \n  let rawText = input.text || input.output || input.result || input.response?.text || input.response || input.data?.text || input.data?.content || input.output?.content || input.content || input.choices?.[0]?.message?.content || \"\";\n\n  if (!rawText && typeof input === 'object') {\n    const deepSearch = JSON.stringify(input);\n    const match = deepSearch.match(/\"content\":\"([^\"]+)\"/);\n    if (match) rawText = match[1];\n  }\n\n  let cleaned = rawText.replace(/```json/g, '').replace(/```/g, '').trim();\n  let jsonMatch = cleaned.match(/\\{[\\s\\S]*\\}/);\n\n  if (jsonMatch) {\n    jsonMatch[0] = jsonMatch[0].replace(/\\n/g, ' ').replace(/\\r/g, ' ');\n  }\n\n  let jsonStr = jsonMatch ? jsonMatch[0] : \"\";\n  let original = meta;\n\n  // For Telegram: keep t.me link as contact\n  const originalContact = original.final_contact || original.sender_contact || null;\n\n  let parsed = {};\n  if (!jsonStr) return [{ json: { ...original, trash: true, category: 'trash', debug_raw: rawText } }];\n  \n  try { parsed = JSON.parse(jsonStr); }\n  catch (ex) { return [{ json: { ...original, trash: true, category: 'trash', debug_error: ex.message } }]; }\n\n  const isTrash = parsed.category === 'trash' || parsed.trash === true;\n\n  return [{ json: { \n    ...original, \n    ...parsed, \n    contact: originalContact,\n    final_contact: originalContact,\n    sender_contact: originalContact,\n    trash: isTrash \n  }}];\n} catch(e) { return [{json:{ trash:true, category:'trash', debug_error: e.message }}]; }"
+      },
+      "id": "tg-parse-001",
+      "name": "Parse",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 1,
+      "position": [
+        -1872,
+        464
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "const item = $json;\n\nconst text = String(item.text_es || \"\").toLowerCase();\nconst category = String(item.category || \"\").trim().toLowerCase();\n\nconst POSITIVE = [\"apartamento\",\"apartments\",\"apartment\",\"plaza\",\"plazas\",\"spot\",\"spots\",\"agency\",\"agencia\",\"club\",\"booking\",\"tour\",\"girls\",\"models\",\"independent\",\"independiente\",\"trabajo\",\"vacante\",\"vacantes\", \"девочки\", \"девушки\", \"море\", \"европу\", \"модель\", \"встречи\", \"встреч\", \"кастинг\", \"эскорт\", \"заработок\", \"тусовки\", \"выезд\", \"апартаменты\"];\nconst NEGATIVE = [\"crypto\",\"forex\",\"casino\",\"bank\",\"teacher\",\"course\",\"insurance\",\"loan\",\"marketing\",\"data entry\",\"call center\", \"инди\", \"контент\", \"koнтент\", \"предоплаты\", \"онлифанс\", \"вирт\", \"кружочк\"];\n\nconst positiveHits = POSITIVE.filter(k => text.includes(k)).length;\nconst negativeHits = NEGATIVE.filter(k => text.includes(k)).length;\nconst city = String(item.city || \"\").trim().toLowerCase();\nconst hasGoodCity = !!city && city !== \"global\" && city !== \"unknown\";\n\nlet reject = false, reason = null;\n\nif (category === \"trash\") { reject = true; reason = \"ai_trash\"; }\nelse if (negativeHits >= 1 && positiveHits === 0) { reject = true; reason = \"negative_signal\"; }\nelse if (positiveHits === 0) { reject = true; reason = \"no_positive_signal\"; }\nelse if (!hasGoodCity && text.length < 180) { reject = true; reason = \"weak_lead\"; }\n\nreturn { ...item, looksValuableFinal: !reject, reject_reason_final: reason };"
+      },
+      "id": "tg-postguard-001",
+      "name": "Post-Parse Guard",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 1,
+      "position": [
+        -1808,
+        464
+      ]
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "boolean": [
+            {
+              "value1": "={{ $json.looksValuableFinal }}",
+              "value2": true
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "tg-finalfilter-001",
+      "name": "Final Guard Filter",
+      "type": "n8n-nodes-base.filter",
+      "typeVersion": 2,
+      "position": [
+        -1744,
+        464
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "const item = $json;\nconst textLength = (item.text_es || '').length;\nconst hasContact = !!item.contact;\nconst isPlaza = item.category === 'plaza';\nlet score = 0;\n\nif (textLength > 200) score += 20;\nif (textLength > 500) score += 20;\nif (hasContact) score += 30;\nif (isPlaza) score += 20;\nif (!item.is_group_source) score += 10;\nif (item.city && item.city !== 'Global') score += 10;\n\nreturn { ...item, score };"
+      },
+      "id": "tg-score-001",
+      "name": "Quality Score",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 1,
+      "position": [
+        -1696,
+        464
+      ]
+    },
+    {
+      "parameters": {
+        "dataType": "string",
+        "value1": "={{ $json.category }}",
+        "rules": {
+          "rules": [
+            {
+              "value2": "plaza"
+            },
+            {
+              "value2": "evento",
+              "output": 1
+            }
+          ]
+        }
+      },
+      "id": "tg-switch-001",
+      "name": "Switch",
+      "type": "n8n-nodes-base.switch",
+      "typeVersion": 1,
+      "position": [
+        -1152,
+        640
+      ]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "http://178.156.186.149:3001/api/leads",
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ {\n  isGroup: true,\n  platform: 'telegram',\n  contact: $json.final_contact || $json.sender_contact,\n  remoteJid: $json.source_chat_id + '@g.us',\n  city: $json.city,\n  location: $json.city,\n  budget: $json.budget,\n  category: $json.category === 'evento' ? 'CAT_EVENTOS' : 'CAT_PLAZAS',\n  text_es: ($json.text_es || '').replace(/cocina/gi, 'area de servicio'),\n  title_es: $json.title_es,\n  text_en: $json.text_en,\n  title_en: $json.title_en,\n  text_ru: $json.text_ru,\n  title_ru: $json.title_ru,\n  text_pt: $json.text_pt,\n  title_pt: $json.title_pt\n} }}",
+        "options": {}
+      },
+      "id": "tg-postapi-001",
+      "name": "Post API",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.1,
+      "position": [
+        -512,
+        496
+      ],
+      "continueOnFail": true
+    },
+    {
+      "parameters": {
+        "jsCode": "const item = $input.first().json;\n\nconst TG_ES = '-5283488138';\nconst TG_EN = '-1003757267210';\nconst TG_RU = '-1003920309636';\nconst TG_PT = '-1003727383883';\n\nfunction escapeHTML(text) {\n  return String(text || '').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');\n}\n\nconst displayContact = item.final_contact || item.sender_contact || 'No disponible';\nconst city = escapeHTML(item.city || 'Global');\nconst budget = escapeHTML(item.budget || 'Negociable');\nconst categoryStr = (item.category === 'plaza') ? 'Plazas' : 'Eventos';\n\nconst languages = [\n  { id: TG_ES, title: item.title_es, text: item.text_es, label: 'Remitente' },\n  { id: TG_EN, title: item.title_en, text: item.text_en, label: 'Sender' },\n  { id: TG_RU, title: item.title_ru, text: item.text_ru, label: 'Отправитель' },\n  { id: TG_PT, title: item.title_pt, text: item.text_pt, label: 'Remetente' }\n];\n\nreturn languages.map(lang => ({\n  json: {\n    chatId: lang.id,\n    text: `<b>${escapeHTML(lang.title) || 'Nuevo Lead'}</b>\\n🏷️ <b>${categoryStr}</b>\\n📍 <b>${city}</b>\\n💰 <b>${budget}</b>\\n\\n${escapeHTML(lang.text) || 'Sin texto'}\\n\\n👤 <b>${lang.label}:</b> ${escapeHTML(displayContact)}\\n🔌 <b>Fuente:</b> Telegram`\n  }\n}));"
+      },
+      "id": "tg-fanout-001",
+      "name": "Telegram Prepare Fanout",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 1,
+      "position": [
+        -656,
+        672
+      ]
+    },
+    {
+      "parameters": {
+        "chatId": "={{ $json.chatId }}",
+        "text": "={{ $json.text }}",
+        "additionalFields": {
+          "parse_mode": "HTML"
+        }
+      },
+      "id": "tg-send-001",
+      "name": "Telegram News Fanout",
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1,
+      "position": [
+        -768,
+        112
+      ],
+      "credentials": {
+        "telegramApi": {
+          "id": "TC7QChVOx72xT6Kf",
+          "name": "Telegram account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "const item = $input.first().json;\nconst map = { \"ES\": \"120363425790792660@g.us\", \"EN\": \"120363408216646972@g.us\", \"RU\": \"120363408298375271@g.us\", \"PT\": \"120363426262586004@g.us\" };\nconst displayContact = item.final_contact || item.sender_contact || 'No disponible';\nconst labelMap = { ES: 'Remitente', EN: 'Sender', RU: 'Отправитель', PT: 'Remetente' };\n\nconst languages = [\n  { id: map.ES, title: item.title_es, text: item.text_es, tag: labelMap.ES },\n  { id: map.EN, title: item.title_en, text: item.text_en, tag: labelMap.EN },\n  { id: map.RU, title: item.title_ru, text: item.text_ru, tag: labelMap.RU },\n  { id: map.PT, title: item.title_pt, text: item.text_pt, tag: labelMap.PT }\n];\n\nreturn languages.filter(l => l.id.includes('@g.us')).map(l => ({ \n  json: { \n    to: l.id, \n    body: `*📢 ${l.title || 'Nuevo Lead'}*\\n📍 *${item.city || 'Global'}* | 💰 *${item.budget || 'Negociable'}*\\n\\n${l.text || 'Sin descripción'}\\n\\n👤 *${l.tag}:* ${displayContact}\\n🔌 *Fuente:* Telegram` \n  } \n}));"
+      },
+      "id": "tg-wafanout-001",
+      "name": "WhatsApp Prepare Fanout",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 1,
+      "position": [
+        -768,
+        304
+      ]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "http://178.156.186.149:3001/api/juana/send",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Authorization",
+              "value": "Bearer shJOb5wskQMTyfoF20GLqmJOclA5if5j"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ { \"to\": $json.to, \"body\": $json.body } }}",
+        "options": {}
+      },
+      "id": "tg-wasend-001",
+      "name": "WhatsApp API Sender",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.1,
+      "position": [
+        -1120,
+        320
+      ],
+      "continueOnFail": true
+    }
+  ],
+  "connections": {
+    "Webhook Telegram": {
+      "main": [
+        [
+          {
+            "node": "Extract Metadata1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Extract Metadata1": {
+      "main": [
+        [
+          {
+            "node": "Pre-IA Reject WA1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Pre-IA Reject WA1": {
+      "main": [
+        [
+          {
+            "node": "Hallucination Guard",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Hallucination Guard": {
+      "main": [
+        [
+          {
+            "node": "Check Clone",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Check Clone": {
+      "main": [
+        [
+          {
+            "node": "DeepSeek IA Extraer",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "DeepSeek IA Extraer": {
+      "main": [
+        [
+          {
+            "node": "Parse",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "DeepSeek Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "DeepSeek IA Extraer",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Parse": {
+      "main": [
+        [
+          {
+            "node": "Post-Parse Guard",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Post-Parse Guard": {
+      "main": [
+        [
+          {
+            "node": "Final Guard Filter",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Final Guard Filter": {
+      "main": [
+        [
+          {
+            "node": "Quality Score",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Quality Score": {
+      "main": [
+        [
+          {
+            "node": "Switch",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Switch": {
+      "main": [
+        [
+          {
+            "node": "Telegram Prepare Fanout",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Post API",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "WhatsApp Prepare Fanout",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Telegram Prepare Fanout",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Post API",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "WhatsApp Prepare Fanout",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Telegram Prepare Fanout": {
+      "main": [
+        [
+          {
+            "node": "Telegram News Fanout",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "WhatsApp Prepare Fanout": {
+      "main": [
+        [
+          {
+            "node": "WhatsApp API Sender",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Post API": {
+      "main": [
+        []
+      ]
+    }
+  },
+  "active": true,
+  "settings": {
+    "executionOrder": "v1"
+  }
+}

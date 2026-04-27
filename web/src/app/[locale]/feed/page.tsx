@@ -7,8 +7,21 @@ import { MapPin, Clock, Share2, ShieldCheck, Zap, Search, Globe } from 'lucide-r
 import { useAuth } from '@/context/AuthContext';
 import { useRouter } from 'next/navigation';
 
-const getAdData = (ad: any, locale: string) => {
-  // Description/Content
+interface Ad {
+  id: string;
+  titulo?: string;
+  descripcion?: string;
+  ubicacion?: string;
+  category?: string;
+  categoria?: string;
+  timestamp?: any;
+  activa?: boolean;
+  contact?: string;
+  translations?: Record<string, { titulo: string; descripcion: string }>;
+  [key: string]: any;
+}
+
+const getAdData = (ad: Ad, locale: string) => {
   let description = '';
   if (ad.translations?.[locale]?.descripcion) {
     description = ad.translations[locale].descripcion;
@@ -22,7 +35,6 @@ const getAdData = (ad: any, locale: string) => {
     description = ad.content || ad.rawText || '';
   }
 
-  // Title
   let title = '';
   if (ad.translations?.[locale]?.titulo) {
     title = ad.translations[locale].titulo;
@@ -36,9 +48,7 @@ const getAdData = (ad: any, locale: string) => {
     title = ad.title || 'WorldModels Listing';
   }
 
-  // Location
   const location = ad.city || ad.location || ad.ubicacion || 'Global';
-
   return { title, description, location };
 };
 
@@ -47,7 +57,7 @@ export default function FeedPage() {
   const locale = useLocale();
   const router = useRouter();
   const { userData } = useAuth();
-  const [ads, setAds] = useState<any[]>([]);
+  const [ads, setAds] = useState<Ad[]>([]);
   const [loading, setLoading] = useState(true);
   const [category, setCategory] = useState('all');
   const [search, setSearch] = useState('');
@@ -57,30 +67,40 @@ export default function FeedPage() {
   useEffect(() => {
     if (typeof window === 'undefined') return;
 
-    // Use 'ofertas' as primary, but we'll fetch 'leads' too if needed or merge them
-    // For stabilization, we'll try to fetch both if one is empty
     const fetchAds = (collectionName: string) => {
       const q = query(
         collection(db, collectionName),
+        orderBy('timestamp', 'desc'),
         limit(100)
       );
 
       return onSnapshot(q, (snapshot) => {
-        const adsData = snapshot.docs.map(doc => ({
+        const adsData: Ad[] = snapshot.docs.map(doc => ({
           id: doc.id,
-          ...doc.data(),
+          ...doc.data() as any,
           _source: collectionName
         }));
         
-        // Final cleaning and sorting
-        const processed = adsData.filter(ad => !ad.trash && ad.status !== 'banned');
+        // 🛡️ MODERATION & CLEANING
+        const processed = adsData.filter(ad => 
+          ad.activa !== false && 
+          !ad.trash && 
+          ad.status !== 'banned'
+        );
 
         setAds(prev => {
-          // Merge logic to avoid duplicates if we happen to fetch from multiple sources
-          const combined = [...prev.filter(a => a._source !== collectionName), ...processed];
-          return combined.sort((a, b) => {
-            const getT = (ad: any) => {
-              const ts = ad.timestamp || ad.ingestedAt || ad.createdAt || ad.display_time;
+          // Robust deduplication using a Map by ID
+          const adMap = new Map();
+          [...prev, ...processed].forEach(a => {
+            // Keep the one from 'ofertas' if there's a collision, as it's our primary source
+            if (!adMap.has(a.id) || a._source === 'ofertas') {
+              adMap.set(a.id, a);
+            }
+          });
+
+          return Array.from(adMap.values()).sort((a, b) => {
+            const getT = (ad: Ad) => {
+              const ts = ad.timestamp || ad.ingestedAt || ad.createdAt;
               if (!ts) return 0;
               if (ts.seconds) return ts.seconds * 1000;
               return new Date(ts).getTime() || 0;
@@ -89,9 +109,7 @@ export default function FeedPage() {
           });
         });
 
-        if (snapshot.docs.length > 0 || collectionName === 'leads') {
-          setLoading(false);
-        }
+        setLoading(false);
       }, (err) => {
         console.error(`Firestore error in ${collectionName}:`, err);
         setError(err.message);
