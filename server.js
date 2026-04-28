@@ -249,37 +249,11 @@ const BANNED_KEYWORDS = [
     'droga', 'drogas', 'drugs', 'cocaína', 'cocaina', 'coke', 'perico', 'nieve', 'tusi', 'tusibi', '2cb', 'marihuana', 'hierba', 'weed', 'maconha', 'porro', 'canuto', 'pastilla', 'éxtasis', 'extasis', 'mdma', 'mda', 'cristal', 'metanfetamina', 'crack', 'base', 'heroína', 'heroina', 'vaper', 'airbnb'
 ];
 
-const DOLORES_TOKEN = 'cCr2pGzXM6hZgORbfo2YjdTWGRLH6eCP';
 const JUANA_TOKEN = 'shJOb5wskQMTyfoF20GLqmJOclA5if5j';
 const SPANISH_GROUP_ID = '120363425790792660@g.us';
 const VIP_TARGET_NUMBER = '34664266926@s.whatsapp.net';
 
-// 🛡️ DOLORES FUNNEL: General posting to Spanish group
-app.post('/api/dolores/send', async (req, res) => {
-    const body = req.body || {};
-    const targetChat = body.to || body.chat_id || "";
-    const messageText = body.body || body.text || "";
-
-    if (!targetChat.endsWith('@g.us')) {
-        console.log(`🚫 [DOLORES BLOCKED] Only group posting allowed for Dolores.`);
-        return res.status(200).json({ success: false, message: "Only groups allowed." });
-    }
-
-    try {
-        const response = await axios.post('https://gate.whapi.cloud/messages/text', {
-            to: targetChat,
-            body: messageText
-        }, {
-            headers: { 'Authorization': `Bearer ${DOLORES_TOKEN}` }
-        });
-        res.json(response.data);
-    } catch (err) {
-        console.error('❌ [DOLORES ERROR]', err.response?.data || err.message);
-        res.status(500).json({ error: "Failed to forward to Whapi (Dolores)" });
-    }
-});
-
-// 🛡️ JUANA FUNNEL: VIP Alerts only
+// 🛡️ JUANA FUNNEL: Universal posting (General & VIP)
 app.post('/api/juana/send', async (req, res) => {
     const body = req.body || {};
     const targetChat = body.to || body.chat_id || "";
