@@ -282,6 +282,7 @@ app.post('/api/juana/send', async (req, res) => {
 app.post(['/api/leads', '/jobs-api/api/ads', '/api/ads', '/api/save-data'], async (req, res) => {
     try {
         const body = req.body || {};
+        const chatId = body.chatId || body.source_chat_id || body.from || "";
 
         // 🛡️ SECURITY & PRIVACY FILTER
         // 🛡️ SECURITY & PRIVACY FILTER (Allow WhatsApp @g.us AND Telegram -100 IDs)
