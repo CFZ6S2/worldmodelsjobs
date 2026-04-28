@@ -252,30 +252,22 @@ const BANNED_KEYWORDS = [
 const JUANA_TOKEN = 'shJOb5wskQMTyfoF20GLqmJOclA5if5j';
 const SPANISH_GROUP_ID = '120363425790792660@g.us';
 
-const JUANA_ALLOWED_CHATS = [
-    SPANISH_GROUP_ID,
-    '120363408216646972@g.us', // English
-    '120363408298375271@g.us', // Russian
-    '120363426262586004@g.us', // Portuguese
-    '34664266926@s.whatsapp.net' // Manager Private
-];
-
-// 🛡️ JUANA FUNNEL: Allow allowed groups and manager private number
+// 🛡️ JUANA FUNNEL: Only allow Spanish group posts
 app.post('/api/juana/send', async (req, res) => {
     const body = req.body || {};
     const targetChat = body.to || body.chat_id || body.body?.chat_id || "";
     const messageText = body.body || body.text?.body || body.text || "";
 
-    if (!JUANA_ALLOWED_CHATS.includes(targetChat)) {
-        console.log(`🚫 [JUANA BLOCKED] Attempted to post in ${targetChat}. Chat not in allowed list.`);
-        return res.status(200).json({ success: false, message: "Target chat not allowed." });
+    if (targetChat !== SPANISH_GROUP_ID) {
+        console.log(`🚫 [JUANA BLOCKED] Attempted to post in ${targetChat}. Only Spanish group is allowed.`);
+        return res.status(200).json({ success: false, message: "Only Spanish group allowed for now." });
     }
 
-    console.log(`✅ [JUANA ALLOWED] Posting to: ${targetChat}`);
+    console.log(`✅ [JUANA ALLOWED] Posting to Spanish group...`);
 
     try {
         const response = await axios.post('https://gate.whapi.cloud/messages/text', {
-            to: targetChat,
+            to: SPANISH_GROUP_ID,
             body: messageText
         }, {
             headers: { 'Authorization': `Bearer ${JUANA_TOKEN}` }
