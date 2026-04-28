@@ -58,11 +58,11 @@
     },
     {
       "parameters": {
-        "conditions": { "boolean": [{ "value1": "={{ $json.looksValuable }}", "value2": true }] }
+        "jsCode": "const results = [];\nfor (const item of $input.all()) {\n  if (item.json.looksValuable === true) {\n    results.push(item);\n  }\n}\nreturn results;"
       },
       "id": "guard-1",
       "name": "Guard Filter",
-      "type": "n8n-nodes-base.if",
+      "type": "n8n-nodes-base.code",
       "typeVersion": 1,
       "position": [-2300, 500]
     },
@@ -172,7 +172,7 @@
     {
       "parameters": {
         "method": "POST",
-        "url": "http://178.156.186.149:3001/api/juana/send",
+        "url": "http://178.156.186.149:3001/api/dolores/send",
         "sendHeaders": true,
         "headerParameters": { "parameters": [{ "name": "Authorization", "value": "Bearer shJOb5wskQMTyfoF20GLqmJOclA5if5j" }] },
         "sendBody": true,

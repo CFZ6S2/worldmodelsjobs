@@ -249,25 +249,47 @@ const BANNED_KEYWORDS = [
     'droga', 'drogas', 'drugs', 'cocaína', 'cocaina', 'coke', 'perico', 'nieve', 'tusi', 'tusibi', '2cb', 'marihuana', 'hierba', 'weed', 'maconha', 'porro', 'canuto', 'pastilla', 'éxtasis', 'extasis', 'mdma', 'mda', 'cristal', 'metanfetamina', 'crack', 'base', 'heroína', 'heroina', 'vaper', 'airbnb'
 ];
 
+const DOLORES_TOKEN = 'cCr2pGzXM6hZgORbfo2YjdTWGRLH6eCP';
 const JUANA_TOKEN = 'shJOb5wskQMTyfoF20GLqmJOclA5if5j';
 const SPANISH_GROUP_ID = '120363425790792660@g.us';
+const VIP_TARGET_NUMBER = '34664266926@s.whatsapp.net';
 
-// 🛡️ JUANA FUNNEL: Only allow Spanish group posts
-app.post('/api/juana/send', async (req, res) => {
+// 🛡️ DOLORES FUNNEL: General posting to Spanish group
+app.post('/api/dolores/send', async (req, res) => {
     const body = req.body || {};
-    const targetChat = body.to || body.chat_id || body.body?.chat_id || "";
-    const messageText = body.body || body.text?.body || body.text || "";
+    const targetChat = body.to || body.chat_id || "";
+    const messageText = body.body || body.text || "";
 
-    if (targetChat !== SPANISH_GROUP_ID) {
-        console.log(`🚫 [JUANA BLOCKED] Attempted to post in ${targetChat}. Only Spanish group is allowed.`);
-        return res.status(200).json({ success: false, message: "Only Spanish group allowed for now." });
+    if (!targetChat.endsWith('@g.us')) {
+        console.log(`🚫 [DOLORES BLOCKED] Only group posting allowed for Dolores.`);
+        return res.status(200).json({ success: false, message: "Only groups allowed." });
     }
-
-    console.log(`✅ [JUANA ALLOWED] Posting to Spanish group...`);
 
     try {
         const response = await axios.post('https://gate.whapi.cloud/messages/text', {
-            to: SPANISH_GROUP_ID,
+            to: targetChat,
+            body: messageText
+        }, {
+            headers: { 'Authorization': `Bearer ${DOLORES_TOKEN}` }
+        });
+        res.json(response.data);
+    } catch (err) {
+        console.error('❌ [DOLORES ERROR]', err.response?.data || err.message);
+        res.status(500).json({ error: "Failed to forward to Whapi (Dolores)" });
+    }
+});
+
+// 🛡️ JUANA FUNNEL: VIP Alerts only
+app.post('/api/juana/send', async (req, res) => {
+    const body = req.body || {};
+    const targetChat = body.to || body.chat_id || "";
+    const messageText = body.body || body.text || "";
+
+    // Juana only sends to the VIP number OR the Spanish group if needed, 
+    // but primarily for the VIP alert requested.
+    try {
+        const response = await axios.post('https://gate.whapi.cloud/messages/text', {
+            to: targetChat,
             body: messageText
         }, {
             headers: { 'Authorization': `Bearer ${JUANA_TOKEN}` }
@@ -275,7 +297,7 @@ app.post('/api/juana/send', async (req, res) => {
         res.json(response.data);
     } catch (err) {
         console.error('❌ [JUANA ERROR]', err.response?.data || err.message);
-        res.status(500).json({ error: "Failed to forward to Whapi" });
+        res.status(500).json({ error: "Failed to forward to Whapi (Juana)" });
     }
 });
 
