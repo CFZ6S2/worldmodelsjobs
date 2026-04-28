@@ -3,7 +3,7 @@ const axios = require('axios');
 
 const N8N_WEBHOOK_URL = 'http://178.156.186.149:5678/webhook/1fd718d6-49f8-43dc-a881-ff7ecf7b94ef';
 
-const COOLDOWN_MS = 5 * 60 * 1000;
+const COOLDOWN_MS = 10000;
 const authorCooldowns = new Map();
 
 const server = http.createServer(async (req, res) => {
@@ -23,19 +23,15 @@ const server = http.createServer(async (req, res) => {
                         if (authorCooldowns.has(author)) {
                             const lastProcessed = authorCooldowns.get(author);
                             if (now - lastProcessed < COOLDOWN_MS) {
-                                console.log(`⏳ [COOLDOWN] Ignorando a ${author} (Cooldown activo)`);
+                                console.log(`⏳ [COOLDOWN] Ignorando a ${author}`);
                                 continue;
                             }
                         }
                         
-                        const extractedText = msg.text?.body || msg.caption || '';
+                        // Extracción de texto mejorada
+                        const extractedText = msg.text?.body || msg.caption || msg.content || (msg.type === 'text' ? msg.body : '') || '';
                         
-                        if (!extractedText) {
-                            console.log(`[SKIP] Mensaje sin texto de ${msg.from}`);
-                            continue;
-                        }
-
-                        // Marcamos el autor con el tiempo actual para el cooldown
+                        // Marcamos el autor
                         authorCooldowns.set(author, now);
 
                         const n8nPayload = {
@@ -45,8 +41,9 @@ const server = http.createServer(async (req, res) => {
                             chatId: msg.chat_id || msg.from,
                             body: { text: extractedText },
                             text: extractedText,
+                            type: msg.type,
                             key: { 
-                                remoteJid: msg.chat_id || msg.from, // IMPORTANTE: ID del grupo o del usuario
+                                remoteJid: msg.chat_id || msg.from,
                                 fromMe: false 
                             },
                             pushName: msg.from_name || 'Usuario WhatsApp',
@@ -54,7 +51,7 @@ const server = http.createServer(async (req, res) => {
                             source: 'whapi_cloud'
                         };
 
-                        console.log(`🚀 Forwarding to n8n: ${extractedText.substring(0, 50)}...`);
+                        console.log(`🚀 Forwarding [${msg.type}] to n8n from ${msg.from_name || msg.from}...`);
                         await axios.post(N8N_WEBHOOK_URL, n8nPayload);
                     }
                 }
