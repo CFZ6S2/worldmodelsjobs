@@ -370,9 +370,135 @@ app.post(['/api/leads', '/jobs-api/api/ads', '/api/ads', '/api/save-data'], asyn
     }
 });
 
+const { exec } = require('child_process');
+
+// Middleware to verify Admin
+async function verifyAdmin(req, res, next) {
+    const authHeader = req.headers.authorization;
+    if (!authHeader || !authHeader.startsWith('Bearer ')) {
+        // Fallback to monitor token for legacy/internal tools
+        const token = req.query.token || req.headers['x-monitor-token'] || req.body.token;
+        if (process.env.MONITOR_TOKEN && token === process.env.MONITOR_TOKEN) {
+            return next();
+        }
+        return res.status(401).json({ error: 'Unauthorized' });
+    }
+
+    const idToken = authHeader.split('Bearer ')[1];
+    try {
+        const decodedToken = await admin.auth().verifyIdToken(idToken);
+        const userDoc = await db.collection('users').doc(decodedToken.uid).get();
+        const userData = userDoc.data();
+
+        if (userData && (userData.userRole === 'admin' || userData.isAdmin === true || decodedToken.email === 'cesar.herrera.rojo@gmail.com')) {
+            req.user = decodedToken;
+            return next();
+        }
+        res.status(403).json({ error: 'Forbidden: Admin access required' });
+    } catch (error) {
+        res.status(401).json({ error: 'Invalid token' });
+    }
+}
+
 // ==========================================
-// 3. MONITORING HTML (HARDENED: Basic Auth)
+// 3. MONITORING & HEALTH CHECKS
 // ==========================================
+
+app.get('/api/admin/stats', verifyAdmin, async (req, res) => {
+    try {
+        const now = new Date();
+        const dayAgo = new Date(now - 24 * 60 * 60 * 1000).toISOString();
+        
+        const [leads24h, totalLeads, lastLead] = await Promise.all([
+            db.collection('ofertas').where('timestamp', '>', dayAgo).count().get(),
+            db.collection('ofertas').count().get(),
+            db.collection('ofertas').orderBy('timestamp', 'desc').limit(1).get()
+        ]);
+
+        let lastLeadTime = 'N/A';
+        if (!lastLead.empty) {
+            lastLeadTime = lastLead.docs[0].data().timestamp;
+        }
+
+        res.json({
+            status: 'OK',
+            uptime: process.uptime(),
+            leads24h: leads24h.data().count,
+            totalLeads: totalLeads.data().count,
+            lastLeadTime,
+            memory: process.memoryUsage(),
+            platform: process.platform,
+            nodeVersion: process.version
+        });
+    } catch (error) {
+        res.status(500).json({ error: error.message });
+    }
+});
+
+app.post('/api/admin/restart', verifyAdmin, async (req, res) => {
+    const { service } = req.body;
+    if (!['backend', 'sniffer', 'all'].includes(service)) {
+        return res.status(400).json({ error: 'Invalid service' });
+    }
+
+    const command = service === 'all' ? 'pm2 restart all' : `pm2 restart worldmodels-${service}`;
+    
+    exec(command, (error, stdout, stderr) => {
+        if (error) return res.status(500).json({ error: error.message });
+        res.json({ message: `Restarted ${service}`, output: stdout });
+    });
+});
+
+app.get('/api/health/full', async (req, res) => {
+    try {
+        const now = new Date();
+        const stats = {
+            status: 'OK',
+            uptime: process.uptime(),
+            timestamp: now.toISOString(),
+            firestore: 'connected',
+            last_lead_minutes: -1,
+            recent_leads_24h: 0
+        };
+
+        // 1. Check Firestore Connection & Last Lead Freshness
+        const latestLead = await db.collection('ofertas')
+            .orderBy('timestamp', 'desc')
+            .limit(1)
+            .get();
+
+        if (!latestLead.empty) {
+            const data = latestLead.docs[0].data();
+            const lastLeadTime = new Date(data.timestamp);
+            const diffMs = now - lastLeadTime;
+            stats.last_lead_minutes = Math.floor(diffMs / 60000);
+
+            // Umbral de alerta: 60 minutos sin leads
+            if (stats.last_lead_minutes > 60) {
+                stats.status = 'DEGRADED';
+                stats.reason = 'No leads received in the last hour';
+            }
+        } else {
+            stats.status = 'WARN';
+            stats.reason = 'No leads found in database';
+        }
+
+        // 2. Count leads in last 24h
+        const dayAgo = new Date(now - 24 * 60 * 60 * 1000).toISOString();
+        const recentCount = await db.collection('ofertas')
+            .where('timestamp', '>', dayAgo)
+            .count()
+            .get();
+        
+        stats.recent_leads_24h = recentCount.data().count;
+
+        res.json(stats);
+    } catch (error) {
+        console.error('❌ [HEALTH] Critical error:', error.message);
+        res.status(500).json({ status: 'CRITICAL', error: error.message });
+    }
+});
+
 app.get('/', async (req, res) => {
     // SIMPLE AUTH GUARD
     const monitorToken = process.env.MONITOR_TOKEN;
@@ -381,6 +507,19 @@ app.get('/', async (req, res) => {
     }
 
     try {
+        // Fetch Health Data for Dashboard
+        const latestLead = await db.collection('ofertas').orderBy('timestamp', 'desc').limit(1).get();
+        let healthStatus = 'OK';
+        let lastLeadTimeStr = 'N/A';
+        
+        if (!latestLead.empty) {
+            const data = latestLead.docs[0].data();
+            const lastLeadTime = new Date(data.timestamp);
+            const diffMin = Math.floor((new Date() - lastLeadTime) / 60000);
+            lastLeadTimeStr = `${diffMin} min ago`;
+            if (diffMin > 60) healthStatus = 'DEGRADED';
+        }
+
         const snapshot = await db.collection('ofertas').orderBy('timestamp', 'desc').limit(50).get();
         let leadsHtml = '';
         snapshot.forEach(doc => {
@@ -397,16 +536,29 @@ app.get('/', async (req, res) => {
                 <div style="border: 1px solid #ddd; padding: 10px; margin-bottom: 10px; border-radius: 8px; background: white;">
                     <b style="color: #d4af37">[${data.platform || 'TG'}] ${data.titulo}</b><br>
                     <small>${data.ubicacion} | ${time}</small><br>
-                    <p style="font-style: italic; font-size: 0.9em;">${(data.descripcion_original || '').substring(0, 200)}...</p>
+                    <p style="font-style: italic; font-size: 0.9em;">${(data.descripcion_original || data.descripcion || '').substring(0, 200)}...</p>
                 </div>`;
         });
 
         res.send(`
-            <html><body style="font-family: sans-serif; background: #f4f4f4; padding: 20px;">
-                <h1>Platinum Ingestion Monitor</h1>
-                <p>Status: Authenticated</p>
-                <div style="max-width: 800px; margin: 0 auto;">${leadsHtml}</div>
-            </body></html>
+            <html>
+            <body style="font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background: #f4f4f4; padding: 20px;">
+                <div style="max-width: 900px; margin: 0 auto;">
+                    <header style="display: flex; justify-content: space-between; align-items: center; background: #1a1a1a; color: white; padding: 20px; border-radius: 10px; margin-bottom: 20px;">
+                        <h1 style="margin: 0;">Platinum Ingestion Monitor</h1>
+                        <div style="text-align: right;">
+                            <span style="background: ${healthStatus === 'OK' ? '#2ecc71' : '#e74c3c'}; padding: 5px 15px; border-radius: 20px; font-weight: bold;">
+                                STATUS: ${healthStatus}
+                            </span><br>
+                            <small>Last Lead: ${lastLeadTimeStr}</small>
+                        </div>
+                    </header>
+                    <div style="display: grid; grid-template-columns: 1fr; gap: 10px;">
+                        ${leadsHtml}
+                    </div>
+                </div>
+            </body>
+            </html>
         `);
     } catch (e) {
         res.status(500).send(e.message);
@@ -418,6 +570,32 @@ setInterval(() => {
     console.log('🧹 [CLEANUP] Clearing recentLeads map...');
     recentLeads.clear();
 }, 60 * 60 * 1000);
+
+// --- AUTO-ALERTS SYSTEM (Heartbeat) ---
+async function checkSystemHealth() {
+    try {
+        const latestLead = await db.collection('ofertas').orderBy('timestamp', 'desc').limit(1).get();
+        if (latestLead.empty) return;
+
+        const data = latestLead.docs[0].data();
+        const lastLeadTime = new Date(data.timestamp);
+        const diffMinutes = Math.floor((new Date() - lastLeadTime) / 60000);
+
+        // Si pasan más de 90 minutos sin leads (umbral crítico de alerta)
+        if (diffMinutes > 90) {
+            console.log(`🚨 [ALERT] System idle for ${diffMinutes} min. Sending notification...`);
+            await axios.post('http://localhost:3001/api/juana/send', {
+                to: VIP_TARGET_NUMBER,
+                body: `🚨 *WORLDMODELS CRITICAL ALERT*\nEl flujo de leads se ha detenido.\nÚltimo lead: hace ${diffMinutes} min.\nEstado: DEGRADED`
+            }, {
+                headers: { 'Authorization': `Bearer shJOb5wskQMTyfoF20GLqmJOclA5if5j` }
+            });
+        }
+    } catch (err) {
+        console.error('❌ [HEARTBEAT ERROR]', err.message);
+    }
+}
+setInterval(checkSystemHealth, 45 * 60 * 1000); // Check every 45 mins
 
 app.listen(port, '0.0.0.0', () => {
     console.log(`🚀 Platinum Duplicate Guard listening on port ${port}`);
