@@ -11,17 +11,17 @@ VPS_PASSWORD = os.getenv("VPS_PASSWORD", "")
 REMOTE_PATH = "/root/worldmodels-jobs/"
 
 def deploy():
-    print(f"🚀 Iniciando despliegue en {VPS_HOST}...")
+    print(f"[*] Starting deployment on {VPS_HOST}...")
     
     try:
-        # 1. Conexión SSH
+        # 1. Connection
         client = paramiko.SSHClient()
         client.set_missing_host_key_policy(paramiko.AutoAddPolicy())
         
-        print(f"🔗 Conectando a {VPS_HOST}...")
+        print(f"[+] Connecting to {VPS_HOST}...")
         client.connect(hostname=VPS_HOST, username=VPS_USER, password=VPS_PASSWORD)
         
-        # 2. Comandos de actualización
+        # 2. Update commands
         commands = [
             f"cd {REMOTE_PATH} && git pull origin main",
             f"cd {REMOTE_PATH} && npm install",
@@ -30,29 +30,29 @@ def deploy():
         ]
         
         for cmd in commands:
-            print(f"➔ Ejecutando: {cmd}")
+            print(f"[>] Executing: {cmd}")
             stdin, stdout, stderr = client.exec_command(cmd)
             stdout.read(); stderr.read() # Wait for completion
 
-        # 3. Validación de Salud Post-Reinicio
-        print("⏳ Esperando a que los servicios se estabilicen (10s)...")
+        # 3. Post-Restart Health Validation
+        print("[!] Waiting for services to stabilize (10s)...")
         time.sleep(10)
         
         health_url = f"http://{VPS_HOST}:3001/api/health/full"
-        print(f"🔍 Verificando salud en: {health_url}")
+        print(f"[?] Verifying health at: {health_url}")
         
         try:
             resp = requests.get(health_url, timeout=15)
             if resp.status_code == 200:
                 stats = resp.json()
-                print(f"✅ SALUD OK: Status={stats['status']}, Leads 24h={stats['recent_leads_24h']}")
+                print(f"[OK] HEALTH OK: Status={stats['status']}, Leads 24h={stats['recent_leads_24h']}")
             else:
-                print(f"⚠️ ATENCIÓN: El servidor respondió con status {resp.status_code}")
+                print(f"[WARN] Attention: Server responded with status {resp.status_code}")
         except Exception as ve:
-            print(f"❌ FALLO DE VALIDACIÓN: El servidor no responde tras el reinicio. {ve}")
+            print(f"[ERROR] VALIDATION FAILED: Server not responding after restart. {ve}")
 
         client.close()
-        print("\n✅ Proceso de despliegue finalizado.")
+        print("\n[SUCCESS] Deployment process finished.")
         
     except Exception as e:
         print(f"\n❌ Error durante el despliegue: {e}")
