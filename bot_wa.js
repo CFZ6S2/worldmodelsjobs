@@ -62,7 +62,7 @@ try {
 }
 
 function postToN8n(payload) {
-  const endpointPath = MODE === 'test' ? 'webhook-test/webhook-test/1fd718d6-49f8-43dc-a881-ff7ecf7b94ef' : 'webhook/webhook-test/1fd718d6-49f8-43dc-a881-ff7ecf7b94ef'
+  const endpointPath = MODE === 'test' ? 'webhook-test/1fd718d6-49f8-43dc-a881-ff7ecf7b94ef' : 'webhook/1fd718d6-49f8-43dc-a881-ff7ecf7b94ef'
   const base = DEFAULT_BASE.endsWith('/') ? DEFAULT_BASE : DEFAULT_BASE + '/'
   const full = N8N_WEBHOOK_URL ? N8N_WEBHOOK_URL : new URL(endpointPath, base).toString()
   const u = new URL(full)

@@ -134,9 +134,9 @@ function getLeadHash(text) {
 function autoCategorize(text) {
     const content = (text || '').toLowerCase();
     const plazasKeywords = ['plaza', 'vacante', 'contratando', 'puesto', 'oferta de trabajo', 'trabajo', 'job', 'hiring', 'contratacion', 'se busca', 'requisito', 'reponedor', 'mozo', 'limpieza', 'camarer'];
-    const eventosKeywords = ['evento', 'party', 'fiesta', 'show', 'bolo', 'presentacion', 'casting', 'event', 'party', 'club', 'vuelo', 'hotel', 'modelo', 'imagen', 'azafata'];
+    const eventosKeywords = ['evento', 'party', 'fiesta', 'show', 'bolo', 'presentacion', 'casting', 'event', 'party', 'club', 'vuelo', 'hotel', 'modelo', 'imagen', 'azafata', 'overnight', 'tonight', 'booking', 'cita', 'meeting'];
 
-    if (plazasKeywords.some(kw => content.includes(kw))) return 'CAT_EVENTOS';
+    if (plazasKeywords.some(kw => content.includes(kw))) return 'CAT_PLAZAS';
     if (eventosKeywords.some(kw => content.includes(kw))) return 'CAT_EVENTOS';
 
     return 'CAT_EVENTOS';
@@ -259,8 +259,6 @@ app.post('/api/juana/send', async (req, res) => {
     const targetChat = body.to || body.chat_id || "";
     const messageText = body.body || body.text || "";
 
-    // Juana only sends to the VIP number OR the Spanish group if needed, 
-    // but primarily for the VIP alert requested.
     try {
         const response = await axios.post('https://gate.whapi.cloud/messages/text', {
             to: targetChat,
@@ -268,9 +266,14 @@ app.post('/api/juana/send', async (req, res) => {
         }, {
             headers: { 'Authorization': `Bearer ${JUANA_TOKEN}` }
         });
+        console.log(`🚀 [JUANA SUCCESS] Sent to ${targetChat}: ${messageText.substring(0, 30)}...`);
         res.json(response.data);
     } catch (err) {
-        console.error('❌ [JUANA ERROR]', err.response?.data || err.message);
+        console.error('❌ [JUANA ERROR]', {
+            status: err.response?.status,
+            data: err.response?.data,
+            message: err.message
+        });
         res.status(500).json({ error: "Failed to forward to Whapi (Juana)" });
     }
 });
@@ -339,7 +342,7 @@ app.post(['/api/leads', '/jobs-api/api/ads', '/api/ads', '/api/save-data'], asyn
             titulo: rawTitle,
             descripcion: rawDescription,
             ubicacion: city,
-            categoria: autoCategorize(rawDescription),
+            categoria: body.category ? (body.category === 'plaza' ? 'CAT_PLAZAS' : 'CAT_EVENTOS') : autoCategorize(rawDescription),
             contact: contact,
             timestamp: new Date().toISOString(),
             platform: (body.platform || "n8n_vps").toUpperCase(),

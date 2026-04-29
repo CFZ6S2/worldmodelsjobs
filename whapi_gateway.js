@@ -1,7 +1,8 @@
+require('dotenv').config();
 const http = require('http');
 const axios = require('axios');
 
-const N8N_WEBHOOK_URL = 'http://178.156.186.149:5678/webhook/1fd718d6-49f8-43dc-a881-ff7ecf7b94ef';
+const N8N_WEBHOOK_URL = process.env.N8N_WEBHOOK_URL || 'http://178.156.186.149:5678/webhook/1fd718d6-49f8-43dc-a881-ff7ecf7b94ef';
 
 const COOLDOWN_MS = 10000;
 const authorCooldowns = new Map();
@@ -52,7 +53,12 @@ const server = http.createServer(async (req, res) => {
                         };
 
                         console.log(`🚀 Forwarding [${msg.type}] to n8n from ${msg.from_name || msg.from}...`);
-                        await axios.post(N8N_WEBHOOK_URL, n8nPayload);
+                        try {
+                            const n8nRes = await axios.post(N8N_WEBHOOK_URL, n8nPayload);
+                            console.log(`✅ [N8N] Response: ${n8nRes.status}`);
+                        } catch (err) {
+                            console.error(`❌ [N8N ERROR] ${err.response?.status || err.code}: ${err.message}`);
+                        }
                     }
                 }
                 res.writeHead(200);
