@@ -2,6 +2,8 @@
 import React, { useEffect, useState } from 'react';
 import { useAuth } from '@/context/AuthContext';
 import { useRouter } from 'next/navigation';
+import { Crown, Zap, Shield, RefreshCw, Database, Activity, Terminal } from 'lucide-react';
+import { useLocale } from 'next-intl';
 
 interface SystemStats {
   status: string;
@@ -17,6 +19,7 @@ interface SystemStats {
 export default function AdminPage() {
   const { user, isAdmin, loading } = useAuth();
   const router = useRouter();
+  const locale = useLocale();
   const [stats, setStats] = useState<SystemStats | null>(null);
   const [actionLoading, setActionLoading] = useState<string | null>(null);
 
@@ -37,7 +40,7 @@ export default function AdminPage() {
   };
 
   const handleRestart = async (service: string) => {
-    if (!user || !confirm(`Are you sure you want to restart ${service}?`)) return;
+    if (!user || !confirm(`Confirm restart: ${service}?`)) return;
     setActionLoading(service);
     try {
       const token = await user.getIdToken();
@@ -50,11 +53,11 @@ export default function AdminPage() {
         body: JSON.stringify({ service })
       });
       if (res.ok) {
-        alert(`${service} restart command sent successfully.`);
+        alert(`${service} restart initialized.`);
         setTimeout(fetchStats, 5000);
       }
     } catch (err) {
-      alert('Failed to restart service');
+      alert('Action failed');
     } finally {
       setActionLoading(null);
     }
@@ -76,8 +79,8 @@ export default function AdminPage() {
 
   if (loading || !user || !isAdmin) {
     return (
-      <div className="min-h-screen bg-black flex items-center justify-center">
-        <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-[#c9a84c]"></div>
+      <div className="flex-1 bg-black flex items-center justify-center min-h-screen">
+        <div className="animate-spin rounded-full h-10 w-10 border-t-2 border-b-2 border-[#c9a84c]"></div>
       </div>
     );
   }
@@ -90,106 +93,141 @@ export default function AdminPage() {
   };
 
   return (
-    <div className="min-h-screen bg-[#0a0a0a] text-white p-6 md:p-12">
-      <div className="max-w-6xl mx-auto">
-        <header className="flex flex-col md:flex-row justify-between items-start md:items-center mb-12 gap-4">
+    <div className="flex-1 flex flex-col pb-32 animate-fade">
+      {/* Header - Matching Mobile Style */}
+      <header className="glass-nav" style={{ top: 0, padding: '16px 24px', display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderBottom: '1px solid var(--glass-border)' }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+          <div style={{ 
+            width: '36px', 
+            height: '36px', 
+            borderRadius: '10px', 
+            background: 'linear-gradient(135deg, #c9a84c, #f3e5ab)', 
+            display: 'flex', 
+            alignItems: 'center', 
+            justifyContent: 'center' 
+          }}>
+            <Crown size={20} color="#000" />
+          </div>
           <div>
-            <h1 className="text-4xl font-black text-[#c9a84c] tracking-tight">CONTROL TOWER</h1>
-            <p className="text-gray-500 mt-2 font-medium uppercase tracking-widest text-xs">WorldModels Infrastructure Management</p>
+            <h1 style={{ fontSize: '1rem', fontWeight: 800, margin: 0 }}>Admin Panel</h1>
+            <p className="text-gold" style={{ fontSize: '10px', fontWeight: 900, textTransform: 'uppercase', letterSpacing: '0.1em', margin: 0 }}>Control Tower</p>
           </div>
-          <div className="flex items-center gap-3 bg-[#111] p-2 rounded-lg border border-[#222]">
-            <div className={`w-3 h-3 rounded-full ${stats?.status === 'OK' ? 'bg-green-500 animate-pulse' : 'bg-red-500'}`}></div>
-            <span className="text-sm font-bold uppercase tracking-tighter">{stats?.status || 'CONNECTING...'}</span>
-          </div>
-        </header>
+        </div>
+        <div className="badge" style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+          <div className={`w-2 h-2 rounded-full ${stats?.status === 'OK' ? 'bg-green-500 animate-pulse' : 'bg-red-500'}`} />
+          <span>{stats?.status || 'OFFLINE'}</span>
+        </div>
+      </header>
 
-        {/* Stats Grid */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-12">
-          <StatCard title="Leads (24h)" value={stats?.leads24h ?? '...'} subValue="Ingested leads" />
-          <StatCard title="Total Database" value={stats?.totalLeads ?? '...'} subValue="Historic records" />
-          <StatCard title="System Uptime" value={stats ? formatUptime(stats.uptime) : '...'} subValue={`Node ${stats?.nodeVersion || ''}`} />
-          <StatCard title="Last Lead" value={stats ? (stats.lastLeadTime !== 'N/A' ? new Date(stats.lastLeadTime).toLocaleTimeString() : 'N/A') : '...'} subValue="Real-time pulse" />
+      {/* Main Content */}
+      <main style={{ padding: '100px 20px 40px' }}>
+        
+        {/* Real-time Health Badge */}
+        <div style={{ textAlign: 'center', marginBottom: '32px' }}>
+           <div className="badge" style={{ display: 'inline-flex', alignItems: 'center', gap: '8px', padding: '8px 16px' }}>
+              <Activity size={14} />
+              <span>LIVE SYSTEM PULSE: {stats ? (stats.lastLeadTime !== 'N/A' ? `${Math.floor((new Date().getTime() - new Date(stats.lastLeadTime).getTime())/60000)}m lag` : 'N/A') : '...'}</span>
+           </div>
         </div>
 
-        {/* Action Center */}
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-          <div className="lg:col-span-2 bg-[#111] rounded-2xl p-8 border border-[#222]">
-            <h2 className="text-xl font-bold mb-6 flex items-center gap-2">
-              <svg className="w-5 h-5 text-[#c9a84c]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M13 10V3L4 14h7v7l9-11h-7z" /></svg>
-              Command Center
-            </h2>
-            <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-              <ActionButton 
-                label="Restart Backend" 
-                onClick={() => handleRestart('backend')} 
-                loading={actionLoading === 'backend'}
-                description="Refreshes API & Duplication Guard"
-              />
-              <ActionButton 
-                label="Restart Sniffer" 
-                onClick={() => handleRestart('sniffer')} 
-                loading={actionLoading === 'sniffer'}
-                description="Reconnects Telegram Listeners"
-              />
-              <ActionButton 
-                label="Emergency Reset" 
-                onClick={() => handleRestart('all')} 
-                loading={actionLoading === 'all'}
-                variant="danger"
-                description="Full system reboot (PM2 All)"
-              />
-            </div>
+        {/* Stats Grid - Mobile Optimized */}
+        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px', marginBottom: '24px' }}>
+          <div className="listing-card" style={{ padding: '16px', marginBottom: 0 }}>
+             <Zap size={18} color="#c9a84c" style={{ marginBottom: '8px' }} />
+             <p style={{ fontSize: '10px', fontWeight: 900, color: 'rgba(255,255,255,0.4)', textTransform: 'uppercase' }}>Leads (24h)</p>
+             <h3 style={{ fontSize: '1.25rem', fontWeight: 800 }}>{stats?.leads24h ?? '...'}</h3>
           </div>
+          <div className="listing-card" style={{ padding: '16px', marginBottom: 0 }}>
+             <Database size={18} color="#c9a84c" style={{ marginBottom: '8px' }} />
+             <p style={{ fontSize: '10px', fontWeight: 900, color: 'rgba(255,255,255,0.4)', textTransform: 'uppercase' }}>Total DB</p>
+             <h3 style={{ fontSize: '1.25rem', fontWeight: 800 }}>{stats?.totalLeads ?? '...'}</h3>
+          </div>
+          <div className="listing-card" style={{ padding: '16px', marginBottom: 0, gridColumn: 'span 2' }}>
+             <Activity size={18} color="#c9a84c" style={{ marginBottom: '8px' }} />
+             <p style={{ fontSize: '10px', fontWeight: 900, color: 'rgba(255,255,255,0.4)', textTransform: 'uppercase' }}>System Uptime</p>
+             <h3 style={{ fontSize: '1.1rem', fontWeight: 800 }}>{stats ? formatUptime(stats.uptime) : '...'}</h3>
+             <p style={{ fontSize: '10px', color: 'rgba(255,255,255,0.3)', marginTop: '4px' }}>Node {stats?.nodeVersion}</p>
+          </div>
+        </div>
 
-          <div className="bg-[#111] rounded-2xl p-8 border border-[#222]">
-            <h2 className="text-xl font-bold mb-6">Server Specs</h2>
-            <div className="space-y-4">
-              <SpecItem label="Platform" value={stats?.platform || '...'} />
-              <SpecItem label="Memory (RSS)" value={stats ? `${Math.round(stats.memory.rss / 1024 / 1024)} MB` : '...'} />
-              <SpecItem label="Heap Used" value={stats ? `${Math.round(stats.memory.heapUsed / 1024 / 1024)} MB` : '...'} />
-              <div className="pt-4 mt-4 border-t border-[#222]">
-                <p className="text-xs text-gray-600">Admin User: {user?.email}</p>
+        {/* Command Center */}
+        <div className="listing-card" style={{ padding: '24px' }}>
+           <h3 style={{ fontSize: '1rem', fontWeight: 800, marginBottom: '20px', display: 'flex', alignItems: 'center', gap: '10px' }}>
+              <Terminal size={18} color="#c9a84c" />
+              COMMAND CENTER
+           </h3>
+           
+           <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
+              <button 
+                onClick={() => handleRestart('backend')}
+                disabled={!!actionLoading}
+                className="btn-primary" 
+                style={{ width: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '10px', fontSize: '12px' }}
+              >
+                {actionLoading === 'backend' ? <RefreshCw className="animate-spin" size={16} /> : <RefreshCw size={16} />}
+                RESTART BACKEND
+              </button>
+
+              <button 
+                onClick={() => handleRestart('sniffer')}
+                disabled={!!actionLoading}
+                className="btn-primary" 
+                style={{ width: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '10px', fontSize: '12px' }}
+              >
+                {actionLoading === 'sniffer' ? <RefreshCw className="animate-spin" size={16} /> : <RefreshCw size={16} />}
+                RESTART SNIFFER
+              </button>
+
+              <button 
+                onClick={() => handleRestart('all')}
+                disabled={!!actionLoading}
+                style={{ 
+                  width: '100%', 
+                  background: 'rgba(231, 76, 60, 0.1)', 
+                  border: '1px solid rgba(231, 76, 60, 0.3)',
+                  color: '#e74c3c',
+                  padding: '16px',
+                  borderRadius: '18px',
+                  fontWeight: 900,
+                  fontSize: '12px',
+                  textTransform: 'uppercase',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  gap: '10px'
+                }}
+              >
+                {actionLoading === 'all' ? <RefreshCw className="animate-spin" size={16} /> : <RefreshCw size={16} />}
+                EMERGENCY RESET
+              </button>
+           </div>
+        </div>
+
+        {/* Server Specs */}
+        <div style={{ marginTop: '24px' }}>
+           <h4 style={{ fontSize: '11px', fontWeight: 900, color: 'rgba(255,255,255,0.3)', textTransform: 'uppercase', letterSpacing: '0.1em', marginBottom: '12px', paddingLeft: '8px' }}>
+              Infrastructure Details
+           </h4>
+           <div className="listing-card" style={{ padding: '20px' }}>
+              <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '12px' }}>
+                 <span style={{ fontSize: '12px', color: 'rgba(255,255,255,0.5)' }}>Platform</span>
+                 <span style={{ fontSize: '12px', fontWeight: 700 }}>{stats?.platform || '...'}</span>
               </div>
-            </div>
-          </div>
+              <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '12px' }}>
+                 <span style={{ fontSize: '12px', color: 'rgba(255,255,255,0.5)' }}>Memory (RSS)</span>
+                 <span style={{ fontSize: '12px', fontWeight: 700, color: '#c9a84c' }}>{stats ? `${Math.round(stats.memory.rss / 1024 / 1024)} MB` : '...'}</span>
+              </div>
+              <div style={{ display: 'flex', justifyContent: 'space-between' }}>
+                 <span style={{ fontSize: '12px', color: 'rgba(255,255,255,0.5)' }}>Heap Used</span>
+                 <span style={{ fontSize: '12px', fontWeight: 700, color: '#c9a84c' }}>{stats ? `${Math.round(stats.memory.heapUsed / 1024 / 1024)} MB` : '...'}</span>
+              </div>
+           </div>
         </div>
-      </div>
-    </div>
-  );
-}
 
-function StatCard({ title, value, subValue }: { title: string, value: any, subValue: string }) {
-  return (
-    <div className="bg-[#111] p-6 rounded-2xl border border-[#222] hover:border-[#c9a84c33] transition-colors">
-      <p className="text-xs uppercase tracking-widest text-gray-500 font-bold mb-2">{title}</p>
-      <p className="text-3xl font-black text-white mb-1">{value}</p>
-      <p className="text-xs text-gray-600">{subValue}</p>
-    </div>
-  );
-}
-
-function ActionButton({ label, onClick, loading, description, variant = 'default' }: { label: string, onClick: () => void, loading: boolean, description: string, variant?: 'default' | 'danger' }) {
-  return (
-    <button 
-      onClick={onClick}
-      disabled={loading}
-      className={`flex flex-col items-start text-left p-4 rounded-xl border transition-all ${
-        variant === 'danger' 
-          ? 'bg-red-950/20 border-red-900/50 hover:bg-red-900/40 text-red-200' 
-          : 'bg-[#1a1a1a] border-[#333] hover:border-[#c9a84c] text-white'
-      } ${loading ? 'opacity-50 cursor-not-allowed' : ''}`}
-    >
-      <span className="font-bold mb-1">{loading ? 'Processing...' : label}</span>
-      <span className="text-[10px] uppercase tracking-tighter opacity-60">{description}</span>
-    </button>
-  );
-}
-
-function SpecItem({ label, value }: { label: string, value: string }) {
-  return (
-    <div className="flex justify-between items-center py-2">
-      <span className="text-sm text-gray-500">{label}</span>
-      <span className="text-sm font-mono text-[#c9a84c]">{value}</span>
+        <p style={{ textAlign: 'center', fontSize: '10px', color: 'rgba(255,255,255,0.2)', marginTop: '32px', fontStyle: 'italic' }}>
+          Secure Access: {user?.email}
+        </p>
+      </main>
     </div>
   );
 }
