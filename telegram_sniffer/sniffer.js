@@ -9,7 +9,7 @@ const apiId = 32882215;
 const apiHash = 'de7fb1c1ec1a0c5b782ffaed8335ace4';
 const phoneNumber = '+573205985878';
 const sessionFile = '/root/worldmodels-jobs/telegram_sniffer/session.txt';
-const targetGroupIds = ['-1002904509105', '-1001223048952', '-1002604091536', '-1003705205249'];
+const targetGroupIds = ['-1002904509105', '-1002604091536', '-1003705205249'];
 
 const N8N_WEBHOOK_URL = 'http://178.156.186.149:5678/webhook/telegram-wm-2024';
 

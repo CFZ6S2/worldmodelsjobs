@@ -117,24 +117,26 @@ function normalizeForDedupe(text) {
         .toLowerCase()
         // 1. Remove ALL Emojis and Symbols
         .replace(/[\u{1F600}-\u{1F64F}\u{1F300}-\u{1F5FF}\u{1F680}-\u{1F6FF}\u{1F1E6}-\u{1F1FF}\u{2600}-\u{26FF}\u{2700}-\u{27BF}]/gu, '')
-        // 2. Remove non-alphanumeric (keep only letters and numbers)
-        .replace(/[^a-z0-9ñáéíóú]/g, '')
-        // 3. Ultra-compact
+        // 2. Remove common noise words/chars used for bypass
+        .replace(/[.\-_*~`]/g, '')
+        // 3. Remove non-alphanumeric (keep only letters and numbers)
+        .replace(/[^a-z0-9ñáéíóúàèìòùâêîôû]/g, '')
+        // 4. Ultra-compact
         .trim();
 }
 
 function getLeadHash(text) {
     const normalized = normalizeForDedupe(text);
-    // If text is effectively empty after cleaning, use raw but trimmed as fallback
-    const finalInput = normalized.length > 5 ? normalized : text.toLowerCase().trim();
+    // If text is effectively empty after cleaning (less than 10 chars), use raw but trimmed as fallback
+    const finalInput = normalized.length > 10 ? normalized : text.toLowerCase().replace(/\s+/g, '').trim();
     return crypto.createHash('sha256').update(finalInput).digest('hex');
 }
 
 // Intelligent Categorization Engine (Migrated from Cloud Functions)
 function autoCategorize(text) {
     const content = (text || '').toLowerCase();
-    const plazasKeywords = ['plaza', 'vacante', 'contratando', 'puesto', 'oferta de trabajo', 'trabajo', 'job', 'hiring', 'contratacion', 'se busca', 'requisito', 'reponedor', 'mozo', 'limpieza', 'camarer'];
-    const eventosKeywords = ['evento', 'party', 'fiesta', 'show', 'bolo', 'presentacion', 'casting', 'event', 'party', 'club', 'vuelo', 'hotel', 'modelo', 'imagen', 'azafata', 'overnight', 'tonight', 'booking', 'cita', 'meeting'];
+    const plazasKeywords = ['plaza', 'vacante', 'contratando', 'puesto', 'oferta de trabajo', 'trabajo', 'job', 'hiring', 'contratacion', 'se busca', 'requisito', 'reponedor', 'mozo', 'limpieza', 'camarer', 'busco chicas', 'busco modelos', 'agency', 'agencia'];
+    const eventosKeywords = ['evento', 'party', 'fiesta', 'show', 'bolo', 'presentacion', 'casting', 'event', 'party', 'club', 'vuelo', 'hotel', 'modelo', 'imagen', 'azafata', 'overnight', 'tonight', 'booking', 'cita', 'meeting', 'disponible ahora', 'outcall', 'incall', 'dinner', 'dinner date'];
 
     if (plazasKeywords.some(kw => content.includes(kw))) return 'CAT_PLAZAS';
     if (eventosKeywords.some(kw => content.includes(kw))) return 'CAT_EVENTOS';
