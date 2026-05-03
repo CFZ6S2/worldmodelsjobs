@@ -27,6 +27,12 @@ services:
       - GENERIC_TIMEZONE=Europe/Madrid
       - N8N_ENFORCE_SETTINGS_FILE_PERMISSIONS=false
       - N8N_SECURE_COOKIE=false
+      - N8N_PATH=${N8N_PATH}
+      - N8N_EDITOR_BASE_URL=${N8N_EDITOR_BASE_URL}
+      - N8N_COOKIES_SAMESITE=${N8N_COOKIES_SAMESITE:-lax}
+      - N8N_TRUST_PROXY=${N8N_TRUST_PROXY:-1}
+      - N8N_USER_MANAGEMENT_DISABLED=${N8N_USER_MANAGEMENT_DISABLED:-false}
+      - N8N_LOG_LEVEL=${N8N_LOG_LEVEL:-info}
     volumes:
       - n8n_data:/home/node/.n8n
       - ./n8n/versions:/home/node/n8n_versions
@@ -42,7 +48,7 @@ services:
     build: 
       context: ./collectors/telegram
     environment:
-      - WEBHOOK_URL=http://n8n:5678/webhook/telegram-wm-2024
+      - WEBHOOK_URL=http://n8n:5678/n8n/webhook/telegram-wm-2024
       - BACKEND_URL=${BACKEND_INTERNAL_URL:-http://host.docker.internal:3001/api/check-duplicate}
       - TELEGRAM_API_ID=${TELEGRAM_API_ID}
       - TELEGRAM_API_HASH=${TELEGRAM_API_HASH}
@@ -56,21 +62,6 @@ services:
       - worldmodels-net
     extra_hosts:
       - "host.docker.internal:host-gateway"
-    depends_on:
-      - n8n
-
-  whatsapp-collector:
-    image: whatsapp-collector:latest
-    container_name: whatsapp-collector
-    restart: always
-    build:
-      context: ./collectors/whatsapp
-    environment:
-      - WEBHOOK_URL=http://n8n:5678/webhook/1fd718d6-49f8-43dc-a881-ff7ecf7b94ef
-    volumes:
-      - ./collectors/whatsapp/auth:/app/.wwebjs_auth
-    networks:
-      - worldmodels-net
     depends_on:
       - n8n
 
@@ -94,3 +85,5 @@ networks:
 volumes:
   n8n_data:
   telegram_sessions:
+    name: worldmodels-jobs_telegram_sessions
+    external: true

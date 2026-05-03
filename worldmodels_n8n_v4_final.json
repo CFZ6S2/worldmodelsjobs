@@ -1,4 +1,5 @@
 {
+  "id": "lmw3VFhMSJRpAVOT",
   "name": "WorldModels Unified Pipeline v4 (Final PRO)",
   "nodes": [
     {
@@ -367,6 +368,61 @@
         -1104,
         832
       ]
+    },
+    {
+      "parameters": {
+        "jsCode": "const item = $json;\nconst category = String(item.category || '').toLowerCase();\nconst city = String(item.city || '').toLowerCase();\n\nif (category === 'evento' && city.includes('miami')) {\n  return { ...item, is_miami: true };\n}\n\nreturn [];"
+      },
+      "id": "0c1dbe43-8f1f-49b2-8cb0-7143f3eeb600",
+      "name": "Filter Miami",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 1,
+      "position": [
+        -304,
+        816
+      ]
+    },
+    {
+      "parameters": {
+        "amount": 2,
+        "unit": "seconds"
+      },
+      "id": "0c1dbe43-8f1f-49b2-8cb0-7143f3eeb601",
+      "name": "Wait 2s Miami",
+      "type": "n8n-nodes-base.wait",
+      "typeVersion": 1,
+      "position": [
+        -128,
+        816
+      ]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "http://178.156.186.149:3001/api/juana/send",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Authorization",
+              "value": "=Bearer {{$env.JUANA_API_TOKEN}}"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ { \"to\": \"525532110621@s.whatsapp.net\", \"body\": \"*\ud83d\udce2 ALERTA MIAMI*\\n\ud83d\udccd *Miami* | \ud83d\udcb0 *\" + $json.budget + \"*\\n\\n\" + $json.text_es + \"\\n\\n\ud83d\udc64 *Contacto:* \" + ($json.contact || $json.final_contact) + \"\\n\ud83d\udd0c *Fuente:* \" + $json.platform } }}",
+        "options": {}
+      },
+      "id": "7e1dfaa5-3939-4dd0-986e-c2fc827ea601",
+      "name": "Send Miami Alert",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.1,
+      "position": [
+        48,
+        816
+      ],
+      "continueOnFail": true
     }
   ],
   "connections": {
@@ -412,6 +468,11 @@
           },
           {
             "node": "Filter VIP Ibiza",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Filter Miami",
             "type": "main",
             "index": 0
           }
@@ -571,6 +632,28 @@
         [
           {
             "node": "Quality Score",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Filter Miami": {
+      "main": [
+        [
+          {
+            "node": "Wait 2s Miami",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Wait 2s Miami": {
+      "main": [
+        [
+          {
+            "node": "Send Miami Alert",
             "type": "main",
             "index": 0
           }
