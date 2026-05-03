@@ -272,7 +272,7 @@
           "parameters": [
             {
               "name": "Authorization",
-              "value": "Bearer shJOb5wskQMTyfoF20GLqmJOclA5if5j"
+              "value": "=Bearer {{$env.JUANA_API_TOKEN}}"
             }
           ]
         },

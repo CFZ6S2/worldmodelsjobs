@@ -164,7 +164,7 @@
         "method": "POST",
         "url": "http://178.156.186.149:3001/api/juana/send",
         "sendHeaders": true,
-        "headerParameters": { "parameters": [{ "name": "Authorization", "value": "Bearer shJOb5wskQMTyfoF20GLqmJOclA5if5j" }] },
+        "headerParameters": { "parameters": [{ "name": "Authorization", "value": "=Bearer {{$env.JUANA_API_TOKEN}}" }] },
         "sendBody": true,
         "specifyBody": "json",
         "jsonBody": "={{ { \"to\": $json.wa_chat, \"body\": $json.wa_text } }}",

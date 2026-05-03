@@ -1,14 +1,49 @@
 rules_version = '2';
 service cloud.firestore {
   match /databases/{database}/documents {
+    function isSignedIn() {
+      return request.auth != null;
+    }
+
+    function leadKeys() {
+      return [
+        'title',
+        'description',
+        'location',
+        'price',
+        'category',
+        'userId',
+        'userEmail',
+        'status',
+        'timestamp',
+        'ingestedAt'
+      ];
+    }
+
+    function isValidLead(data) {
+      return data.keys().hasOnly(leadKeys())
+        && data.keys().hasAll(['title', 'description', 'location', 'category', 'userId', 'userEmail', 'status', 'timestamp', 'ingestedAt', 'price'])
+        && data.title is string && data.title.size() > 0 && data.title.size() <= 200
+        && data.description is string && data.description.size() > 0 && data.description.size() <= 5000
+        && data.location is string && data.location.size() > 0 && data.location.size() <= 200
+        && data.price is string && data.price.size() <= 100
+        && data.category in ['CAT_PLAZAS', 'CAT_EVENTOS']
+        && data.userId is string && data.userId == request.auth.uid
+        && data.userEmail is string && data.userEmail.size() <= 320
+        && data.status == 'pending'
+        && data.timestamp is timestamp
+        && data.ingestedAt is string && data.ingestedAt.size() <= 40;
+    }
+
     // Ofertas \u0026 Leads: Public read, Admin write
     match /ofertas/{document} {
       allow read: if true;
       allow write: if false; 
     }
     match /leads/{document} {
-      allow read: if true;
-      allow write: if false; 
+      allow read: if false;
+      allow create: if isSignedIn() && isValidLead(request.resource.data);
+      allow update, delete: if false;
     }
     
     // Lead Hashes: Strictly internal

@@ -38,6 +38,7 @@ sessions/
 *.session
 *.session-journal
 auth_*.json
+bypass_login.sh
 
 # ─── DATOS SENSIBLES ─────────────────────────────────────────────────────────
 # Dumps de base de datos
