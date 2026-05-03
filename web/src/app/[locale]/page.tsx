@@ -19,7 +19,7 @@ export default function HomePage() {
   return (
     <div className="flex-1 flex flex-col pb-32">
       {/* Header */}
-      <header className="glass-nav" style={{ top: 0, padding: '16px 24px', display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderBottom: '1px solid var(--glass-border)' }}>
+      <header className="glass-header" style={{ padding: '16px 24px', display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderBottom: '1px solid var(--glass-border)' }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
           <div style={{ 
             width: '36px', 

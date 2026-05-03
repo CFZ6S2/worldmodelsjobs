@@ -66,9 +66,9 @@ export default function AdminPage() {
   useEffect(() => {
     if (!loading) {
       if (!user) {
-        router.push('/auth/login');
+        router.push(`/${locale}/auth/login`);
       } else if (!isAdmin) {
-        router.push('/');
+        router.push(`/${locale}`);
       } else {
         fetchStats();
         const interval = setInterval(fetchStats, 30000);

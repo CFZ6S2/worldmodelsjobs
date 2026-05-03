@@ -2,6 +2,7 @@
 import React, { useState } from 'react';
 import { useAuth } from '@/context/AuthContext';
 import { useRouter } from 'next/navigation';
+import { useTranslations, useLocale } from 'next-intl';
 import { db } from '@/lib/firebase';
 import { collection, addDoc, serverTimestamp } from 'firebase/firestore';
 import { Zap, MapPin, AlignLeft, CreditCard, Send, CheckCircle2, ChevronLeft } from 'lucide-react';
@@ -9,6 +10,7 @@ import { Zap, MapPin, AlignLeft, CreditCard, Send, CheckCircle2, ChevronLeft } f
 export default function PublishPage() {
   const { user, loading: authLoading } = useAuth();
   const router = useRouter();
+  const locale = useLocale();
   
   const [formData, setFormData] = useState({
     title: '',
@@ -25,7 +27,7 @@ export default function PublishPage() {
   if (authLoading) return null;
 
   if (!user) {
-    router.push('/auth/login');
+    router.push(`/${locale}/auth/login`);
     return null;
   }
 
@@ -45,7 +47,7 @@ export default function PublishPage() {
       });
       
       setSuccess(true);
-      setTimeout(() => router.push('/feed'), 2000);
+      setTimeout(() => router.push(`/${locale}/feed`), 2000);
     } catch (err: any) {
       console.error(err);
       setError('Failed to submit intelligence. Please try again.');

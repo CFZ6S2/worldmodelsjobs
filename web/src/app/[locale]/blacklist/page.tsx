@@ -2,6 +2,7 @@
 import React, { useState, useEffect } from 'react';
 import { useAuth } from '@/context/AuthContext';
 import { useRouter } from 'next/navigation';
+import { useLocale } from 'next-intl';
 import { db } from '@/lib/firebase';
 import { collection, query, onSnapshot, addDoc, deleteDoc, doc, serverTimestamp } from 'firebase/firestore';
 import { ShieldAlert, UserPlus, Trash2, Phone, Calendar, Info, ChevronLeft, Lock } from 'lucide-react';
@@ -9,6 +10,7 @@ import { ShieldAlert, UserPlus, Trash2, Phone, Calendar, Info, ChevronLeft, Lock
 export default function BlacklistPage() {
   const { userData, loading: authLoading, isAdmin } = useAuth();
   const router = useRouter();
+  const locale = useLocale();
   const [bannedUsers, setBannedUsers] = useState<any[]>([]);
   const [newNumber, setNewNumber] = useState('');
   const [reason, setReason] = useState('Spam/Malicious behavior');
@@ -71,7 +73,7 @@ export default function BlacklistPage() {
         <Lock size={48} className="text-gold" style={{ marginBottom: '20px' }} />
         <h2 style={{ color: '#fff' }}>Access Restricted</h2>
         <p style={{ color: 'rgba(255,255,255,0.4)', maxWidth: '280px' }}>Only high-level intelligence officers can access the systemic blacklist.</p>
-        <button onClick={() => router.push('/feed')} className="btn-primary" style={{ marginTop: '24px', padding: '12px 24px' }}>Return to Feed</button>
+        <button onClick={() => router.push(`/${locale}/feed`)} className="btn-primary" style={{ marginTop: '24px', padding: '12px 24px' }}>Return to Feed</button>
       </div>
     );
   }

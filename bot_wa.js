@@ -5,6 +5,7 @@ const { URL } = require('url')
 const http = require('http')
 const https = require('https')
 const logger = require('pino')({ level: process.env.LOG_LEVEL || 'info' })
+const { BANNED_NUMBERS, BANNED_PREFIXES } = require('./shared_bans.js');
 
 // --- GLOBAL ERROR HANDLING ---
 process.on('uncaughtException', (err) => {
@@ -268,6 +269,15 @@ async function handleUpsert(msg, sock) {
   }
 
   // 2. Strict Policy Filtering
+  const senderDigits = sender.wa_id || sender.jid.replace(/\D/g, '');
+  if (
+    senderDigits && 
+    (BANNED_NUMBERS.includes(senderDigits) || BANNED_PREFIXES.some(prefix => senderDigits.startsWith(prefix)))
+  ) {
+    logger.warn({ jid: sender.jid, wa_id: sender.wa_id }, 'Banned number blocked pre-IA')
+    return { ok: false, filtered: true, reason: 'banned_number' }
+  }
+
   const hasDigits = /\d/.test(txt)
   const lenOk = txt.length >= 50
   const banned = ['cambio', 'gratis', 'paja']

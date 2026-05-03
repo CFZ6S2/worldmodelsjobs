@@ -7,6 +7,8 @@ const N8N_WEBHOOK_URL = process.env.N8N_WEBHOOK_URL || 'http://178.156.186.149:5
 const COOLDOWN_MS = 10000;
 const authorCooldowns = new Map();
 
+const { BANNED_NUMBERS, BANNED_PREFIXES } = require('./shared_bans.js');
+
 const server = http.createServer(async (req, res) => {
     if (req.method === 'POST' && req.url === '/whapi') {
         let body = '';
@@ -20,7 +22,17 @@ const server = http.createServer(async (req, res) => {
                         
                         const author = msg.from;
                         const now = Date.now();
+                        const authorDigits = author ? author.replace(/\D/g, '') : '';
                         
+                        // Ban pre IA
+                        if (
+                            authorDigits && 
+                            (BANNED_NUMBERS.includes(authorDigits) || BANNED_PREFIXES.some(prefix => authorDigits.startsWith(prefix)))
+                        ) {
+                            console.log(`🚫 [BANNED PRE-IA] Ignorando a ${author}`);
+                            continue;
+                        }
+
                         if (authorCooldowns.has(author)) {
                             const lastProcessed = authorCooldowns.get(author);
                             if (now - lastProcessed < COOLDOWN_MS) {

@@ -13,13 +13,13 @@ export default function ProfilePage() {
   if (loading) return null;
 
   if (!user) {
-    router.push('/auth/login');
+    router.push(`/${locale}/auth/login`);
     return null;
   }
 
   const handleLogout = async () => {
     await logout();
-    router.push('/');
+    router.push(`/${locale}`);
   };
 
   return (

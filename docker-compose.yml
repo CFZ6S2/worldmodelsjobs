@@ -19,7 +19,7 @@ services:
     environment:
       - N8N_HOST=${N8N_HOST:-localhost}
       - N8N_PORT=5678
-      - N8N_PROTOCOL=https
+      - N8N_PROTOCOL=${N8N_PROTOCOL:-http}
       - NODE_ENV=production
       - WEBHOOK_URL=${WEBHOOK_URL}
       - N8N_API_ENABLED=true
@@ -42,10 +42,16 @@ services:
     build: 
       context: ./collectors/telegram
     environment:
-      - WEBHOOK_URL=http://n8n:5678/webhook/1fd718d6-49f8-43dc-a881-ff7ecf7b94ef
+      - WEBHOOK_URL=http://n8n:5678/webhook/telegram-wm-2024
       - BACKEND_URL=${BACKEND_INTERNAL_URL:-http://host.docker.internal:3001/api/check-duplicate}
       - TELEGRAM_API_ID=${TELEGRAM_API_ID}
       - TELEGRAM_API_HASH=${TELEGRAM_API_HASH}
+      - TELEGRAM_PHONE=${TELEGRAM_PHONE}
+      - TELEGRAM_2FA_PASSWORD=${TELEGRAM_2FA_PASSWORD}
+      - TELEGRAM_TARGET_CHAT_IDS=${TELEGRAM_TARGET_CHAT_IDS}
+      - TELEGRAM_BANNED_USERNAMES=${TELEGRAM_BANNED_USERNAMES}
+    volumes:
+      - telegram_sessions:/sessions
     networks:
       - worldmodels-net
     extra_hosts:
@@ -87,3 +93,4 @@ networks:
 
 volumes:
   n8n_data:
+  telegram_sessions:

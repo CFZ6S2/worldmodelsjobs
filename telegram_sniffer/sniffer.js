@@ -5,13 +5,21 @@ const input = require('input');
 const fetch = require('node-fetch');
 const fs = require('fs');
 
-const apiId = 32882215;
-const apiHash = 'de7fb1c1ec1a0c5b782ffaed8335ace4';
-const phoneNumber = '+573205985878';
-const sessionFile = '/root/worldmodels-jobs/telegram_sniffer/session.txt';
-const targetGroupIds = ['-1002904509105', '-1002604091536', '-1003705205249'];
+const apiId = Number(process.env.TELEGRAM_API_ID || '');
+const apiHash = String(process.env.TELEGRAM_API_HASH || '');
+const phoneNumber = String(process.env.TELEGRAM_PHONE || '');
+const sessionFile = String(process.env.TELEGRAM_SESSION_FILE || '/root/worldmodels-jobs/telegram_sniffer/session.txt');
+const targetGroupIds = String(process.env.TELEGRAM_TARGET_GROUP_IDS || '-1002904509105,-1002604091536,-1003705205249')
+    .split(',')
+    .map(s => s.trim())
+    .filter(Boolean);
 
-const N8N_WEBHOOK_URL = 'http://178.156.186.149:5678/webhook/telegram-wm-2024';
+const N8N_WEBHOOK_URL = String(process.env.N8N_WEBHOOK_URL || 'http://178.156.186.149/webhook/telegram-wm-2024');
+
+if (!apiId || !apiHash || !phoneNumber) {
+    console.error('Missing TELEGRAM_API_ID / TELEGRAM_API_HASH / TELEGRAM_PHONE');
+    process.exit(1);
+}
 
 let sessionString = '';
 if (fs.existsSync(sessionFile)) {

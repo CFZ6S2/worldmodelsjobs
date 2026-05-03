@@ -1,13 +1,15 @@
 'use client';
 import React, { useState, useEffect, Suspense } from 'react';
 import { useAuth } from '@/context/AuthContext';
-import { useRouter, useSearchParams } from 'next/navigation';
+import { useRouter, useSearchParams, useParams } from 'next/navigation';
 import { Crown, Mail, Lock, ChevronRight, Zap, ShieldCheck } from 'lucide-react';
 
 function LoginContent() {
   const { login, register, user, loading: authLoading } = useAuth();
   const router = useRouter();
   const searchParams = useSearchParams();
+  const params = useParams();
+  const locale = params?.locale as string || 'es';
   
   const [isLogin, setIsLogin] = useState(true);
   const [email, setEmail] = useState('');
@@ -24,9 +26,9 @@ function LoginContent() {
 
   useEffect(() => {
     if (user && !authLoading) {
-      router.push('/feed');
+      router.push(`/${locale}/feed`);
     }
-  }, [user, authLoading, router]);
+  }, [user, authLoading, router, locale]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -92,6 +94,7 @@ function LoginContent() {
                   value={email} 
                   onChange={(e) => setEmail(e.target.value)}
                   placeholder="name@example.com"
+                  autoComplete="email"
                   required
                   style={{
                     width: '100%',
@@ -116,6 +119,7 @@ function LoginContent() {
                   value={password} 
                   onChange={(e) => setPassword(e.target.value)}
                   placeholder="••••••••"
+                  autoComplete={isLogin ? "current-password" : "new-password"}
                   required
                   style={{
                     width: '100%',

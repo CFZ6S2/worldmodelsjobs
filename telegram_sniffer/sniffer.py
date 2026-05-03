@@ -22,13 +22,18 @@ logger = logging.getLogger(__name__)
 load_dotenv(".env")
 
 # Configuration from environment
-API_ID = os.getenv('TELEGRAM_API_ID', '27866843')
-API_HASH = os.getenv('TELEGRAM_API_HASH', '7e8c5188038965bdc1739fa8c3c0dad7')
-N8N_WEBHOOK_URL = os.getenv('N8N_WEBHOOK_URL', 'http://178.156.186.149:5678/webhook/worldmodels-platinum-v5')
+API_ID_RAW = os.getenv('TELEGRAM_API_ID', '')
+API_HASH = os.getenv('TELEGRAM_API_HASH', '')
+N8N_WEBHOOK_URL = os.getenv('N8N_WEBHOOK_URL', 'http://178.156.186.149/webhook/telegram-wm-2024')
 SESSION_NAME = 'euromodel_prod_v3'
 
-if not API_ID or not API_HASH:
+if not API_ID_RAW or not API_HASH:
     logger.error("TELEGRAM_API_ID and TELEGRAM_API_HASH are required.")
+    exit(1)
+try:
+    API_ID = int(str(API_ID_RAW).strip())
+except Exception:
+    logger.error("TELEGRAM_API_ID must be a number.")
     exit(1)
 if '127.' in str(N8N_WEBHOOK_URL):
     logger.error("N8N_WEBHOOK_URL cannot use 127.0.0.0/8")

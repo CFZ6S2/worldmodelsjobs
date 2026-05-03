@@ -91,7 +91,7 @@
           "parameters": [
             {
               "name": "Authorization",
-              "value": "Bearer shJOb5wskQMTyfoF20GLqmJOclA5if5j"
+              "value": "=Bearer {{$env.JUANA_API_TOKEN}}"
             }
           ]
         },
@@ -151,7 +151,7 @@
           "parameters": [
             {
               "name": "Authorization",
-              "value": "Bearer shJOb5wskQMTyfoF20GLqmJOclA5if5j"
+              "value": "=Bearer {{$env.JUANA_API_TOKEN}}"
             }
           ]
         },
@@ -167,6 +167,47 @@
       "position": [
         -48,
         464
+      ],
+      "continueOnFail": true
+    },
+    {
+      "parameters": {
+        "jsCode": "const item = $json;\nconst category = String(item.category || '').toLowerCase();\nconst city = String(item.city || '').toLowerCase();\nconst text = String(item.text_es || '').toLowerCase();\n\nif (category === 'evento' && (city.includes('ibiza') || text.includes('ibiza'))) {\n  return { ...item, is_vip_ibiza: true };\n}\n\nreturn [];"
+      },
+      "id": "68c0be43-8f1f-49b2-8cb0-7143f3eeb5ff",
+      "name": "Filter VIP Ibiza",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 1,
+      "position": [
+        -304,
+        640
+      ]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "http://178.156.186.149:3001/api/juana/send",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Authorization",
+              "value": "=Bearer {{$env.JUANA_API_TOKEN}}"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ { \"to\": \"34662058447@s.whatsapp.net\", \"body\": \"*📢 ALERTA IBIZA*\\n📍 *Ibiza* | 💰 *\" + $json.budget + \"*\\n\\n\" + $json.text_es + \"\\n\\n👤 *Contacto:* \" + ($json.contact || $json.final_contact) + \"\\n🔌 *Fuente:* \" + $json.platform } }}",
+        "options": {}
+      },
+      "id": "7e1dfaa5-3939-4dd0-986e-c2fc827ea559",
+      "name": "Send Ibiza Alert",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.1,
+      "position": [
+        -48,
+        640
       ],
       "continueOnFail": true
     },
@@ -368,6 +409,11 @@
             "node": "Filter VIP Madrid",
             "type": "main",
             "index": 0
+          },
+          {
+            "node": "Filter VIP Ibiza",
+            "type": "main",
+            "index": 0
           }
         ]
       ]
@@ -377,6 +423,17 @@
         [
           {
             "node": "Send VIP Alert",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Filter VIP Ibiza": {
+      "main": [
+        [
+          {
+            "node": "Send Ibiza Alert",
             "type": "main",
             "index": 0
           }

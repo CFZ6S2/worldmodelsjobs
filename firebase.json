@@ -10,11 +10,39 @@
     "trailingSlash": true,
     "headers": [
       {
-        "source": "**/__next._tree.txt",
+        "source": "**/*.@(js|css|woff2|jpg|png|svg|ico|txt|json)",
         "headers": [
-          { "key": "Content-Type", "value": "text/plain" },
-          { "key": "Cache-Control", "value": "public, max-age=0, must-revalidate" }
+          {
+            "key": "Cache-Control",
+            "value": "public, max-age=31536000, immutable"
+          }
         ]
+      },
+      {
+        "source": "**/*.txt",
+        "headers": [
+          {
+            "key": "Content-Type",
+            "value": "text/plain; charset=utf-8"
+          }
+        ]
+      }
+    ],
+    "redirects": [
+      {
+        "source": "/admin",
+        "destination": "/es/admin/",
+        "type": 301
+      },
+      {
+        "source": "/feed",
+        "destination": "/es/feed/",
+        "type": 301
+      },
+      {
+        "source": "/login",
+        "destination": "/es/auth/login/",
+        "type": 301
       }
     ],
     "rewrites": [
@@ -24,6 +52,14 @@
           "id": "api",
           "region": "europe-west1"
         }
+      },
+      {
+        "source": "**/*.@(txt|json|js|css|woff2|jpg|png|svg|ico)",
+        "destination": "**/*.@(txt|json|js|css|woff2|jpg|png|svg|ico)"
+      },
+      {
+        "source": "**",
+        "destination": "/index.html"
       }
     ]
   },

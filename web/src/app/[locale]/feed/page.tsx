@@ -57,7 +57,8 @@ export default function FeedPage() {
   const locale = useLocale();
   const router = useRouter();
   const { userData } = useAuth();
-  const [ads, setAds] = useState<Ad[]>([]);
+  const [ofertas, setOfertas] = useState<Ad[]>([]);
+  const [leads, setLeads] = useState<Ad[]>([]);
   const [loading, setLoading] = useState(true);
   const [category, setCategory] = useState('all');
   const [search, setSearch] = useState('');
@@ -67,7 +68,7 @@ export default function FeedPage() {
   useEffect(() => {
     if (typeof window === 'undefined') return;
 
-    const fetchAds = (collectionName: string) => {
+    const setupListener = (collectionName: string, setter: React.Dispatch<React.SetStateAction<Ad[]>>) => {
       const q = query(
         collection(db, collectionName),
         orderBy('timestamp', 'desc'),
@@ -88,43 +89,44 @@ export default function FeedPage() {
           ad.status !== 'banned'
         );
 
-        setAds(prev => {
-          // Robust deduplication using a Map by ID
-          const adMap = new Map();
-          [...prev, ...processed].forEach(a => {
-            // Keep the one from 'ofertas' if there's a collision, as it's our primary source
-            if (!adMap.has(a.id) || a._source === 'ofertas') {
-              adMap.set(a.id, a);
-            }
-          });
-
-          return Array.from(adMap.values()).sort((a, b) => {
-            const getT = (ad: Ad) => {
-              const ts = ad.timestamp || ad.ingestedAt || ad.createdAt;
-              if (!ts) return 0;
-              if (ts.seconds) return ts.seconds * 1000;
-              return new Date(ts).getTime() || 0;
-            };
-            return getT(b) - getT(a);
-          });
-        });
-
+        setter(processed);
         setLoading(false);
       }, (err) => {
         console.error(`Firestore error in ${collectionName}:`, err);
-        setError(err.message);
-        setLoading(false);
+        // Silently retry or handle specific errors if needed
+        if (err.code === 'unavailable') {
+          console.warn('Firestore temporarily unavailable, retrying connection...');
+        }
       });
     };
 
-    const unsubOfertas = fetchAds('ofertas');
-    const unsubLeads = fetchAds('leads');
+    const unsubOfertas = setupListener('ofertas', setOfertas);
+    const unsubLeads = setupListener('leads', setLeads);
 
     return () => {
       unsubOfertas();
       unsubLeads();
     };
   }, []);
+
+  // Combine and deduplicate ads in a useMemo to avoid redundant work
+  const ads = React.useMemo(() => {
+    const adMap = new Map();
+    
+    // Process leads first, then ofertas to let ofertas overwrite (primary source)
+    leads.forEach(ad => adMap.set(ad.id, ad));
+    ofertas.forEach(ad => adMap.set(ad.id, ad));
+
+    return Array.from(adMap.values()).sort((a, b) => {
+      const getT = (ad: Ad) => {
+        const ts = ad.timestamp || ad.ingestedAt || ad.createdAt;
+        if (!ts) return 0;
+        if (ts.seconds) return ts.seconds * 1000;
+        return new Date(ts).getTime() || 0;
+      };
+      return getT(b) - getT(a);
+    });
+  }, [ofertas, leads]);
 
   const filteredAds = ads.filter(ad => {
     const { title, description, location } = getAdData(ad, locale);

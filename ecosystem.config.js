@@ -10,14 +10,7 @@ module.exports = {
       max_restarts: 10,
       restart_delay: 5000
     },
-    {
-      name: 'worldmodels-bot',
-      script: './bot_wa.js',
-      cwd: path.resolve(__dirname),
-      env: { NODE_ENV: 'production' },
-      max_restarts: 5,
-      restart_delay: 10000
-    },
+
     {
       name: 'worldmodels-web',
       script: 'npm',

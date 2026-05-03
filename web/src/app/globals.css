@@ -88,6 +88,18 @@ body {
   transform: scale(0.96);
 }
 
+.glass-header {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  width: 100%;
+  background: rgba(5, 5, 5, 0.85);
+  backdrop-filter: blur(25px) saturate(200%);
+  -webkit-backdrop-filter: blur(25px) saturate(200%);
+  z-index: 900;
+}
+
 .glass-nav {
   position: fixed;
   bottom: 0px;
