@@ -1,47 +1,286 @@
 {
-  "name": "WorldModels&Jobs - PRODUCTION (Consolidated)",
+  "id": "lmw3VFhMSJRpAVOT",
+  "name": "WorldModels Enterprise Engine v5 (Redis Ready)",
   "nodes": [
     {
       "parameters": {
         "httpMethod": "POST",
-        "path": "message",
+        "path": "telegram-wm-2024",
         "options": {}
       },
-      "id": "webhook-node",
-      "name": "Webhook",
+      "id": "a4a23784-9bab-47b8-8a65-382fde22523a",
+      "name": "Webhook Telegram",
       "type": "n8n-nodes-base.webhook",
       "typeVersion": 1,
       "position": [
-        100,
-        300
+        -3200,
+        160
       ],
-      "webhookId": "fb382e2f-49c6-4d98-9ced-fec55b56d337"
+      "webhookId": "0636d1ec-a349-4eec-8e84-c913a1949e96"
     },
     {
       "parameters": {
-        "jsCode": "const crypto = require('crypto');\nconst text = $json.body.text || \"\";\nconst hash = crypto.createHash('md5').update(text).digest('hex');\nreturn { hash, original_body: $json.body };"
+        "httpMethod": "POST",
+        "path": "1fd718d6-49f8-43dc-a881-ff7ecf7b94ef",
+        "options": {}
       },
-      "id": "code-hash-node",
-      "name": "Generar MD5 Hash",
+      "id": "04759c00-50b2-4c4d-8180-fe361eaeac42",
+      "name": "Webhook WhatsApp",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 1,
+      "position": [
+        -3200,
+        608
+      ],
+      "webhookId": "307fea47-4b3a-4883-8af5-5a4a64b48b02"
+    },
+    {
+      "parameters": {
+        "jsCode": "const item = $json;\n\n// Solo bloqueamos si es TRASH absoluto o si ya fue rechazado por Guard\nif (item.category === 'trash' || item.trash === true) return [];\n\nlet score = 0;\n// Scoring dinámico para el feed\nif (item.category === 'evento') score += 50;\nif (item.category === 'plaza') score += 20;\nif (item.city && item.city !== 'Global') score += 15;\nif ((item.text_es || '').length > 200) score += 10;\n\nreturn { ...item, final_score: score };"
+      },
+      "id": "fd6a27ba-4dcf-4390-8e6e-fcb400fc879e",
+      "name": "Quality Score",
       "type": "n8n-nodes-base.code",
       "typeVersion": 1,
       "position": [
-        300,
-        300
+        -496,
+        160
       ]
     },
     {
       "parameters": {
-        "url": "=https://worldmodels-jobs.firebaseio.com/duplicates/{{$json.hash}}.json",
-        "options": {}
+        "jsCode": "const item = $input.first().json;\nfunction escapeHTML(text) { return String(text||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }\nfunction formatContact(val) { \n  if (!val) return 'No disponible';\n  const str = String(val).trim();\n  if (/[a-zA-Z]/.test(str)) return str; \n  const s = str.replace(/[^0-9]/g, ''); \n  return s.length >= 7 ? `+${s}` : str; \n}\n\nconst displayContact = formatContact(item.contact || item.final_contact);\nconst categoryStr = (item.category === 'plaza') ? 'Plazas' : 'Eventos';\n\nconst langs = [\n  { code: 'ES', tg: '-5283488138', wa: '120363425790792660@g.us', title: item.title_es, text: item.text_es, tag: 'Remitente' }\n];\n\nconst results = [];\nfor (const l of langs) {\n  function formatOutputContact(val, mode) {\n    if (!val) return 'No disponible';\n    if (String(val).startsWith('tg_id_')) {\n      const id = val.replace('tg_id_', '');\n      return mode === 'html' ? `<a href=\"tg://user?id=${id}\">Chat Directo</a>` : `ID: ${id}`;\n    }\n    if (/[a-zA-Z]/.test(val)) {\n       const user = String(val).replace('@', '');\n       return mode === 'html' ? `<a href=\"https://t.me/${user}\">@${user}</a>` : `@${user}`;\n    }\n    const s = String(val).replace(/[^0-9]/g, '');\n    return s.length >= 7 ? `+${s}` : val;\n  }\n\n  const tgContact = formatOutputContact(item.contact || item.final_contact, 'html');\n  const waContact = formatOutputContact(item.contact || item.final_contact, 'text');\n\n  const tgText = `<b>${escapeHTML(l.title)}</b>\\n🏷️ <b>${categoryStr}</b>\\n📍 <b>${escapeHTML(item.city)}</b>\\n💰 <b>${escapeHTML(item.budget)}</b>\\n\\n${escapeHTML(l.text)}\\n\\n👤 <b>${l.tag}:</b> ${tgContact}\\n🔌 <b>Fuente:</b> ${escapeHTML(item.platform)}`;\n  const waText = `*📢 ${l.title}*\\n📍 *${item.city}* | 💰 *${item.budget}*\\n\\n${l.text}\\n\\n👤 *${l.tag}:* ${waContact}\\n🔌 *Fuente:* ${item.platform}`;\n  \n  results.push({\n    json: { ...item, route_lang: l.code, tg_chat: l.tg, tg_text: tgText, wa_chat: l.wa, wa_text: waText }\n  });\n}\nreturn results;"
       },
-      "id": "firebase-check-node",
-      "name": "Check Duplicado",
-      "type": "n8n-nodes-base.httpRequest",
+      "id": "0f5e59f0-1492-4b71-b105-9c9685c66904",
+      "name": "Message Router",
+      "type": "n8n-nodes-base.code",
       "typeVersion": 1,
       "position": [
-        500,
-        300
+        -304,
+        160
+      ]
+    },
+    {
+      "parameters": {
+        "chatId": "={{ $json.tg_chat }}",
+        "text": "={{ $json.tg_text }}",
+        "additionalFields": {
+          "parse_mode": "HTML"
+        }
+      },
+      "id": "73aa59be-4813-4a22-b064-e9b38447104a",
+      "name": "Telegram Fanout",
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1,
+      "position": [
+        0,
+        0
+      ],
+      "credentials": {
+        "telegramApi": {
+          "id": "TC7QChVOx72xT6Kf",
+          "name": "Telegram account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "http://178.156.186.149:3001/api/juana/send",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Authorization",
+              "value": "Bearer shJOb5wskQMTyfoF20GLqmJOclA5if5j"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ { \"to\": $json.wa_chat, \"body\": $json.wa_text || $json.tg_text } }}",
+        "options": {}
+      },
+      "id": "0f912d18-9029-42b2-89a0-bafdcc0612df",
+      "name": "WhatsApp Fanout",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.1,
+      "position": [
+        0,
+        160
+      ],
+      "continueOnFail": true
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "http://178.156.186.149:3001/api/leads",
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ {\n  isGroup: true,\n  platform: $json.platform,\n  contact: $json.contact || $json.final_contact,\n  remoteJid: $json.platform === 'WhatsApp' ? $json.source_chat_id : ($json.source_chat_id + '@g.us'),\n  city: $json.city,\n  location: $json.city,\n  budget: $json.budget,\n  category: $json.category,\n  text_es: $json.text_es,\n  title_es: $json.title_es,\n  text_en: $json.text_en,\n  title_en: $json.title_en,\n  text_ru: $json.text_ru,\n  title_ru: $json.title_ru,\n  text_pt: $json.text_pt,\n  title_pt: $json.title_pt\n} }}",
+        "options": {}
+      },
+      "id": "5dc94ceb-4152-46fc-a94a-1983778f4f2e",
+      "name": "Post Backend",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.1,
+      "position": [
+        0,
+        320
+      ],
+      "continueOnFail": true
+    },
+    {
+      "parameters": {
+        "jsCode": "// DYNAMIC ROUTING ENGINE v5\nconst item = $json;\nconst category = String(item.category || '').toLowerCase();\nconst city = String(item.city || '').toLowerCase();\nconst text = String(item.text_es || '').toLowerCase();\n\nif (category !== 'evento') return [];\n\nconst routingTable = {\n  \"madrid\": [\n    { to: \"34664266926@s.whatsapp.net\", label: \"MADRID\" },\n    { to: \"34603346859@s.whatsapp.net\", label: \"MADRID\" }\n  ],\n  \"ibiza\": [\n    { to: \"34662058447@s.whatsapp.net\", label: \"IBIZA\" },\n    { to: \"34642107796@s.whatsapp.net\", label: \"IBIZA\" }\n  ],\n  \"miami\": [\n    { to: \"17862812324@s.whatsapp.net\", label: \"MIAMI\" },\n    { to: \"525532110621@s.whatsapp.net\", label: \"MIAMI\" }\n  ],\n  \"paris\": [\n    { to: \"33744156314@s.whatsapp.net\", label: \"PARIS\" }\n  ]\n};\n\nlet targets = [];\nfor (const [key, dests] of Object.entries(routingTable)) {\n  if (city.includes(key) || text.includes(key)) {\n    targets = [...targets, ...dests];\n  }\n}\n\nconst uniqueTargets = Array.from(new Set(targets.map(t => t.to)))\n  .map(to => targets.find(t => t.to === to));\n\nreturn uniqueTargets.map(t => ({\n  json: { \n    ...item, \n    target_wa: t.to, \n    city_label: t.label \n  }\n}));"
+      },
+      "id": "60d0be43-8f1f-49b2-8cb0-7143f3eeb5ff",
+      "name": "Dynamic Routing Engine",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 1,
+      "position": [
+        -304,
+        480
+      ]
+    },
+    {
+      "parameters": {
+        "amount": 2,
+        "unit": "seconds"
+      },
+      "id": "0c1dbe43-8f1f-49b2-8cb0-7143f3eeb5fa",
+      "name": "Global Alert Waiter",
+      "type": "n8n-nodes-base.wait",
+      "typeVersion": 1.1,
+      "position": [
+        -112,
+        480
+      ]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "http://178.156.186.149:3001/api/juana/send",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Authorization",
+              "value": "Bearer shJOb5wskQMTyfoF20GLqmJOclA5if5j"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ { \"to\": $json.target_wa, \"body\": \"*📢 ALERTA \" + $json.city_label + \"*\\n📍 *\" + $json.city + \"* | 💰 *\" + ($json.budget || \"Negociable\") + \"*\\n\\n\" + $json.text_es + \"\\n\\n👤 *Contacto:* \" + ($json.contact || $json.final_contact) + \"\\n🔌 *Fuente:* \" + $json.platform } }}",
+        "options": {}
+      },
+      "id": "7d1dfaa5-3939-4dd0-986e-c2fc827ea559",
+      "name": "Dynamic WhatsApp Alert",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.1,
+      "position": [
+        80,
+        480
+      ],
+      "continueOnFail": true
+    },
+    {
+      "parameters": {
+        "jsCode": "const payload = $input.first().json;\nconst item = payload.body || payload;\nconst textBody = item.text || item.message?.text || '';\n\nfunction findUsername(obj) {\n  if (!obj || typeof obj !== 'object') return null;\n  const contact = obj.contact || obj.sender || obj.from || '';\n  if (typeof contact === 'string') {\n    if (contact.includes('t.me/')) return contact.split('t.me/')[1];\n    if (contact.startsWith('tg_id_')) return contact;\n    if (contact.startsWith('@')) return contact;\n    if (/^\\d{7,15}$/.test(contact)) return 'tg_id_' + contact;\n  }\n  return null;\n}\n\nlet sc = findUsername(item);\nif (sc && !sc.startsWith('tg_id_')) {\n  sc = sc.trim();\n  if (!sc.startsWith('@')) sc = '@' + sc;\n}\n\nconst sourceChatId = item.chatId || item.message?.chat?.id || '';\n\nreturn {\n  ...item,\n  platform: 'Telegram',\n  sender_contact: sc || 'No_Username',\n  final_contact: sc || 'No_Username',\n  source_chat_id: sourceChatId,\n  texto_limpio: textBody.trim(),\n  looksValuable: textBody.length > 5 && sc\n};"
+      },
+      "id": "00590255-909f-4406-9fe5-c5255b8b7678",
+      "name": "Extract Metadata TG1",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 1,
+      "position": [
+        -2848,
+        736
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "const item = $input.first().json;\nconst body = item.body || item;\nconst msgs = body.messages || [];\nconst msg = msgs[0] || {};\nconst textBody = msg.text?.body || msg.caption || body.text || body.caption || '';\n\nfunction getPhone(val) {\n  if (!val) return null;\n  let s = String(typeof val === 'object' ? (val.id || val.phone || val.number) : val);\n  const digits = s.replace(/\\D/g, '');\n  return (digits.length >= 7) ? digits : null;\n}\n\nconst sc = getPhone(msg.from) || getPhone(body.from) || \"No disponible\";\nconst sourceChatId = msg.chat_id || body.chatId || null;\n\nreturn {\n  ...item,\n  platform: \"WhatsApp\",\n  sender_contact: sc,\n  final_contact: sc,\n  source_chat_id: sourceChatId,\n  texto_limpio: textBody.trim(),\n  looksValuable: textBody.length > 5\n};"
+      },
+      "id": "89ef5f60-436c-4797-9e5b-73f88f0539c3",
+      "name": "Extract Metadata WA1",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 1,
+      "position": [
+        -2848,
+        928
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "const results = [];\nconst HARD_BLOCK = new Set([\"crypto\", \"binance\", \"casino\", \"usdt\", \"bitcoin\", \"wallet\", \"trading\", \"ganar dinero\", \"инди\", \"контент\", \"onlyfans\", \"вирт\", \"sugar baby\", \"sugar daddy\", \"anal\", \"masaje erotico\", \"ingles\", \"english\"]);\nconst BANNED_PREFIXES = [\"58\", \"57\", \"92\", \"91\", \"62\", \"63\"];\n\nfunction norm(v) { return String(v || \"\").toLowerCase().normalize(\"NFD\").replace(/[\\u0300-\\u036f]/g, \"\"); }\n\nfor (const item of $input.all()) {\n  const data = item.json;\n  const text = norm(data.texto_limpio);\n  const sender = String(data.final_contact).replace(/\\D/g, \"\");\n\n  let rejectReason = null;\n  if (BANNED_PREFIXES.some(p => sender.startsWith(p))) rejectReason = \"prefix_banned\";\n  else if (HARD_BLOCK.has(text)) rejectReason = \"hard_block_match\";\n\n  results.push({ json: { ...data, looksValuable: !rejectReason, reject_reason: rejectReason } });\n}\nreturn results;"
+      },
+      "id": "c1f1ec75-2748-433b-8181-432d4310d655",
+      "name": "Pre-Filter Unified1",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 1,
+      "position": [
+        -2544,
+        832
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "const results = [];\nconst store = $getWorkflowStaticData('global');\nif (!store.history) store.history = [];\n\nconst now = Date.now();\nconst TTL = 86400000;\nstore.history = store.history.filter(h => now - h.time < TTL);\n\nfor (const item of $input.all()) {\n  const fp = String(item.json.texto_limpio).substring(0, 100);\n  if (!store.history.some(h => h.fp === fp)) {\n    store.history.push({ time: now, fp });\n    results.push(item);\n  }\n}\nreturn results;"
+      },
+      "id": "a0808dae-1798-45b0-9c35-ddf4b856d24a",
+      "name": "Dedup Hash1",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 1,
+      "position": [
+        -2144,
+        832
+      ]
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "=### WORLDMODELS QUALITY ENGINE v5 (HIGH PRECISION) ###\nTEXT: \"{{ $json.texto_limpio }}\"\n\nCLASSIFICATION RULES:\n\n1. EVENTO (Peticiones de Clientes / Leads Inmediatos) - ALTA PRIORIDAD:\n   - PETICIONES DIRECTAS: \"Busco chica para ahora\", \"Disponible en Madrid?\", \"Outcall 1h\", \"Dinner tonight\".\n   - TIEMPO REAL: Mensajes que mencionen \"Ahora\", \"Hoy\", \"Esta noche\", \"ASAP\", o una hora específica.\n   - TOURS Y CASTINGS: \"Casting para marca\", \"Haciendo tour en Ibiza\".\n   - CONTEXTO: Un cliente o agencia busca a alguien para algo ESPECÍFICO e inmediato.\n\n2. PLAZA (Ofertas de Trabajo / Vacantes):\n   - PUESTOS FIJOS: \"Buscamos chica fija para club\", \"Plaza libre en agencia\", \"Hiring for season\".\n   - CASTINGS DE AGENCIA: \"Buscando caras nuevas\", \"Envíen disponibilidad para mayo\".\n   - ALOJAMIENTO: \"Habitacion para modelos\", \"Piso disponible para trabajar\".\n   - CONTEXTO: Una agencia u organizador ofrece trabajo estable, vacantes o alojamiento.\n\n3. TRASH (Descartar):\n   - AUTO-PROMOCIÓN INDIVIDUAL: \"Hola soy Maria, disponible en Madrid\", \"Soy modelo, contratadme\". (Solo si es la modelo quien se ofrece).\n   - CHAT CASUAL: Saludos, preguntas sin oferta, o mensajes de mantenimiento.\n   - SPAM: Crypto, links raros, anuncios no relacionados.\n\nCRITICAL: \n- If an AGENCY or CLUB asks \"Who is available?\" or \"Seeking models\", it is a PLAZA or EVENTO, NOT trash.\n- If a CLIENT asks to meet now, it is an EVENTO, NOT trash.\n\nOUTPUT JSON:\n{\n  \"city\": \"City Name\",\n  \"budget\": \"Value\",\n  \"category\": \"plaza|evento|trash\",\n  \"detected_lang\": \"ES|EN|RU|PT\",\n  \"title_es\": \"Título corto descriptivo\",\n  \"text_es\": \"Texto limpio y traducido\",\n  \"trash\": boolean\n}"
+      },
+      "id": "344fb711-f057-4631-9cb1-50ed7720ebbe",
+      "name": "IA Extract1",
+      "type": "@n8n/n8n-nodes-langchain.chainLlm",
+      "typeVersion": 1.4,
+      "position": [
+        -1952,
+        832
+      ]
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "id": "1b1aaf57-01d5-443e-b704-b859d7528786",
+      "name": "DeepSeek Chat Model1",
+      "type": "@n8n/n8n-nodes-langchain.lmChatDeepSeek",
+      "typeVersion": 1,
+      "position": [
+        -1952,
+        1024
+      ],
+      "credentials": {
+        "deepSeekApi": {
+          "id": "WoSvFWDtEwmPK8Qw",
+          "name": "DeepSeek account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "try {\n  const input = $input.first().json;\n  let rawText = input.text || input.output || input.response || input.result || \"\";\n  if (typeof rawText !== 'string') rawText = JSON.stringify(rawText);\n  let cleaned = rawText.replace(/```json/gi, '').replace(/```/gi, '').trim();\n  let start = cleaned.indexOf('{');\n  let end = cleaned.lastIndexOf('}');\n  if (start === -1 || end === -1) return [{ json: { ...input, trash: true, category: 'trash', debug_error: 'No JSON object delimiters found' } }];\n  let jsonStr = cleaned.substring(start, end + 1);\n  jsonStr = jsonStr.replace(/\\n/g, ' ').replace(/\\r/g, ' ');\n  let parsed = JSON.parse(jsonStr);\n  return [{ json: { ...input, ...parsed, trash: parsed.trash === true || parsed.category === 'trash' } }];\n} catch(e) {\n  return [{ json: { ...$input.first().json, trash: true, category: 'trash', parse_error: e.message } }];\n}"
+      },
+      "id": "5e0a23a9-a433-418e-abbc-3a03484a3b41",
+      "name": "Parse JSON1",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 1,
+      "position": [
+        -1696,
+        832
       ]
     },
     {
@@ -49,227 +288,39 @@
         "conditions": {
           "boolean": [
             {
-              "value1": "={{$json === null}}",
-              "value2": true
+              "value1": "={{ $json.category }}",
+              "value2": "trash",
+              "operator": "notEqual"
             }
           ]
         }
       },
-      "id": "if-new-node",
-      "name": "¿Es Nuevo?",
+      "id": "687598bc-5348-42f0-a594-dedc965835b6",
+      "name": "Final Guard1",
       "type": "n8n-nodes-base.if",
       "typeVersion": 1,
       "position": [
-        700,
-        300
-      ]
-    },
-    {
-      "parameters": {
-        "method": "PUT",
-        "url": "=https://worldmodels-jobs.firebaseio.com/duplicates/{{$node[\"Generar MD5 Hash\"].json.hash}}.json",
-        "sendBody": true,
-        "specifyBody": "json",
-        "jsonBody": "={ \"timestamp\": { \".sv\": \"timestamp\" } }",
-        "options": {}
-      },
-      "id": "firebase-mark-node",
-      "name": "Marcar como Visto",
-      "type": "n8n-nodes-base.httpRequest",
-      "typeVersion": 1,
-      "position": [
-        900,
-        200
-      ]
-    },
-    {
-      "parameters": {
-        "conditions": {
-          "string": [
-            {
-              "value1": "={{$node[\"Generar MD5 Hash\"].json.original_body.text.length}}",
-              "operation": "largerEqual",
-              "value2": 50
-            },
-            {
-              "value1": "={{$node[\"Generar MD5 Hash\"].json.original_body.text}}",
-              "operation": "regex",
-              "value2": ".*\\d+.*"
-            }
-          ]
-        },
-        "combineOperation": "all"
-      },
-      "id": "filter-security-node",
-      "name": "Filtro: +50 chars & Números",
-      "type": "n8n-nodes-base.if",
-      "typeVersion": 1,
-      "position": [
-        1100,
-        200
-      ]
-    },
-    {
-      "parameters": {
-        "method": "POST",
-        "url": "https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent",
-        "sendQueryParameters": true,
-        "queryParameters": {
-          "parameters": [
-            {
-              "name": "key",
-              "value": "AIzaSyA1cSd-D3Uux2DK35NXnssOmhsaDwXmB00"
-            }
-          ]
-        },
-        "sendBody": true,
-        "specifyBody": "json",
-        "jsonBody": "={ \n  \"contents\": [ \n    { \n      \"parts\": [ \n        { \n          \"text\": \"Actúa como moderador de un portal de empleo de imagen y eventos. Tu objetivo es profesionalizar mensajes de WhatsApp. Extrae: Tipo de trabajo (Imagen, Azafata/o, Acompañante de Viaje, Protocolo o Extra Evento), Ciudad/País, Pago (o 'A convenir'), Duración, Contacto. Genera un título atractivo y una descripción limpia en español. Si tiene ciudad, contacto y oferta clara de empleo, añade 'valido': true. De lo contrario 'valido': false. Mensaje: \" + $node[\"Generar MD5 Hash\"].json.original_body.text \n        } \n      ] \n    } \n  ], \n  \"generationConfig\": { \n    \"response_mime_type\": \"application/json\",\n    \"response_schema\": {\n      \"type\": \"object\",\n      \"properties\": {\n        \"categoria\": { \"type\": \"string\" },\n        \"ubicacion\": { \"type\": \"string\" },\n        \"pago\": { \"type\": \"string\" },\n        \"duracion\": { \"type\": \"string\" },\n        \"contacto\": { \"type\": \"string\" },\n        \"titulo_web\": { \"type\": \"string\" },\n        \"descripcion_limpia\": { \"type\": \"string\" },\n        \"valido\": { \"type\": \"boolean\" }\n      },\n      \"required\": [\"categoria\", \"contacto\", \"valido\"]\n    }\n  }\n}",
-        "options": {}
-      },
-      "id": "gemini-node",
-      "name": "Moderador AI (Gemini 2.0)",
-      "type": "n8n-nodes-base.httpRequest",
-      "typeVersion": 1,
-      "position": [
-        1300,
-        200
-      ]
-    },
-    {
-      "parameters": {
-        "conditions": {
-          "boolean": [
-            {
-              "value1": "={{ JSON.parse($json.candidates[0].content.parts[0].text).valido }}",
-              "value2": true
-            }
-          ]
-        }
-      },
-      "id": "filter-valid-node",
-      "name": "Filtro: Válido",
-      "type": "n8n-nodes-base.if",
-      "typeVersion": 1,
-      "position": [
-        1500,
-        200
-      ]
-    },
-    {
-      "parameters": {
-        "method": "POST",
-        "url": "https://worldmodels-jobs.firebaseio.com/posts.json",
-        "sendBody": true,
-        "bodyParameters": {
-          "parameters": [
-            {
-              "name": "data",
-              "value": "={{$node[\"Moderador AI (Gemini 2.0)\"].json.candidates[0].content.parts[0].text}}"
-            }
-          ]
-        },
-        "options": {}
-      },
-      "id": "firebase-save-node",
-      "name": "Guardar en Firebase",
-      "type": "n8n-nodes-base.httpRequest",
-      "typeVersion": 1,
-      "position": [
-        1700,
-        200
+        -1104,
+        832
       ]
     }
   ],
   "connections": {
-    "Webhook": {
-      "main": [
-        [
-          {
-            "node": "Generar MD5 Hash",
-            "type": "main",
-            "index": 0
-          }
-        ]
-      ]
-    },
-    "Generar MD5 Hash": {
-      "main": [
-        [
-          {
-            "node": "Check Duplicado",
-            "type": "main",
-            "index": 0
-          }
-        ]
-      ]
-    },
-    "Check Duplicado": {
-      "main": [
-        [
-          {
-            "node": "¿Es Nuevo?",
-            "type": "main",
-            "index": 0
-          }
-        ]
-      ]
-    },
-    "¿Es Nuevo?": {
-      "main": [
-        [
-          {
-            "node": "Marcar como Visto",
-            "type": "main",
-            "index": 0
-          }
-        ]
-      ]
-    },
-    "Marcar como Visto": {
-      "main": [
-        [
-          {
-            "node": "Filtro: +50 chars & Números",
-            "type": "main",
-            "index": 0
-          }
-        ]
-      ]
-    },
-    "Filtro: +50 chars & Números": {
-      "main": [
-        [
-          {
-            "node": "Moderador AI (Gemini 2.0)",
-            "type": "main",
-            "index": 0
-          }
-        ]
-      ]
-    },
-    "Moderador AI (Gemini 2.0)": {
-      "main": [
-        [
-          {
-            "node": "Filtro: Válido",
-            "type": "main",
-            "index": 0
-          }
-        ]
-      ]
-    },
-    "Filtro: Válido": {
-      "main": [
-        [
-          {
-            "node": "Guardar en Firebase",
-            "type": "main",
-            "index": 0
-          }
-        ]
-      ]
-    }
+    "Webhook Telegram": { "main": [[{ "node": "Extract Metadata TG1", "type": "main", "index": 0 }]] },
+    "Webhook WhatsApp": { "main": [[{ "node": "Extract Metadata WA1", "type": "main", "index": 0 }]] },
+    "Extract Metadata TG1": { "main": [[{ "node": "Pre-Filter Unified1", "type": "main", "index": 0 }]] },
+    "Extract Metadata WA1": { "main": [[{ "node": "Pre-Filter Unified1", "type": "main", "index": 0 }]] },
+    "Pre-Filter Unified1": { "main": [[{ "node": "Dedup Hash1", "type": "main", "index": 0 }]] },
+    "Dedup Hash1": { "main": [[{ "node": "IA Extract1", "type": "main", "index": 0 }]] },
+    "IA Extract1": { "main": [[{ "node": "Parse JSON1", "type": "main", "index": 0 }]] },
+    "DeepSeek Chat Model1": { "ai_languageModel": [[{ "node": "IA Extract1", "type": "ai_languageModel", "index": 0 }]] },
+    "Parse JSON1": { "main": [[{ "node": "Final Guard1", "type": "main", "index": 0 }]] },
+    "Final Guard1": { "main": [[{ "node": "Quality Score", "type": "main", "index": 0 }]] },
+    "Quality Score": { "main": [[{ "node": "Message Router", "type": "main", "index": 0 }, { "node": "Post Backend", "type": "main", "index": 0 }, { "node": "Dynamic Routing Engine", "type": "main", "index": 0 }]] },
+    "Message Router": { "main": [[{ "node": "Telegram Fanout", "type": "main", "index": 0 }, { "node": "WhatsApp Fanout", "type": "main", "index": 0 }]] },
+    "Dynamic Routing Engine": { "main": [[{ "node": "Global Alert Waiter", "type": "main", "index": 0 }]] },
+    "Global Alert Waiter": { "main": [[{ "node": "Dynamic WhatsApp Alert", "type": "main", "index": 0 }]] }
   },
-  "active": true
+  "active": true,
+  "settings": { "executionOrder": "v1" }
 }
