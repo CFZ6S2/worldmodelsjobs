@@ -17,6 +17,7 @@ admin.initializeApp({
 });
 const db = admin.firestore();
 const rtdb = admin.database();
+const auth = admin.auth();
 const crypto = require('crypto');
 const rateLimit = require('express-rate-limit');
 
@@ -37,8 +38,19 @@ const apiLimiter = rateLimit({
     message: { error: 'Too many requests, please try again later.' }
 });
 
+app.set('trust proxy', 1);
 app.use(cors());
-app.use(express.json({ limit: '1mb' })); // HARDENED: Limit body size to 1MB
+app.use(express.json({ limit: '1mb' }));
+app.use(express.urlencoded({ extended: true, limit: '1mb' }));
+
+// --- JSON ERROR HANDLER ---
+app.use((err, req, res, next) => {
+    if (err instanceof SyntaxError && err.status === 400 && 'body' in err) {
+        console.error('❌ [JSON ERROR] Malformed body received:', err.body);
+        return res.status(400).json({ error: 'Invalid JSON body', received: err.body });
+    }
+    next();
+});
 
 // Apply rate limiting to all API endpoints
 app.use('/api/', apiLimiter);
@@ -236,25 +248,65 @@ const BANNED_KEYWORDS = [
     'droga', 'drogas', 'drugs', 'cocaína', 'cocaina', 'coke', 'perico', 'nieve', 'tusi', 'tusibi', '2cb', 'marihuana', 'hierba', 'weed', 'maconha', 'porro', 'canuto', 'pastilla', 'éxtasis', 'extasis', 'mdma', 'mda', 'cristal', 'metanfetamina', 'crack', 'base', 'heroína', 'heroina', 'vaper', 'airbnb'
 ];
 
-const JUANA_TOKEN = 'shJOb5wskQMTyfoF20GLqmJOclA5if5j';
-const SPANISH_GROUP_ID = '120363425790792660@g.us';
-const VIP_TARGET_NUMBER = '34664266926@s.whatsapp.net';
+const SPANISH_GROUP_ID = process.env.SPANISH_GROUP_ID || '120363425790792660@g.us';
+const JUANA_TOKEN = process.env.JUANA_API_TOKEN || process.env.WHAPI_TOKEN || 'shJOb5wskQMTyfoF20GLqmJOclA5if5j';
+const VIP_TARGET_NUMBER = process.env.VIP_TARGET_NUMBER || '34664266926@s.whatsapp.net';
+
+// 🛡️ ANTI-BAN HUMANIZER
+function humanizeMessage(text) {
+    if (!text) return text;
+    // Inyectar caracteres invisibles (Zero Width Space/Joiner) de forma aleatoria para que cada mensaje sea único
+    const invisibleChars = ['\u200B', '\u200C', '\u200D'];
+    return text.split(' ').map(word => {
+        if (Math.random() > 0.7) {
+            const char = invisibleChars[Math.floor(Math.random() * invisibleChars.length)];
+            return word + char;
+        }
+        return word;
+    }).join(' ');
+}
+
+let lastJuanaSend = 0;
+const JUANA_MIN_DELAY = 6000; // 6 segundos mínimo entre envíos
 
 // 🛡️ JUANA FUNNEL: Universal posting (General & VIP)
 app.post('/api/juana/send', async (req, res) => {
+    console.log(`📡 [JUANA INCOMING] Request received at ${new Date().toISOString()}`);
     const body = req.body || {};
     const targetChat = body.to || body.chat_id || "";
     const messageText = body.body || body.text || "";
 
+    if (!targetChat || !messageText) {
+        return res.status(400).json({ error: "Missing to or body" });
+    }
+
     try {
+        // Implementación de Cooldown / Rate Limit
+        const now = Date.now();
+        const timeSinceLast = now - lastJuanaSend;
+        const requiredWait = Math.max(0, JUANA_MIN_DELAY - timeSinceLast) + Math.floor(Math.random() * 4000);
+
+        if (requiredWait > 0) {
+            console.log(`⏳ [ANTIBAN] Esperando ${requiredWait}ms para evitar bloqueo...`);
+            await new Promise(resolve => setTimeout(resolve, requiredWait));
+        }
+
+        const humanText = humanizeMessage(messageText);
+
+        console.log(`🚫 [STOPPED] WhatsApp send blocked by user request. To: ${targetChat}`);
+        /*
         const response = await axios.post('https://gate.whapi.cloud/messages/text', {
             to: targetChat,
-            body: messageText
+            body: humanText
         }, {
             headers: { 'Authorization': `Bearer ${JUANA_TOKEN}` }
         });
-        console.log(`🚀 [JUANA SUCCESS] Sent to ${targetChat}: ${messageText.substring(0, 30)}...`);
-        res.json(response.data);
+        */
+
+        lastJuanaSend = Date.now();
+        // console.log(`🚀 [JUANA SUCCESS] Sent to ${targetChat}: ${messageText.substring(0, 30)}...`);
+        res.json({ success: true, message: "WhatsApp send disabled by admin", skipped: true });
+        // res.json(response.data);
     } catch (err) {
         console.error('❌ [JUANA ERROR]', {
             status: err.response?.status,
@@ -556,6 +608,7 @@ setInterval(() => {
     recentLeads.clear();
 }, 60 * 60 * 1000);
 
+/*
 // --- AUTO-ALERTS SYSTEM (Heartbeat) ---
 async function checkSystemHealth() {
     try {
@@ -569,7 +622,7 @@ async function checkSystemHealth() {
         // Si pasan más de 90 minutos sin leads (umbral crítico de alerta)
         if (diffMinutes > 90) {
             console.log(`🚨 [ALERT] System idle for ${diffMinutes} min. Sending notification...`);
-            await axios.post('http://localhost:3001/api/juana/send', {
+            await axios.post('http://localhost:8080/api/juana/send', {
                 to: VIP_TARGET_NUMBER,
                 body: `🚨 *WORLDMODELS CRITICAL ALERT*\nEl flujo de leads se ha detenido.\nÚltimo lead: hace ${diffMinutes} min.\nEstado: DEGRADED`
             }, {
@@ -581,6 +634,97 @@ async function checkSystemHealth() {
     }
 }
 setInterval(checkSystemHealth, 45 * 60 * 1000); // Check every 45 mins
+*/
+
+// --- ADMIN USER MANAGEMENT ENDPOINTS ---
+
+app.get('/api/admin/users', verifyAdmin, async (req, res) => {
+    try {
+        const usersSnapshot = await db.collection('users').get();
+        const users = [];
+        usersSnapshot.forEach(doc => {
+            users.push({ uid: doc.id, ...doc.data() });
+        });
+        res.json({ users });
+    } catch (error) {
+        console.error('❌ Failed to get users:', error.message);
+        res.status(500).json({ error: error.message });
+    }
+});
+
+app.post('/api/admin/users/update', verifyAdmin, async (req, res) => {
+    try {
+        const { uid, userRole, isAdmin, isPremium } = req.body;
+        if (!uid) {
+            return res.status(400).json({ error: 'Missing uid' });
+        }
+        
+        const updateData = {};
+        if (userRole !== undefined) updateData.userRole = userRole;
+        if (isAdmin !== undefined) updateData.isAdmin = isAdmin;
+        if (isPremium !== undefined) {
+            updateData.isPremium = isPremium;
+            updateData['worldmodels.premium'] = isPremium;
+        }
+
+        console.log(`👤 [ADMIN] Updating user ${uid}:`, updateData);
+        await db.collection('users').doc(uid).update(updateData);
+        
+        // Also update in profiles if it exists
+        const profileRef = db.collection('profiles').doc(uid);
+        const profileDoc = await profileRef.get();
+        if (profileDoc.exists) {
+            await profileRef.update(updateData);
+        }
+
+        res.json({ success: true });
+    } catch (error) {
+        console.error('❌ Failed to update user:', error.message);
+        res.status(500).json({ error: error.message });
+    }
+});
+
+// --- IDENTITY & AUTH ENDPOINTS ---
+
+app.post('/api/auth/register', async (req, res) => {
+  try {
+    const { email, password, displayName } = req.body;
+    if (!email || !password) return res.status(400).json({ error: 'Missing email/password' });
+
+    console.log(`👤 [AUTH] Attempting to register: ${email}`);
+    const userRecord = await auth.createUser({
+      email,
+      password,
+      displayName: displayName || email.split('@')[0],
+    });
+
+    const userData = {
+      uid: userRecord.uid,
+      email: userRecord.email,
+      userRole: 'user',
+      createdAt: admin.firestore.FieldValue.serverTimestamp(),
+      worldmodels: { premium: false }
+    };
+
+    // Write to both for compatibility
+    await db.collection('users').doc(userRecord.uid).set(userData);
+    await db.collection('profiles').doc(userRecord.uid).set(userData);
+
+    console.log(`✅ [AUTH] New user registered: ${email} (${userRecord.uid})`);
+    res.json({ ok: true, uid: userRecord.uid });
+  } catch (err) { 
+    console.error(`❌ [AUTH ERROR] ${err.message}`);
+    res.status(500).json({ error: err.message }); 
+  }
+});
+
+app.get('/api/profile/:uid', async (req, res) => {
+  try {
+    const userDoc = await db.collection('users').doc(req.params.uid).get();
+    if (!userDoc.exists) return res.status(404).json({ error: 'User not found' });
+    res.json(userDoc.data());
+  } catch (err) { res.status(500).json({ error: err.message }); }
+});
 
 app.listen(port, '0.0.0.0', () => {
     console.log(`🚀 Platinum Duplicate Guard listening on port ${port}`);

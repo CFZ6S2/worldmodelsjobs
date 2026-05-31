@@ -176,29 +176,37 @@ export default function ProfilePage() {
         {/* Action Menu */}
         <div className="listing-card" style={{ marginBottom: 0, padding: '12px' }}>
            {[
-             { label: 'Notifications', icon: Bell, href: '/settings/notifications' },
-             { label: 'Account Settings', icon: Settings, href: '/settings' },
-           ].map((item, idx) => (
-             <button 
-               key={idx}
-               onClick={() => router.push(`/${item.href}`)}
-               style={{ 
-                 width: '100%', 
-                 padding: '16px', 
-                 display: 'flex', 
-                 alignItems: 'center', 
-                 gap: '16px', 
-                 background: 'none', 
-                 border: 'none',
-                 cursor: 'pointer',
-                 borderBottom: idx === 0 ? '1px solid rgba(255,255,255,0.03)' : 'none'
-               }}
-             >
-               <item.icon size={18} className="text-gold" />
-               <span style={{ flex: 1, fontSize: '14px', fontWeight: 700, color: '#fff', textAlign: 'left' }}>{item.label}</span>
-               <ChevronRight size={16} className="text-muted" />
-             </button>
-           ))}
+             ...(isAdmin ? [
+               { label: locale === 'es' ? 'Panel de Administración' : 'Admin Panel', icon: Crown, href: `/admin` },
+               { label: locale === 'es' ? 'Lista Negra' : 'Blacklist Manager', icon: ShieldCheck, href: `/blacklist` }
+             ] : []),
+             { label: locale === 'es' ? 'Notificaciones' : 'Notifications', icon: Bell, href: `/settings/notifications` },
+             { label: locale === 'es' ? 'Configuración de Cuenta' : 'Account Settings', icon: Settings, href: `/settings` }
+           ].map((item, idx, arr) => {
+             // For compatibility, if the href is '/settings', handle it correctly with locale
+             const destination = item.href.startsWith('/') ? `/${locale}${item.href}` : `/${locale}/${item.href}`;
+             return (
+               <button 
+                 key={idx}
+                 onClick={() => router.push(destination)}
+                 style={{ 
+                   width: '100%', 
+                   padding: '16px', 
+                   display: 'flex', 
+                   alignItems: 'center', 
+                   gap: '16px', 
+                   background: 'none', 
+                   border: 'none',
+                   cursor: 'pointer',
+                   borderBottom: idx === arr.length - 1 ? 'none' : '1px solid rgba(255,255,255,0.03)'
+                 }}
+               >
+                 <item.icon size={18} className="text-gold" />
+                 <span style={{ flex: 1, fontSize: '14px', fontWeight: 700, color: '#fff', textAlign: 'left' }}>{item.label}</span>
+                 <ChevronRight size={16} className="text-muted" />
+               </button>
+             );
+           })}
         </div>
 
         {/* Logout Button */}

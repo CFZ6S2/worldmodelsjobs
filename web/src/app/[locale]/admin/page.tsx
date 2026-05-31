@@ -2,7 +2,7 @@
 import React, { useEffect, useState } from 'react';
 import { useAuth } from '@/context/AuthContext';
 import { useRouter } from 'next/navigation';
-import { Crown, Zap, Shield, RefreshCw, Database, Activity, Terminal } from 'lucide-react';
+import { Crown, Zap, Shield, RefreshCw, Database, Activity, Terminal, Users } from 'lucide-react';
 import { useLocale } from 'next-intl';
 
 interface SystemStats {
@@ -158,6 +158,24 @@ export default function AdminPage() {
            </h3>
            
            <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
+              <button 
+                onClick={() => router.push(`/${locale}/admin/users`)}
+                className="btn-primary" 
+                style={{ 
+                  width: '100%', 
+                  display: 'flex', 
+                  alignItems: 'center', 
+                  justifyContent: 'center', 
+                  gap: '10px', 
+                  fontSize: '12px',
+                  background: 'linear-gradient(135deg, #c9a84c, #f3e5ab)',
+                  color: '#000'
+                }}
+              >
+                <Users size={16} />
+                {locale === 'es' ? 'GESTIONAR USUARIOS' : 'MANAGE USERS'}
+              </button>
+
               <button 
                 onClick={() => handleRestart('backend')}
                 disabled={!!actionLoading}
