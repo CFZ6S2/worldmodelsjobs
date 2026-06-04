@@ -5,6 +5,13 @@ service cloud.firestore {
       return request.auth != null;
     }
 
+    function isAdmin() {
+      return isSignedIn() && (
+        get(/databases/$(database)/documents/users/$(request.auth.uid)).data.isAdmin == true ||
+        get(/databases/$(database)/documents/users/$(request.auth.uid)).data.userRole == 'admin'
+      );
+    }
+
     function leadKeys() {
       return [
         'title',
@@ -35,15 +42,15 @@ service cloud.firestore {
         && data.ingestedAt is string && data.ingestedAt.size() <= 40;
     }
 
-    // Ofertas \u0026 Leads: Public read, Admin write
+    // Ofertas & Leads: Public read, Admin write
     match /ofertas/{document} {
       allow read: if true;
-      allow write: if false; 
+      allow write: if isAdmin(); 
     }
     match /leads/{document} {
-      allow read: if false;
+      allow read: if isAdmin();
       allow create: if isSignedIn() && isValidLead(request.resource.data);
-      allow update, delete: if false;
+      allow update, delete: if isAdmin();
     }
     
     // Lead Hashes: Strictly internal
@@ -51,9 +58,9 @@ service cloud.firestore {
       allow read, write: if false;
     }
     
-    // Users: Only the owner can read/write their own profile
+    // Users: Only the owner can read/write their own profile, Admin can do anything
     match /users/{userId} {
-      allow read, write: if request.auth != null && request.auth.uid == userId;
+      allow read, write: if request.auth != null && (request.auth.uid == userId || isAdmin());
     }
 
     // Default: Deny all other access

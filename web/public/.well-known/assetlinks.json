@@ -1,0 +1,10 @@
+[{
+  "relation": ["delegate_permission/common.handle_all_urls"],
+  "target": {
+    "namespace": "android_app",
+    "package_name": "app.web.worldmodels_jobs.twa",
+    "sha256_cert_fingerprints": [
+      "BA:6B:34:92:E3:C6:1D:63:3C:BA:D0:C3:1E:E5:B2:DF:8F:40:72:E2:71:FF:63:E2:15:55:F8:69:83:F9:F1:CC"
+    ]
+  }
+}]

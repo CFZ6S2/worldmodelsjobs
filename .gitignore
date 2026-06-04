@@ -39,6 +39,7 @@ sessions/
 *.session-journal
 auth_*.json
 bypass_login.sh
+worldmodelsjobs-mirror.git/
 
 # ─── DATOS SENSIBLES ─────────────────────────────────────────────────────────
 # Dumps de base de datos

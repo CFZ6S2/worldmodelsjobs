@@ -6,6 +6,7 @@ import BottomNav from '@/components/BottomNav';
 import { NextIntlClientProvider } from 'next-intl';
 import { getMessages } from 'next-intl/server';
 import { notFound } from 'next/navigation';
+import ServiceWorkerRegister from '@/components/ServiceWorkerRegister';
 
 const inter = Inter({ 
   subsets: ['latin'],
@@ -16,6 +17,7 @@ const inter = Inter({
 export const metadata: Metadata = {
   title: 'WorldModels&Jobs | Premium VIP Intelligence',
   description: 'AI-filtered real-time intelligence feed for real estate and premium listings.',
+  manifest: '/manifest.webmanifest',
 };
 
 export const viewport: Viewport = {
@@ -23,6 +25,7 @@ export const viewport: Viewport = {
   initialScale: 1,
   maximumScale: 1,
   userScalable: false,
+  themeColor: '#000000',
 };
 
 const locales = ['en', 'es', 'pt', 'ru'];
@@ -46,7 +49,8 @@ export default async function RootLayout({
     notFound();
   }
 
-  const messages = await getMessages();
+  // Pass locale explicitly to ensure correct messages are loaded in SSR
+  const messages = await getMessages({ locale });
 
   return (
     <html lang={locale} className="dark" suppressHydrationWarning>
@@ -56,6 +60,8 @@ export default async function RootLayout({
             <AuthProvider>
               {children}
               <BottomNav />
+              <div style={{ position: 'fixed', bottom: '80px', right: '20px', background: '#ff0000', color: '#ffffff', padding: '4px 8px', borderRadius: '4px', fontSize: '10px', zIndex: 10000, fontWeight: 'bold', boxShadow: '0 2px 10px rgba(0,0,0,0.5)' }}>V1.0.8 ACTIVE</div>
+              <ServiceWorkerRegister />
             </AuthProvider>
           </NextIntlClientProvider>
         </div>

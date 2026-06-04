@@ -1,7 +1,7 @@
 const axios = require('axios');
 const fs = require('fs');
 
-const API_KEY = 'shJOb5wskQMTyfoF20GLqmJOclA5if5j'; 
+const API_KEY = process.env.JUANA_API_TOKEN || process.env.WHAPI_TOKEN || '';
 const LINK = 'https://chat.whatsapp.com/Lhw1UixH2f68FNBR6VbrUV';
 const CONTACTS_FILE = 'TOTAL_CONTACTOS_RUSOS.txt';
 const PROGRESS_FILE = 'PROGRESO_RECLUTAMIENTO.json';
@@ -27,6 +27,10 @@ function saveProgress(sentList) {
 }
 
 async function reclutar() {
+    if (!API_KEY) {
+        console.error('❌ Missing API key');
+        return;
+    }
     if (!fs.existsSync(CONTACTS_FILE)) {
         console.error('❌ No encuentro el archivo de contactos.');
         return;

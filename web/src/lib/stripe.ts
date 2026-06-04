@@ -8,10 +8,7 @@ export const getStripe = () => {
     if (!key) {
       throw new Error('STRIPE_SECRET_KEY is not defined');
     }
-    stripeInstance = new Stripe(key, {
-      // @ts-expect-error - dynamic versioning
-      apiVersion: '2024-12-18',
-    });
+    stripeInstance = new Stripe(key);
   }
   return stripeInstance;
 };

@@ -174,6 +174,14 @@ function extractContent(msg) {
   } else if (m.audioMessage) {
     type = 'audio'
     mime_type = m.audioMessage.mimetype || null
+  } else if (m.groupInviteMessage) {
+    type = 'group_invite'
+    const inviteCode = m.groupInviteMessage.inviteCode || ''
+    const groupName = m.groupInviteMessage.groupName || ''
+    const groupJid = m.groupInviteMessage.groupJid || ''
+    const inviteExpiration = m.groupInviteMessage.inviteExpiration || ''
+    const inviteLink = inviteCode ? `https://chat.whatsapp.com/${inviteCode}` : ''
+    text = inviteLink ? `🔗 Grupo: ${groupName}\n${inviteLink}` : `🔗 Grupo: ${groupName} (JID: ${groupJid})`
   } else if (m.stickerMessage) {
     type = 'sticker'
   } else if (m.contactMessage) {
@@ -278,17 +286,21 @@ async function handleUpsert(msg, sock) {
     return { ok: false, filtered: true, reason: 'banned_number' }
   }
 
-  const hasDigits = /\d/.test(txt)
-  const lenOk = txt.length >= 50
-  const banned = ['cambio', 'gratis', 'paja']
+  // Policy relaxed: Allow all messages to reach the processing stage
+  if (!txt) {
+    logger.debug({ jid: sender.jid }, 'Message ignored: empty text')
+    return { ok: false, filtered: true, reason: 'no_text' }
+  }
+  
+  const banned = ['paja', 'sexo gratis']
   const containsBanned = banned.some(w => txt.toLowerCase().includes(w))
   
-  if (!txt || !lenOk || !hasDigits || containsBanned) {
-    const reason = !txt ? 'no_text' : !lenOk ? 'too_short' : !hasDigits ? 'no_digits' : 'banned_word'
-    logger.debug({ jid: sender.jid, reason }, 'Message filtered by policy')
-    return { ok: false, filtered: true, reason }
+  if (containsBanned) {
+    logger.debug({ jid: sender.jid }, 'Message filtered: banned word')
+    return { ok: false, filtered: true, reason: 'banned_word' }
   }
-
+  
+  // Payload preparation and sync to n8n
   const payload = {
     event: 'message.received',
     source: 'whatsapp',
@@ -301,16 +313,19 @@ async function handleUpsert(msg, sock) {
       push_name: sender.push_name,
       is_group: sender.is_group
     },
+    source_chat_id: sender.jid,
     message: {
       message_id: msg.key && msg.key.id ? msg.key.id : '',
       type: content.type,
-      text: content.text || null,
+      text: content.text || '',
+      caption: content.text || '',
+      from: sender.wa_id,
       media: {
         url: null,
         mime_type: content.mime_type || null
       }
     }
-  }
+  };
 
   if (['image', 'video', 'document', 'audio', 'sticker'].includes(content.type)) {
     try {

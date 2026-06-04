@@ -1,4 +1,8 @@
 {
+  "firestore": {
+    "rules": "firestore.rules",
+    "indexes": "firestore.indexes.json"
+  },
   "hosting": {
     "public": "web/out",
     "ignore": [
@@ -46,13 +50,6 @@
       }
     ],
     "rewrites": [
-      {
-        "source": "/api/**",
-        "function": {
-          "id": "api",
-          "region": "europe-west1"
-        }
-      },
       {
         "source": "**/*.@(txt|json|js|css|woff2|jpg|png|svg|ico)",
         "destination": "**/*.@(txt|json|js|css|woff2|jpg|png|svg|ico)"

@@ -2,13 +2,14 @@ const axios = require('axios');
 const fs = require('fs');
 
 // CONFIGURACIÓN
-const API_KEY = 'shJOb5wskQMTyfoF20GLqmJOclA5if5j'; // Token de Juana/Salida
+const API_KEY = process.env.JUANA_API_TOKEN || process.env.WHAPI_TOKEN || '';
 const GRUPO_RU = '120363408298375271@g.us'; // ID de tu grupo de Rusia
 
 async function extraerContactosRusos() {
     console.log(`🇷🇺 Iniciando extracción del grupo: ${GRUPO_RU}...`);
     
     try {
+        if (!API_KEY) throw new Error('Missing API key');
         const response = await axios.get(`https://gate.whapi.cloud/groups/${GRUPO_RU}`, {
             headers: {
                 'Authorization': `Bearer ${API_KEY}`

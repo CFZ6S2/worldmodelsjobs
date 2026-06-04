@@ -1,12 +1,48 @@
 'use client';
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
-import { Bell, Zap, MapPin, Search, ChevronLeft, ShieldCheck, Speaker } from 'lucide-react';
+import { Bell, Zap, MapPin, Search, ChevronLeft, ShieldCheck, Speaker, Loader2 } from 'lucide-react';
+import { useAuth } from '@/context/AuthContext';
 
 export default function NotificationsPage() {
   const router = useRouter();
+  const { userData, updateProfileData, loading: authLoading } = useAuth();
+  
   const [enabled, setEnabled] = useState(true);
   const [keywords, setKeywords] = useState('Moscow, Paris, Premium, VIP');
+  const [saving, setSaving] = useState(false);
+
+  // Sync state with Firestore data on mount
+  useEffect(() => {
+    if (userData) {
+      setEnabled(userData.alertsEnabled !== false); // default to true
+      setKeywords(userData.alertKeywords || 'Moscow, Paris, Premium, VIP');
+    }
+  }, [userData]);
+
+  const handleSave = async () => {
+    setSaving(true);
+    try {
+      await updateProfileData({
+        alertsEnabled: enabled,
+        alertKeywords: keywords
+      });
+      router.back();
+    } catch (err) {
+      console.error('Failed to save notification settings:', err);
+      alert('Failed to save settings');
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  if (authLoading) {
+    return (
+      <div style={{ background: '#000', minHeight: '100vh', display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
+        <Loader2 className="animate-spin text-gold" size={32} />
+      </div>
+    );
+  }
 
   return (
     <div className="animate-fade" style={{ background: '#000', minHeight: '100vh', padding: '0 20px 100px 20px' }}>
@@ -123,10 +159,12 @@ export default function NotificationsPage() {
 
         <button 
            className="btn-primary"
-           style={{ padding: '18px', width: '100%', marginTop: '10px' }}
-           onClick={() => router.back()}
+           style={{ padding: '18px', width: '100%', marginTop: '10px', display: 'flex', justifyContent: 'center', alignItems: 'center', gap: '8px' }}
+           onClick={handleSave}
+           disabled={saving}
         >
-           Save Radar Configuration
+           {saving && <Loader2 className="animate-spin" size={18} />}
+           {saving ? 'Saving...' : 'Save Radar Configuration'}
         </button>
 
         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px', opacity: 0.2, marginTop: '20px' }}>

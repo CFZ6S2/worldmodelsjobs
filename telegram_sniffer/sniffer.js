@@ -1,3 +1,4 @@
+require('dotenv').config({ path: '/root/worldmodels-jobs/.env' });
 const { TelegramClient } = require('telegram');
 const { StringSession } = require('telegram/sessions');
 const { NewMessage } = require('telegram/events');
@@ -9,7 +10,7 @@ const apiId = Number(process.env.TELEGRAM_API_ID || '');
 const apiHash = String(process.env.TELEGRAM_API_HASH || '');
 const phoneNumber = String(process.env.TELEGRAM_PHONE || '');
 const sessionFile = String(process.env.TELEGRAM_SESSION_FILE || '/root/worldmodels-jobs/telegram_sniffer/session.txt');
-const targetGroupIds = String(process.env.TELEGRAM_TARGET_GROUP_IDS || '-1002904509105,-1002604091536,-1003705205249')
+const targetGroupIds = String(process.env.TELEGRAM_TARGET_CHAT_IDS || '-1002904509105,-1002604091536,-1003705205249')
     .split(',')
     .map(s => s.trim())
     .filter(Boolean);

@@ -4,7 +4,8 @@ import React, { createContext, useContext, useEffect, useState } from 'react';
 import {
   onAuthStateChanged,
   signInWithEmailAndPassword,
-  createUserWithEmailAndPassword,
+  signInWithPopup,
+  GoogleAuthProvider,
   signOut,
   User,
 } from 'firebase/auth';
@@ -33,6 +34,8 @@ interface UserData {
   membership?: { type: string; expiresAt?: any };
   isAdmin?: boolean;
   openedContacts?: string[];
+  alertsEnabled?: boolean;
+  alertKeywords?: string;
 }
 
 interface AuthContextType {
@@ -43,7 +46,9 @@ interface AuthContextType {
   isAdmin: boolean;
   isVip: boolean;
   isConcierge: boolean;
+  isTrialExpired: boolean;
   login: (email: string, password: string) => Promise<void>;
+  loginWithGoogle: () => Promise<void>;
   register: (email: string, password: string) => Promise<void>;
   logout: () => Promise<void>;
   updateProfileData: (data: Partial<UserData>) => Promise<void>;
@@ -83,8 +88,16 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
               isAdmin: rawData.userRole === 'admin' || rawData.isAdmin === true,
             });
           } else {
-            console.warn('User doc not found in users or profiles.');
-            setUserData(null);
+            console.warn('User doc not found in users or profiles. Creating default profile...');
+            const defaultData = {
+              uid: firebaseUser.uid,
+              email: firebaseUser.email,
+              userRole: 'user',
+              createdAt: serverTimestamp(),
+              worldmodels: { premium: false }
+            };
+            await setDoc(doc(db, 'users', firebaseUser.uid), defaultData);
+            setUserData({ ...defaultData, isAdmin: false } as UserData);
           }
         } catch (err) {
           console.error('Error fetching user data:', err);
@@ -100,6 +113,11 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
   const login = async (email: string, password: string) => {
     await signInWithEmailAndPassword(auth, email, password);
+  };
+
+  const loginWithGoogle = async () => {
+    const provider = new GoogleAuthProvider();
+    await signInWithPopup(auth, provider);
   };
 
   const register = async (email: string, password: string) => {
@@ -129,8 +147,27 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const isVip = isPremium || isAdmin;
   const isConcierge = userData?.userRole === 'concierge';
 
+  // 7-Day Trial Logic
+  const creationTime = user?.metadata.creationTime ? new Date(user.metadata.creationTime).getTime() : Date.now();
+  const sevenDaysInMs = 7 * 24 * 60 * 60 * 1000;
+  const isTrialExpired = !isPremium && !isAdmin && (Date.now() - creationTime > sevenDaysInMs);
+
   return (
-    <AuthContext.Provider value={{ user, userData, loading, isPremium, isAdmin, isVip, isConcierge, login, register, logout, updateProfileData }}>
+    <AuthContext.Provider value={{ 
+      user, 
+      userData, 
+      loading, 
+      isPremium, 
+      isAdmin, 
+      isVip, 
+      isConcierge, 
+      isTrialExpired,
+      login, 
+      loginWithGoogle,
+      register, 
+      logout, 
+      updateProfileData 
+    }}>
       {children}
     </AuthContext.Provider>
   );

@@ -1,37 +1,82 @@
 'use client';
-import React from 'react';
-import { useRouter } from 'next/navigation';
-import { Check, Crown, Zap, Shield, ChevronRight, Star } from 'lucide-react';
+import React, { useState } from 'react';
+import { useRouter, useParams } from 'next/navigation';
+import { Check, Crown, Zap, Shield, ChevronRight, Star, Loader2 } from 'lucide-react';
+import { useAuth } from '@/context/AuthContext';
 
 const PLANS = [
   {
+    id: 'explorer',
     name: 'Explorer',
     price: '0',
-    description: 'Basic access to the intelligence feed with standard latency.',
-    features: ['Standard Feed Access', 'Basic Search', 'Community Alerts'],
+    description: '7-Day Full Intelligence Trial. Experience the power of WorldModels before upgrading.',
+    features: ['7 Days Full Access', 'Standard Feed Access', 'Community Alerts', 'Mandatory VIP Upgrade After Trial'],
     accent: 'rgba(255,255,255,0.4)',
-    popular: false
+    popular: false,
+    priceId: process.env.NEXT_PUBLIC_STRIPE_PRICE_EXPLORER || ''
   },
   {
+    id: 'vip',
     name: 'VIP Intelligence',
     price: '49',
     description: 'Real-time ingestion and direct access to filtered leads.',
     features: ['Zero Latency Feed', 'Advanced Filters', 'Verified Source Data', 'Push Notifications', 'Support Priority'],
     accent: '#c9a84c',
-    popular: true
+    popular: true,
+    priceId: process.env.NEXT_PUBLIC_STRIPE_PRICE_VIP || ''
   },
   {
+    id: 'elite',
     name: 'Crown Elite',
     price: '199',
     description: 'The ultimate tier for high-frequency operators and institutions.',
     features: ['All VIP Features', 'Private Concierge', 'Custom API Access', 'Unrestricted Exports', 'Identity Cloaking'],
     accent: '#f3e5ab',
-    popular: false
+    popular: false,
+    priceId: process.env.NEXT_PUBLIC_STRIPE_PRICE_ELITE || ''
   }
 ];
 
 export default function PricingPage() {
   const router = useRouter();
+  const params = useParams();
+  const locale = params?.locale || 'es';
+  const { user } = useAuth();
+  const [loadingPlan, setLoadingPlan] = useState<string | null>(null);
+
+  const handleSubscribe = async (plan: typeof PLANS[0]) => {
+    if (!user) { 
+      router.push(`/${locale}/auth/login`); 
+      return; 
+    }
+    
+    // For free explorer plan
+    if (plan.price === '0') {
+      router.push(`/${locale}/feed`);
+      return;
+    }
+
+    setLoadingPlan(plan.id);
+    try {
+      const res = await fetch('/api/checkout', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ priceId: plan.priceId, userId: user.uid, email: user.email }),
+      });
+      const data = await res.json();
+      if (data.url) {
+        window.location.href = data.url;
+      } else {
+        console.error('No checkout URL returned:', data);
+        alert('Payment setup is incomplete. Please contact support.');
+      }
+    } catch (e) {
+      console.error('Checkout failed:', e);
+      alert('Checkout failed. Please try again later.');
+    } finally {
+      setLoadingPlan(null);
+    }
+  };
 
   return (
     <div className="animate-fade" style={{ background: '#000', minHeight: '100vh', padding: '0 20px 100px 20px' }}>
@@ -46,7 +91,7 @@ export default function PricingPage() {
       <div style={{ display: 'flex', flexDirection: 'column', gap: '24px', maxWidth: '500px', margin: '0 auto' }}>
         {PLANS.map((plan, idx) => (
           <div 
-            key={idx} 
+            key={plan.id} 
             className="listing-card" 
             style={{ 
               position: 'relative', 
@@ -95,6 +140,8 @@ export default function PricingPage() {
             </div>
 
             <button 
+              onClick={() => handleSubscribe(plan)}
+              disabled={loadingPlan !== null}
               className={plan.popular ? 'btn-primary' : ''}
               style={{ 
                 width: '100%', 
@@ -107,14 +154,19 @@ export default function PricingPage() {
                 fontWeight: 900,
                 textTransform: 'uppercase',
                 letterSpacing: '0.1em',
-                cursor: 'pointer',
+                cursor: loadingPlan !== null ? 'not-allowed' : 'pointer',
                 display: 'flex',
                 alignItems: 'center',
                 justifyContent: 'center',
-                gap: '8px'
+                gap: '8px',
+                opacity: loadingPlan === plan.id ? 0.7 : 1
               }}
             >
-              Get Started <ChevronRight size={16} />
+              {loadingPlan === plan.id ? (
+                <><Loader2 className="animate-spin" size={16} /> Processing...</>
+              ) : (
+                <>Get Started <ChevronRight size={16} /></>
+              )}
             </button>
           </div>
         ))}

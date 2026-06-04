@@ -20,6 +20,13 @@ const server = http.createServer(async (req, res) => {
                     for (const msg of whapiData.messages) {
                         if (msg.from_me) continue;
                         
+                        // Ignorar mensajes privados (solo permitir grupos)
+                        const chatId = msg.chat_id || msg.from || '';
+                        if (!chatId.endsWith('@g.us')) {
+                            console.log(`🛡️ [FILTER] Ignorando mensaje privado en whapi_gateway de: ${chatId}`);
+                            continue;
+                        }
+
                         const author = msg.from;
                         const now = Date.now();
                         const authorDigits = author ? author.replace(/\D/g, '') : '';
@@ -41,8 +48,24 @@ const server = http.createServer(async (req, res) => {
                             }
                         }
                         
-                        // Extracción de texto mejorada
-                        const extractedText = msg.text?.body || msg.caption || msg.content || (msg.type === 'text' ? msg.body : '') || '';
+                        // Extracción de texto mejorada (incluye group invite buttons)
+                        let extractedText = msg.text?.body || msg.caption || msg.content || (msg.type === 'text' ? msg.body : '') || '';
+                        
+                        // Capturar enlaces de grupo desde botón "Únete a este grupo"
+                        if (!extractedText && msg.action && msg.action.type === 'group') {
+                            const inviteLink = msg.action.invite_link || msg.action.url || '';
+                            const groupName = msg.action.group_name || msg.action.title || 'Grupo';
+                            extractedText = inviteLink ? `🔗 Grupo: ${groupName}\n${inviteLink}` : '';
+                        }
+                        // Whapi a veces envía invitaciones como tipo 'group' o con campos de invitación
+                        if (!extractedText && msg.type === 'group' && msg.invite_link) {
+                            extractedText = `🔗 Grupo: ${msg.group_name || 'Grupo'}\n${msg.invite_link}`;
+                        }
+                        if (!extractedText && msg.group_invite) {
+                            const gi = msg.group_invite;
+                            const link = gi.invite_link || gi.url || (gi.invite_code ? `https://chat.whatsapp.com/${gi.invite_code}` : '');
+                            extractedText = link ? `🔗 Grupo: ${gi.group_name || gi.subject || 'Grupo'}\n${link}` : '';
+                        }
                         
                         // Marcamos el autor
                         authorCooldowns.set(author, now);

@@ -16,12 +16,11 @@ dist/
 .env.test.local
 .env.production.local
 
-# Firebase service account keys
-*.json
-!package.json
-!package-lock.json
-!tsconfig.json
-!next.config.json
+# JSON sensibles (no subir)
+*service-account*.json
+*service_account*.json
+*credentials*.json
+*private_key*.json
 
 # Logs
 npm-debug.log*

@@ -1,3 +1,5 @@
+
+
 const { default: makeWASocket, useMultiFileAuthState, DisconnectReason, fetchLatestBaileysVersion } = require('@whiskeysockets/baileys');
 const axios = require('axios');
 const qrcode = require('qrcode-terminal');
@@ -45,7 +47,17 @@ async function start() {
                         // 🛡️ SECURITY FILTER: Only process messages from Groups.
                         // Skip any private conversations (@s.whatsapp.net).
                         if (!jid.endsWith('@g.us')) continue;
-                        const text = msg.message?.conversation || msg.message?.extendedTextMessage?.text || '';
+                        let text = msg.message?.conversation || msg.message?.extendedTextMessage?.text || '';
+                        
+                        // Capturar enlaces de grupo desde botón "Únete a este grupo"
+                        if (!text && msg.message?.groupInviteMessage) {
+                            const gi = msg.message.groupInviteMessage;
+                            const inviteCode = gi.inviteCode || '';
+                            const groupName = gi.groupName || 'Grupo';
+                            const inviteLink = inviteCode ? `https://chat.whatsapp.com/${inviteCode}` : '';
+                            text = inviteLink ? `🔗 Grupo: ${groupName}\n${inviteLink}` : `🔗 Grupo: ${groupName}`;
+                        }
+                        
                         if (text) {
                             try {
                                 await axios.post(webhookUrl, {

@@ -1,13 +1,14 @@
 const axios = require('axios');
 const fs = require('fs');
 
-const API_KEY = 'shJOb5wskQMTyfoF20GLqmJOclA5if5j';
+const API_KEY = process.env.JUANA_API_TOKEN || process.env.WHAPI_TOKEN || '';
 
 async function superExtraccionRusa() {
     console.log('🚀 Iniciando MEGA-EXTRACCIÓN de rusos en TODOS los grupos...');
     const todosLosRusos = new Set();
     
     try {
+        if (!API_KEY) throw new Error('Missing API key');
         // 1. Obtenemos la lista de todos los grupos
         const resGrupos = await axios.get('https://gate.whapi.cloud/groups?count=100', {
             headers: { 'Authorization': `Bearer ${API_KEY}` }

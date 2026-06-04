@@ -11,19 +11,21 @@ const LANGUAGES = [
   { code: 'ru', label: 'Русский', flag: '🇷🇺' },
 ];
 
-const LOCALE_PREFIXES = ['es', 'pt', 'ru'];
+const LOCALE_PREFIXES = ['en', 'pt', 'ru'];
 
 function getCurrentLocale(pathname: string): string {
   const segments = pathname.split('/').filter(Boolean);
   if (LOCALE_PREFIXES.includes(segments[0])) return segments[0];
-  return 'en';
+  return 'es';
 }
 
 function buildLocalePath(pathname: string, newLocale: string): string {
   const segments = pathname.split('/').filter(Boolean);
-  if (LOCALE_PREFIXES.includes(segments[0])) segments.shift();
+  // Remove existing locale prefix if present
+  if (['es', 'en', 'pt', 'ru'].includes(segments[0])) segments.shift();
+  
   const rest = segments.join('/');
-  if (newLocale === 'en') return `/${rest}`;
+  // We always want the prefix since we have a root redirect to /es
   return `/${newLocale}${rest ? `/${rest}` : ''}`;
 }
 
@@ -36,7 +38,14 @@ export default function LanguageSwitcher() {
   const current = LANGUAGES.find((l) => l.code === locale) ?? LANGUAGES[0];
 
   const handleChange = (newLocale: string) => {
-    router.push(buildLocalePath(pathname, newLocale));
+    try {
+      localStorage.setItem('wm_locale', newLocale);
+    } catch {}
+
+    const hash = typeof window !== 'undefined' ? window.location.hash : '';
+    const search = typeof window !== 'undefined' ? window.location.search : '';
+    const nextUrl = `${buildLocalePath(pathname, newLocale)}${search || ''}${hash || ''}`;
+    router.push(nextUrl);
     setOpen(false);
   };
 

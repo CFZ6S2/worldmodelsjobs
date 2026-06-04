@@ -92,7 +92,7 @@
           "parameters": [
             {
               "name": "Authorization",
-              "value": "Bearer shJOb5wskQMTyfoF20GLqmJOclA5if5j"
+              "value": "=Bearer {{$env.JUANA_API_TOKEN}}"
             }
           ]
         },
@@ -152,13 +152,13 @@
           "parameters": [
             {
               "name": "Authorization",
-              "value": "Bearer shJOb5wskQMTyfoF20GLqmJOclA5if5j"
+              "value": "=Bearer {{$env.JUANA_API_TOKEN}}"
             }
           ]
         },
         "sendBody": true,
         "specifyBody": "json",
-        "jsonBody": "={{ { \"to\": \"34664266926@s.whatsapp.net\", \"body\": \"*📢 ALERTA VIP EVENTO MADRID*\\n📍 *Madrid* | 💰 *\" + $json.budget + \"*\\n\\n\" + $json.text_es + \"\\n\\n👤 *Contacto:* \" + ($json.contact || $json.final_contact) + \"\\n🔌 *Fuente:* \" + $json.platform } }}",
+        "jsonBody": "={{ { \"to\": $env.VIP_TARGET_NUMBER, \"body\": \"*📢 ALERTA VIP EVENTO MADRID*\\n📍 *Madrid* | 💰 *\" + $json.budget + \"*\\n\\n\" + $json.text_es + \"\\n\\n👤 *Contacto:* \" + ($json.contact || $json.final_contact) + \"\\n🔌 *Fuente:* \" + $json.platform } }}",
         "options": {}
       },
       "id": "fa064351-1bad-46fa-8c07-ebbb1c4f64ed",
@@ -350,13 +350,13 @@
           "parameters": [
             {
               "name": "Authorization",
-              "value": "Bearer shJOb5wskQMTyfoF20GLqmJOclA5if5j"
+              "value": "=Bearer {{$env.JUANA_API_TOKEN}}"
             }
           ]
         },
         "sendBody": true,
         "specifyBody": "json",
-        "jsonBody": "={{ { \"to\": \"33744156314@s.whatsapp.net\", \"body\": \"*📣 ALERTA PARIS EVENTO*\\n📍 *Paris* | 💰 *\" + $json.budget + \"*\\n\\n\" + $json.text_es + \"\\n\\n👤 *Contacto:* \" + ($json.contact || $json.final_contact) + \"\\n🔌 *Fuente:* \" + $json.platform } }}",
+        "jsonBody": "={{ { \"to\": $env.VIP_TARGET_NUMBER_PARIS, \"body\": \"*📣 ALERTA PARIS EVENTO*\\n📍 *Paris* | 💰 *\" + $json.budget + \"*\\n\\n\" + $json.text_es + \"\\n\\n👤 *Contacto:* \" + ($json.contact || $json.final_contact) + \"\\n🔌 *Fuente:* \" + $json.platform } }}",
         "options": {}
       },
       "id": "f1e2d3c4-b5a6-4f7e-8d9c-0b1a2c3d4e5f",

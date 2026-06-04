@@ -1,15 +1,76 @@
 'use client';
 import React, { useState, useEffect, Suspense } from 'react';
 import { useAuth } from '@/context/AuthContext';
-import { useRouter, useSearchParams, useParams } from 'next/navigation';
+import { useRouter, useSearchParams } from 'next/navigation';
 import { Crown, Mail, Lock, ChevronRight, Zap, ShieldCheck } from 'lucide-react';
+import { useTranslations, useLocale } from 'next-intl';
+
+const getLocalizedText = (key: string, locale: string) => {
+  const dicts: Record<string, Record<string, string>> = {
+    gateway: {
+      es: 'Portal de Inteligencia',
+      en: 'Intelligence Gateway',
+      pt: 'Portal de Inteligência',
+      ru: 'Портал разведки'
+    },
+    or: {
+      es: 'O CONTINUAR CON',
+      en: 'OR CONTINUE WITH',
+      pt: 'OU CONTINUAR COM',
+      ru: 'ИЛИ ПРОДОЛЖИТЬ С'
+    },
+    google: {
+      es: 'Continuar con Google',
+      en: 'Continue with Google',
+      pt: 'Continuar com o Google',
+      ru: 'Войти через Google'
+    },
+    initiate: {
+      es: 'Iniciar Acceso',
+      en: 'Initiate Access',
+      pt: 'Iniciar Acesso',
+      ru: 'Войти'
+    },
+    create: {
+      es: 'Crear Perfil',
+      en: 'Create Profile',
+      pt: 'Criar Perfil',
+      ru: 'Создать профиль'
+    },
+    noAccount: {
+      es: '¿Aún no tienes perfil? ',
+      en: "Don't have a profile yet? ",
+      pt: 'Ainda não tem um perfil? ',
+      ru: 'Еще нет профиля? '
+    },
+    haveAccount: {
+      es: '¿Ya tienes perfil? ',
+      en: 'Already have a profile? ',
+      pt: 'Já tem um perfil? ',
+      ru: 'Уже есть профиль? '
+    },
+    registerNow: {
+      es: 'Regístrate Ahora',
+      en: 'Register Now',
+      pt: 'Cadastre-se Agora',
+      ru: 'Зарегистрироваться'
+    },
+    signInNow: {
+      es: 'Iniciar Sesión',
+      en: 'Sign In',
+      pt: 'Entrar',
+      ru: 'Войти'
+    }
+  };
+  return dicts[key]?.[locale] || dicts[key]?.['es'];
+};
 
 function LoginContent() {
-  const { login, register, user, loading: authLoading } = useAuth();
+  const { login, register, loginWithGoogle, user, loading: authLoading } = useAuth();
   const router = useRouter();
   const searchParams = useSearchParams();
-  const params = useParams();
-  const locale = params?.locale as string || 'es';
+  const t = useTranslations('auth');
+  const locale = useLocale();
   
   const [isLogin, setIsLogin] = useState(true);
   const [email, setEmail] = useState('');
@@ -48,6 +109,18 @@ function LoginContent() {
     }
   };
 
+  const handleGoogleLogin = async () => {
+    setError(null);
+    setLoading(true);
+    try {
+      await loginWithGoogle();
+    } catch (err: any) {
+      console.error(err);
+      setError(err.message || 'Google Login failed');
+      setLoading(false);
+    }
+  };
+
   if (authLoading) return null;
 
   return (
@@ -76,7 +149,9 @@ function LoginContent() {
             <Crown size={32} color="#000" />
           </div>
           <h1 style={{ fontSize: '24px', fontWeight: 900, color: '#fff', letterSpacing: '0.05em', margin: '0 0 8px 0' }}>WORLDMODELS</h1>
-          <p style={{ color: 'rgba(255,255,255,0.4)', fontSize: '12px', fontWeight: 800, textTransform: 'uppercase', letterSpacing: '0.2em' }}>Intelligence Gateway</p>
+          <p style={{ color: 'rgba(255,255,255,0.4)', fontSize: '12px', fontWeight: 800, textTransform: 'uppercase', letterSpacing: '0.2em' }}>
+            {getLocalizedText('gateway', locale)}
+          </p>
         </div>
 
         <div className="listing-card" style={{ padding: '32px', position: 'relative', overflow: 'hidden' }}>
@@ -86,7 +161,9 @@ function LoginContent() {
 
           <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
             <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
-              <label style={{ fontSize: '10px', color: 'rgba(255,255,255,0.3)', fontWeight: 900, textTransform: 'uppercase', letterSpacing: '0.1em' }}>Email Identity</label>
+              <label style={{ fontSize: '10px', color: 'rgba(255,255,255,0.3)', fontWeight: 900, textTransform: 'uppercase', letterSpacing: '0.1em' }}>
+                {t('emailLabel')}
+              </label>
               <div style={{ position: 'relative' }}>
                 <Mail size={16} style={{ position: 'absolute', left: '16px', top: '50%', transform: 'translateY(-50%)', opacity: 0.3 }} />
                 <input 
@@ -94,7 +171,6 @@ function LoginContent() {
                   value={email} 
                   onChange={(e) => setEmail(e.target.value)}
                   placeholder="name@example.com"
-                  autoComplete="email"
                   required
                   style={{
                     width: '100%',
@@ -111,7 +187,9 @@ function LoginContent() {
             </div>
 
             <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
-              <label style={{ fontSize: '10px', color: 'rgba(255,255,255,0.3)', fontWeight: 900, textTransform: 'uppercase', letterSpacing: '0.1em' }}>Access Key</label>
+              <label style={{ fontSize: '10px', color: 'rgba(255,255,255,0.3)', fontWeight: 900, textTransform: 'uppercase', letterSpacing: '0.1em' }}>
+                {t('passwordLabel')}
+              </label>
               <div style={{ position: 'relative' }}>
                 <Lock size={16} style={{ position: 'absolute', left: '16px', top: '50%', transform: 'translateY(-50%)', opacity: 0.3 }} />
                 <input 
@@ -119,7 +197,6 @@ function LoginContent() {
                   value={password} 
                   onChange={(e) => setPassword(e.target.value)}
                   placeholder="••••••••"
-                  autoComplete={isLogin ? "current-password" : "new-password"}
                   required
                   style={{
                     width: '100%',
@@ -151,21 +228,58 @@ function LoginContent() {
                 <div className="animate-spin" style={{ width: '20px', height: '20px', border: '2px solid #000', borderTopColor: 'transparent', borderRadius: '50%' }} />
               ) : (
                 <>
-                  {isLogin ? 'Initiate Access' : 'Create Intelligence Profile'} 
+                  {isLogin ? getLocalizedText('initiate', locale) : getLocalizedText('create', locale)} 
                   <ChevronRight size={18} />
                 </>
               )}
             </button>
           </form>
 
+          <div style={{ margin: '24px 0', display: 'flex', alignItems: 'center', gap: '16px' }}>
+            <div style={{ flex: 1, height: '1px', background: 'rgba(255,255,255,0.1)' }} />
+            <span style={{ fontSize: '10px', color: 'rgba(255,255,255,0.3)', fontWeight: 800 }}>
+              {getLocalizedText('or', locale)}
+            </span>
+            <div style={{ flex: 1, height: '1px', background: 'rgba(255,255,255,0.1)' }} />
+          </div>
+
+          <button 
+            onClick={handleGoogleLogin}
+            disabled={loading}
+            style={{
+              width: '100%',
+              padding: '16px',
+              background: 'rgba(255,255,255,0.03)',
+              border: '1px solid rgba(255,255,255,0.08)',
+              borderRadius: '16px',
+              color: '#fff',
+              fontSize: '14px',
+              fontWeight: 600,
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              gap: '12px',
+              cursor: 'pointer',
+              transition: 'all 0.2s'
+            }}
+          >
+            <svg width="18" height="18" viewBox="0 0 24 24">
+              <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/>
+              <path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-1 .67-2.26 1.07-3.71 1.07-2.87 0-5.3-1.94-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/>
+              <path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l3.66-2.84z"/>
+              <path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 12-4.53z"/>
+            </svg>
+            {getLocalizedText('google', locale)}
+          </button>
+
           <div style={{ marginTop: '32px', textAlign: 'center' }}>
             <button 
               onClick={() => setIsLogin(!isLogin)}
               style={{ background: 'none', border: 'none', color: 'rgba(255,255,255,0.4)', fontSize: '13px', fontWeight: 600, cursor: 'pointer' }}
             >
-              {isLogin ? "Don't have an profile yet? " : "Already have a profile? "}
-              <span className="text-gold" style={{ borderBottom: '1px solid var(--accent)' }}>
-                {isLogin ? 'Register Now' : 'Sign In'}
+              {isLogin ? getLocalizedText('noAccount', locale) : getLocalizedText('haveAccount', locale)}
+              <span className="text-gold" style={{ borderBottom: '1px solid #c9a84c' }}>
+                {isLogin ? getLocalizedText('registerNow', locale) : getLocalizedText('signInNow', locale)}
               </span>
             </button>
           </div>
@@ -191,4 +305,3 @@ export default function LoginPage() {
     </Suspense>
   );
 }
-
