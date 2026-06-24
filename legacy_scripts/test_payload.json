@@ -1,0 +1,11 @@
+{
+  "platform": "telegram",
+  "source": "telegram_sniffer",
+  "chatId": "-1002604091536",
+  "message": {
+    "text": "Hola busco chica disponible esta noche en Madrid, outcall 1h, presupuesto 300 euros",
+    "chat": { "id": "-1002604091536" }
+  },
+  "contact": "@testlead_cesar",
+  "sender_contact": "@testlead_cesar"
+}

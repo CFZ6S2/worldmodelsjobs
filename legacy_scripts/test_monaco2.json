@@ -1,0 +1,11 @@
+{
+  "platform": "telegram",
+  "source": "telegram_sniffer",
+  "chatId": "-1002604091536",
+  "message": {
+    "text": "Buscando chica en monaco, nice, cannes. urgente",
+    "chat": { "id": "-1002604091536" }
+  },
+  "contact": "@testlead_cesar",
+  "sender_contact": "@testlead_cesar"
+}

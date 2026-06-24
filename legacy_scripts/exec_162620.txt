@@ -1,0 +1,249 @@
+Message Router output:
+[
+  {
+    "startTime": 1782219391108,
+    "executionIndex": 9,
+    "source": [
+      {
+        "previousNode": "Quality Score",
+        "previousNodeOutput": 0,
+        "previousNodeRun": 0
+      }
+    ],
+    "hints": [],
+    "executionTime": 31,
+    "executionStatus": "success",
+    "data": {
+      "main": [
+        [
+          {
+            "json": {
+              "platform": "Telegram",
+              "contact": "@Rechaelalexa",
+              "texto_limpio": "\ud83d\udc8e**\u0421\u0410\u041d\u041a\u0422**-\u041f\u0415\u0422\u0415\u0420\u0411\u0423\u0420\u0413 \ud83d\udc8e\n\n**\u0412\u0441\u0442\u0440\u0435\u0447\u0430 \u0441\u0435\u0433\u043e\u0434\u043d\u044f \u043a 22**:00\n\u041a \u043c\u043e\u043b\u043e\u0434\u043e\u043c\u0443, \u043a\u043b\u0430\u0441\u0441\u043d\u043e\u043c\u0443 \u043f\u043e\u0441\u0442\u0443 \u043d\u0430 2 \u0447\u0430\u0441\u0430\n\u0423\u0436\u0438\u043d, \u0433\u043e\u0441\u0442\u0438\u043d\u043d\u0438\u0446\u0430 \u0432 \u0446\u0435\u043d\u0442\u0440\u0435\ud83e\udd42\n\u041a\u043b\u0430\u0441\u0441\u0438\u043a\u0430 \u0438 \u043c\u0431\u0440  \n\u0422\u0430\u043a\u0441\u0438 \u0432 \u043e\u0431\u0435 \u0441\u0442\u043e\u0440\u043e\u043d\u044b \n**\u0417\u0430 \u0432\u0441\u0442\u0440\u0435\u0447\u0443 20\u043a \u0447\u0438\u0441\u0442\u044b\u043c\u0438          **\n\u0414\u043e 27 \u043b\u0435\u0442, \u043a\u0442\u043e \u043c\u043e\u0436\u0435\u0442? \n\u0416\u0434\u0443 \u0430\u043d\u043a\u0435\u0442\u043a\u0438 \u0432 \u043b\u0441 \ud83d\udcf2",
+              "source_chat_id": "-1002904509105",
+              "city": "\u0421\u0430\u043d\u043a\u0442-\u041f\u0435\u0442\u0435\u0440\u0431\u0443\u0440\u0433",
+              "budget": "20 000",
+              "category": "evento",
+              "text_es": "Cliente busca chica joven (hasta 27 a\u00f1os) para una cita hoy a las 22:00. Duraci\u00f3n: 2 horas. Incluye cena, hotel en el centro, cl\u00e1sico y MBR. Taxi ida y vuelta. Presupuesto: 20 000 limpios. Enviar perfiles al DM.",
+              "title_es": "Cita en San Petersburgo esta noche",
+              "text_en": "Client is looking for a young girl (up to 27) for a meeting today at 22:00. Duration: 2 hours. Includes dinner, hotel in the center, classic and MBR. Taxi both ways. Budget: 20k clean. Send profiles to DM.",
+              "title_en": "Meeting in St. Petersburg tonight",
+              "text_ru": "\u041a\u043b\u0438\u0435\u043d\u0442 \u0438\u0449\u0435\u0442 \u043c\u043e\u043b\u043e\u0434\u0443\u044e \u0434\u0435\u0432\u0443\u0448\u043a\u0443 (\u0434\u043e 27 \u043b\u0435\u0442) \u043d\u0430 \u0432\u0441\u0442\u0440\u0435\u0447\u0443 \u0441\u0435\u0433\u043e\u0434\u043d\u044f \u043a 22:00. \u041f\u0440\u043e\u0434\u043e\u043b\u0436\u0438\u0442\u0435\u043b\u044c\u043d\u043e\u0441\u0442\u044c: 2 \u0447\u0430\u0441\u0430. \u0423\u0436\u0438\u043d, \u0433\u043e\u0441\u0442\u0438\u043d\u0438\u0446\u0430 \u0432 \u0446\u0435\u043d\u0442\u0440\u0435, \u043a\u043b\u0430\u0441\u0441\u0438\u043a\u0430 \u0438 \u041c\u0411\u0420. \u0422\u0430\u043a\u0441\u0438 \u0432 \u043e\u0431\u0435 \u0441\u0442\u043e\u0440\u043e\u043d\u044b. \u0411\u044e\u0434\u0436\u0435\u0442 20 \u0442\u044b\u0441. \u0447\u0438\u0441\u0442\u044b\u043c\u0438. \u0416\u0434\u0443 \u0430\u043d\u043a\u0435\u0442\u043a\u0438 \u0432 \u043b\u0441.",
+              "title_ru": "\u0412\u0441\u0442\u0440\u0435\u0447\u0430 \u0432 \u0421\u0430\u043d\u043a\u0442-\u041f\u0435\u0442\u0435\u0440\u0431\u0443\u0440\u0433\u0435 \u0441\u0435\u0433\u043e\u0434\u043d\u044f",
+              "text_pt": "Cliente procura uma jovem (at\u00e9 27 anos) para um encontro hoje \u00e0s 22:00. Dura\u00e7\u00e3o: 2 horas. Inclui jantar, hotel no centro, cl\u00e1ssico e MBR. T\u00e1xi ida e volta. Or\u00e7amento: 20k limpos. Enviar perfis no direct.",
+              "title_pt": "Encontro em S\u00e3o Petersburgo hoje",
+              "trash": false,
+              "final_score": 75,
+              "route_lang": "ES",
+              "tg_chat": "-5283488138",
+              "tg_text": "<b>Cita en San Petersburgo esta noche</b>\n\ud83c\udff7\ufe0f <b>Eventos</b>\n\ud83d\udccd <b>\u0421\u0430\u043d\u043a\u0442-\u041f\u0435\u0442\u0435\u0440\u0431\u0443\u0440\u0433</b>\n\ud83d\udcb0 <b>20 000</b>\n\nCliente busca chica joven (hasta 27 a\u00f1os) para una cita hoy a las 22:00. Duraci\u00f3n: 2 horas. Incluye cena, hotel en el centro, cl\u00e1sico y MBR. Taxi ida y vuelta. Presupuesto: 20 000 limpios. Enviar perfiles al DM.\n\n\ud83d\udc64 <b>Remitente:</b> <a href=\"https://t.me/Rechaelalexa\">@Rechaelalexa</a>\n\ud83d\udd0c <b>Fuente:</b> Telegram",
+              "wa_chat": "120363425790792660@g.us"
+            },
+            "pairedItem": {
+              "item": 0
+            }
+          },
+          {
+            "json": {
+              "platform": "Telegram",
+              "contact": "@Rechaelalexa",
+              "texto_limpio": "\ud83d\udc8e**\u0421\u0410\u041d\u041a\u0422**-\u041f\u0415\u0422\u0415\u0420\u0411\u0423\u0420\u0413 \ud83d\udc8e\n\n**\u0412\u0441\u0442\u0440\u0435\u0447\u0430 \u0441\u0435\u0433\u043e\u0434\u043d\u044f \u043a 22**:00\n\u041a \u043c\u043e\u043b\u043e\u0434\u043e\u043c\u0443, \u043a\u043b\u0430\u0441\u0441\u043d\u043e\u043c\u0443 \u043f\u043e\u0441\u0442\u0443 \u043d\u0430 2 \u0447\u0430\u0441\u0430\n\u0423\u0436\u0438\u043d, \u0433\u043e\u0441\u0442\u0438\u043d\u043d\u0438\u0446\u0430 \u0432 \u0446\u0435\u043d\u0442\u0440\u0435\ud83e\udd42\n\u041a\u043b\u0430\u0441\u0441\u0438\u043a\u0430 \u0438 \u043c\u0431\u0440  \n\u0422\u0430\u043a\u0441\u0438 \u0432 \u043e\u0431\u0435 \u0441\u0442\u043e\u0440\u043e\u043d\u044b \n**\u0417\u0430 \u0432\u0441\u0442\u0440\u0435\u0447\u0443 20\u043a \u0447\u0438\u0441\u0442\u044b\u043c\u0438          **\n\u0414\u043e 27 \u043b\u0435\u0442, \u043a\u0442\u043e \u043c\u043e\u0436\u0435\u0442? \n\u0416\u0434\u0443 \u0430\u043d\u043a\u0435\u0442\u043a\u0438 \u0432 \u043b\u0441 \ud83d\udcf2",
+              "source_chat_id": "-1002904509105",
+              "city": "\u0421\u0430\u043d\u043a\u0442-\u041f\u0435\u0442\u0435\u0440\u0431\u0443\u0440\u0433",
+              "budget": "20 000",
+              "category": "evento",
+              "text_es": "Cliente busca chica joven (hasta 27 a\u00f1os) para una cita hoy a las 22:00. Duraci\u00f3n: 2 horas. Incluye cena, hotel en el centro, cl\u00e1sico y MBR. Taxi ida y vuelta. Presupuesto: 20 000 limpios. Enviar perfiles al DM.",
+              "title_es": "Cita en San Petersburgo esta noche",
+              "text_en": "Client is looking for a young girl (up to 27) for a meeting today at 22:00. Duration: 2 hours. Includes dinner, hotel in the center, classic and MBR. Taxi both ways. Budget: 20k clean. Send profiles to DM.",
+              "title_en": "Meeting in St. Petersburg tonight",
+              "text_ru": "\u041a\u043b\u0438\u0435\u043d\u0442 \u0438\u0449\u0435\u0442 \u043c\u043e\u043b\u043e\u0434\u0443\u044e \u0434\u0435\u0432\u0443\u0448\u043a\u0443 (\u0434\u043e 27 \u043b\u0435\u0442) \u043d\u0430 \u0432\u0441\u0442\u0440\u0435\u0447\u0443 \u0441\u0435\u0433\u043e\u0434\u043d\u044f \u043a 22:00. \u041f\u0440\u043e\u0434\u043e\u043b\u0436\u0438\u0442\u0435\u043b\u044c\u043d\u043e\u0441\u0442\u044c: 2 \u0447\u0430\u0441\u0430. \u0423\u0436\u0438\u043d, \u0433\u043e\u0441\u0442\u0438\u043d\u0438\u0446\u0430 \u0432 \u0446\u0435\u043d\u0442\u0440\u0435, \u043a\u043b\u0430\u0441\u0441\u0438\u043a\u0430 \u0438 \u041c\u0411\u0420. \u0422\u0430\u043a\u0441\u0438 \u0432 \u043e\u0431\u0435 \u0441\u0442\u043e\u0440\u043e\u043d\u044b. \u0411\u044e\u0434\u0436\u0435\u0442 20 \u0442\u044b\u0441. \u0447\u0438\u0441\u0442\u044b\u043c\u0438. \u0416\u0434\u0443 \u0430\u043d\u043a\u0435\u0442\u043a\u0438 \u0432 \u043b\u0441.",
+              "title_ru": "\u0412\u0441\u0442\u0440\u0435\u0447\u0430 \u0432 \u0421\u0430\u043d\u043a\u0442-\u041f\u0435\u0442\u0435\u0440\u0431\u0443\u0440\u0433\u0435 \u0441\u0435\u0433\u043e\u0434\u043d\u044f",
+              "text_pt": "Cliente procura uma jovem (at\u00e9 27 anos) para um encontro hoje \u00e0s 22:00. Dura\u00e7\u00e3o: 2 horas. Inclui jantar, hotel no centro, cl\u00e1ssico e MBR. T\u00e1xi ida e volta. Or\u00e7amento: 20k limpos. Enviar perfis no direct.",
+              "title_pt": "Encontro em S\u00e3o Petersburgo hoje",
+              "trash": false,
+              "final_score": 75,
+              "route_lang": "EN",
+              "tg_chat": "-1003757267210",
+              "tg_text": "<b>Meeting in St. Petersburg tonight</b>\n\ud83c\udff7\ufe0f <b>Eventos</b>\n\ud83d\udccd <b>\u0421\u0430\u043d\u043a\u0442-\u041f\u0435\u0442\u0435\u0440\u0431\u0443\u0440\u0433</b>\n\ud83d\udcb0 <b>20 000</b>\n\nClient is looking for a young girl (up to 27) for a meeting today at 22:00. Duration: 2 hours. Includes dinner, hotel in the center, classic and MBR. Taxi both ways. Budget: 20k clean. Send profiles to DM.\n\n\ud83d\udc64 <b>Sender:</b> <a href=\"https://t.me/Rechaelalexa\">@Rechaelalexa</a>\n\ud83d\udd0c <b>Fuente:</b> Telegram",
+              "wa_chat": "120363408216646972@g.us"
+            },
+            "pairedItem": {
+              "item": 0
+            }
+          },
+          {
+            "json": {
+              "platform": "Telegram",
+              "contact": "@Rechaelalexa",
+              "texto_limpio": "\ud83d\udc8e**\u0421\u0410\u041d\u041a\u0422**-\u041f\u0415\u0422\u0415\u0420\u0411\u0423\u0420\u0413 \ud83d\udc8e\n\n**\u0412\u0441\u0442\u0440\u0435\u0447\u0430 \u0441\u0435\u0433\u043e\u0434\u043d\u044f \u043a 22**:00\n\u041a \u043c\u043e\u043b\u043e\u0434\u043e\u043c\u0443, \u043a\u043b\u0430\u0441\u0441\u043d\u043e\u043c\u0443 \u043f\u043e\u0441\u0442\u0443 \u043d\u0430 2 \u0447\u0430\u0441\u0430\n\u0423\u0436\u0438\u043d, \u0433\u043e\u0441\u0442\u0438\u043d\u043d\u0438\u0446\u0430 \u0432 \u0446\u0435\u043d\u0442\u0440\u0435\ud83e\udd42\n\u041a\u043b\u0430\u0441\u0441\u0438\u043a\u0430 \u0438 \u043c\u0431\u0440  \n\u0422\u0430\u043a\u0441\u0438 \u0432 \u043e\u0431\u0435 \u0441\u0442\u043e\u0440\u043e\u043d\u044b \n**\u0417\u0430 \u0432\u0441\u0442\u0440\u0435\u0447\u0443 20\u043a \u0447\u0438\u0441\u0442\u044b\u043c\u0438          **\n\u0414\u043e 27 \u043b\u0435\u0442, \u043a\u0442\u043e \u043c\u043e\u0436\u0435\u0442? \n\u0416\u0434\u0443 \u0430\u043d\u043a\u0435\u0442\u043a\u0438 \u0432 \u043b\u0441 \ud83d\udcf2",
+              "source_chat_id": "-1002904509105",
+              "city": "\u0421\u0430\u043d\u043a\u0442-\u041f\u0435\u0442\u0435\u0440\u0431\u0443\u0440\u0433",
+              "budget": "20 000",
+              "category": "evento",
+              "text_es": "Cliente busca chica joven (hasta 27 a\u00f1os) para una cita hoy a las 22:00. Duraci\u00f3n: 2 horas. Incluye cena, hotel en el centro, cl\u00e1sico y MBR. Taxi ida y vuelta. Presupuesto: 20 000 limpios. Enviar perfiles al DM.",
+              "title_es": "Cita en San Petersburgo esta noche",
+              "text_en": "Client is looking for a young girl (up to 27) for a meeting today at 22:00. Duration: 2 hours. Includes dinner, hotel in the center, classic and MBR. Taxi both ways. Budget: 20k clean. Send profiles to DM.",
+              "title_en": "Meeting in St. Petersburg tonight",
+              "text_ru": "\u041a\u043b\u0438\u0435\u043d\u0442 \u0438\u0449\u0435\u0442 \u043c\u043e\u043b\u043e\u0434\u0443\u044e \u0434\u0435\u0432\u0443\u0448\u043a\u0443 (\u0434\u043e 27 \u043b\u0435\u0442) \u043d\u0430 \u0432\u0441\u0442\u0440\u0435\u0447\u0443 \u0441\u0435\u0433\u043e\u0434\u043d\u044f \u043a 22:00. \u041f\u0440\u043e\u0434\u043e\u043b\u0436\u0438\u0442\u0435\u043b\u044c\u043d\u043e\u0441\u0442\u044c: 2 \u0447\u0430\u0441\u0430. \u0423\u0436\u0438\u043d, \u0433\u043e\u0441\u0442\u0438\u043d\u0438\u0446\u0430 \u0432 \u0446\u0435\u043d\u0442\u0440\u0435, \u043a\u043b\u0430\u0441\u0441\u0438\u043a\u0430 \u0438 \u041c\u0411\u0420. \u0422\u0430\u043a\u0441\u0438 \u0432 \u043e\u0431\u0435 \u0441\u0442\u043e\u0440\u043e\u043d\u044b. \u0411\u044e\u0434\u0436\u0435\u0442 20 \u0442\u044b\u0441. \u0447\u0438\u0441\u0442\u044b\u043c\u0438. \u0416\u0434\u0443 \u0430\u043d\u043a\u0435\u0442\u043a\u0438 \u0432 \u043b\u0441.",
+              "title_ru": "\u0412\u0441\u0442\u0440\u0435\u0447\u0430 \u0432 \u0421\u0430\u043d\u043a\u0442-\u041f\u0435\u0442\u0435\u0440\u0431\u0443\u0440\u0433\u0435 \u0441\u0435\u0433\u043e\u0434\u043d\u044f",
+              "text_pt": "Cliente procura uma jovem (at\u00e9 27 anos) para um encontro hoje \u00e0s 22:00. Dura\u00e7\u00e3o: 2 horas. Inclui jantar, hotel no centro, cl\u00e1ssico e MBR. T\u00e1xi ida e volta. Or\u00e7amento: 20k limpos. Enviar perfis no direct.",
+              "title_pt": "Encontro em S\u00e3o Petersburgo hoje",
+              "trash": false,
+              "final_score": 75,
+              "route_lang": "RU",
+              "tg_chat": "-1003920309636",
+              "tg_text": "<b>\u0412\u0441\u0442\u0440\u0435\u0447\u0430 \u0432 \u0421\u0430\u043d\u043a\u0442-\u041f\u0435\u0442\u0435\u0440\u0431\u0443\u0440\u0433\u0435 \u0441\u0435\u0433\u043e\u0434\u043d\u044f</b>\n\ud83c\udff7\ufe0f <b>Eventos</b>\n\ud83d\udccd <b>\u0421\u0430\u043d\u043a\u0442-\u041f\u0435\u0442\u0435\u0440\u0431\u0443\u0440\u0433</b>\n\ud83d\udcb0 <b>20 000</b>\n\n\u041a\u043b\u0438\u0435\u043d\u0442 \u0438\u0449\u0435\u0442 \u043c\u043e\u043b\u043e\u0434\u0443\u044e \u0434\u0435\u0432\u0443\u0448\u043a\u0443 (\u0434\u043e 27 \u043b\u0435\u0442) \u043d\u0430 \u0432\u0441\u0442\u0440\u0435\u0447\u0443 \u0441\u0435\u0433\u043e\u0434\u043d\u044f \u043a 22:00. \u041f\u0440\u043e\u0434\u043e\u043b\u0436\u0438\u0442\u0435\u043b\u044c\u043d\u043e\u0441\u0442\u044c: 2 \u0447\u0430\u0441\u0430. \u0423\u0436\u0438\u043d, \u0433\u043e\u0441\u0442\u0438\u043d\u0438\u0446\u0430 \u0432 \u0446\u0435\u043d\u0442\u0440\u0435, \u043a\u043b\u0430\u0441\u0441\u0438\u043a\u0430 \u0438 \u041c\u0411\u0420. \u0422\u0430\u043a\u0441\u0438 \u0432 \u043e\u0431\u0435 \u0441\u0442\u043e\u0440\u043e\u043d\u044b. \u0411\u044e\u0434\u0436\u0435\u0442 20 \u0442\u044b\u0441. \u0447\u0438\u0441\u0442\u044b\u043c\u0438. \u0416\u0434\u0443 \u0430\u043d\u043a\u0435\u0442\u043a\u0438 \u0432 \u043b\u0441.\n\n\ud83d\udc64 <b>\u041e\u0442\u043f\u0440\u0430\u0432\u0438\u0442\u0435\u043b\u044c:</b> <a href=\"https://t.me/Rechaelalexa\">@Rechaelalexa</a>\n\ud83d\udd0c <b>Fuente:</b> Telegram",
+              "wa_chat": "120363408298375271@g.us"
+            },
+            "pairedItem": {
+              "item": 0
+            }
+          },
+          {
+            "json": {
+              "platform": "Telegram",
+              "contact": "@Rechaelalexa",
+              "texto_limpio": "\ud83d\udc8e**\u0421\u0410\u041d\u041a\u0422**-\u041f\u0415\u0422\u0415\u0420\u0411\u0423\u0420\u0413 \ud83d\udc8e\n\n**\u0412\u0441\u0442\u0440\u0435\u0447\u0430 \u0441\u0435\u0433\u043e\u0434\u043d\u044f \u043a 22**:00\n\u041a \u043c\u043e\u043b\u043e\u0434\u043e\u043c\u0443, \u043a\u043b\u0430\u0441\u0441\u043d\u043e\u043c\u0443 \u043f\u043e\u0441\u0442\u0443 \u043d\u0430 2 \u0447\u0430\u0441\u0430\n\u0423\u0436\u0438\u043d, \u0433\u043e\u0441\u0442\u0438\u043d\u043d\u0438\u0446\u0430 \u0432 \u0446\u0435\u043d\u0442\u0440\u0435\ud83e\udd42\n\u041a\u043b\u0430\u0441\u0441\u0438\u043a\u0430 \u0438 \u043c\u0431\u0440  \n\u0422\u0430\u043a\u0441\u0438 \u0432 \u043e\u0431\u0435 \u0441\u0442\u043e\u0440\u043e\u043d\u044b \n**\u0417\u0430 \u0432\u0441\u0442\u0440\u0435\u0447\u0443 20\u043a \u0447\u0438\u0441\u0442\u044b\u043c\u0438          **\n\u0414\u043e 27 \u043b\u0435\u0442, \u043a\u0442\u043e \u043c\u043e\u0436\u0435\u0442? \n\u0416\u0434\u0443 \u0430\u043d\u043a\u0435\u0442\u043a\u0438 \u0432 \u043b\u0441 \ud83d\udcf2",
+              "source_chat_id": "-1002904509105",
+              "city": "\u0421\u0430\u043d\u043a\u0442-\u041f\u0435\u0442\u0435\u0440\u0431\u0443\u0440\u0433",
+              "budget": "20 000",
+              "category": "evento",
+              "text_es": "Cliente busca chica joven (hasta 27 a\u00f1os) para una cita hoy a las 22:00. Duraci\u00f3n: 2 horas. Incluye cena, hotel en el centro, cl\u00e1sico y MBR. Taxi ida y vuelta. Presupuesto: 20 000 limpios. Enviar perfiles al DM.",
+              "title_es": "Cita en San Petersburgo esta noche",
+              "text_en": "Client is looking for a young girl (up to 27) for a meeting today at 22:00. Duration: 2 hours. Includes dinner, hotel in the center, classic and MBR. Taxi both ways. Budget: 20k clean. Send profiles to DM.",
+              "title_en": "Meeting in St. Petersburg tonight",
+              "text_ru": "\u041a\u043b\u0438\u0435\u043d\u0442 \u0438\u0449\u0435\u0442 \u043c\u043e\u043b\u043e\u0434\u0443\u044e \u0434\u0435\u0432\u0443\u0448\u043a\u0443 (\u0434\u043e 27 \u043b\u0435\u0442) \u043d\u0430 \u0432\u0441\u0442\u0440\u0435\u0447\u0443 \u0441\u0435\u0433\u043e\u0434\u043d\u044f \u043a 22:00. \u041f\u0440\u043e\u0434\u043e\u043b\u0436\u0438\u0442\u0435\u043b\u044c\u043d\u043e\u0441\u0442\u044c: 2 \u0447\u0430\u0441\u0430. \u0423\u0436\u0438\u043d, \u0433\u043e\u0441\u0442\u0438\u043d\u0438\u0446\u0430 \u0432 \u0446\u0435\u043d\u0442\u0440\u0435, \u043a\u043b\u0430\u0441\u0441\u0438\u043a\u0430 \u0438 \u041c\u0411\u0420. \u0422\u0430\u043a\u0441\u0438 \u0432 \u043e\u0431\u0435 \u0441\u0442\u043e\u0440\u043e\u043d\u044b. \u0411\u044e\u0434\u0436\u0435\u0442 20 \u0442\u044b\u0441. \u0447\u0438\u0441\u0442\u044b\u043c\u0438. \u0416\u0434\u0443 \u0430\u043d\u043a\u0435\u0442\u043a\u0438 \u0432 \u043b\u0441.",
+              "title_ru": "\u0412\u0441\u0442\u0440\u0435\u0447\u0430 \u0432 \u0421\u0430\u043d\u043a\u0442-\u041f\u0435\u0442\u0435\u0440\u0431\u0443\u0440\u0433\u0435 \u0441\u0435\u0433\u043e\u0434\u043d\u044f",
+              "text_pt": "Cliente procura uma jovem (at\u00e9 27 anos) para um encontro hoje \u00e0s 22:00. Dura\u00e7\u00e3o: 2 horas. Inclui jantar, hotel no centro, cl\u00e1ssico e MBR. T\u00e1xi ida e volta. Or\u00e7amento: 20k limpos. Enviar perfis no direct.",
+              "title_pt": "Encontro em S\u00e3o Petersburgo hoje",
+              "trash": false,
+              "final_score": 75,
+              "route_lang": "RU_CHANNEL",
+              "tg_chat": "-1003934906353",
+              "tg_text": "<b>\u0412\u0441\u0442\u0440\u0435\u0447\u0430 \u0432 \u0421\u0430\u043d\u043a\u0442-\u041f\u0435\u0442\u0435\u0440\u0431\u0443\u0440\u0433\u0435 \u0441\u0435\u0433\u043e\u0434\u043d\u044f</b>\n\ud83c\udff7\ufe0f <b>Eventos</b>\n\ud83d\udccd <b>\u0421\u0430\u043d\u043a\u0442-\u041f\u0435\u0442\u0435\u0440\u0431\u0443\u0440\u0433</b>\n\ud83d\udcb0 <b>20 000</b>\n\n\u041a\u043b\u0438\u0435\u043d\u0442 \u0438\u0449\u0435\u0442 \u043c\u043e\u043b\u043e\u0434\u0443\u044e \u0434\u0435\u0432\u0443\u0448\u043a\u0443 (\u0434\u043e 27 \u043b\u0435\u0442) \u043d\u0430 \u0432\u0441\u0442\u0440\u0435\u0447\u0443 \u0441\u0435\u0433\u043e\u0434\u043d\u044f \u043a 22:00. \u041f\u0440\u043e\u0434\u043e\u043b\u0436\u0438\u0442\u0435\u043b\u044c\u043d\u043e\u0441\u0442\u044c: 2 \u0447\u0430\u0441\u0430. \u0423\u0436\u0438\u043d, \u0433\u043e\u0441\u0442\u0438\u043d\u0438\u0446\u0430 \u0432 \u0446\u0435\u043d\u0442\u0440\u0435, \u043a\u043b\u0430\u0441\u0441\u0438\u043a\u0430 \u0438 \u041c\u0411\u0420. \u0422\u0430\u043a\u0441\u0438 \u0432 \u043e\u0431\u0435 \u0441\u0442\u043e\u0440\u043e\u043d\u044b. \u0411\u044e\u0434\u0436\u0435\u0442 20 \u0442\u044b\u0441. \u0447\u0438\u0441\u0442\u044b\u043c\u0438. \u0416\u0434\u0443 \u0430\u043d\u043a\u0435\u0442\u043a\u0438 \u0432 \u043b\u0441.\n\n\ud83d\udc64 <b>\u041e\u0442\u043f\u0440\u0430\u0432\u0438\u0442\u0435\u043b\u044c:</b> <a href=\"https://t.me/Rechaelalexa\">@Rechaelalexa</a>\n\ud83d\udd0c <b>Fuente:</b> Telegram"
+            },
+            "pairedItem": {
+              "item": 0
+            }
+          },
+          {
+            "json": {
+              "platform": "Telegram",
+              "contact": "@Rechaelalexa",
+              "texto_limpio": "\ud83d\udc8e**\u0421\u0410\u041d\u041a\u0422**-\u041f\u0415\u0422\u0415\u0420\u0411\u0423\u0420\u0413 \ud83d\udc8e\n\n**\u0412\u0441\u0442\u0440\u0435\u0447\u0430 \u0441\u0435\u0433\u043e\u0434\u043d\u044f \u043a 22**:00\n\u041a \u043c\u043e\u043b\u043e\u0434\u043e\u043c\u0443, \u043a\u043b\u0430\u0441\u0441\u043d\u043e\u043c\u0443 \u043f\u043e\u0441\u0442\u0443 \u043d\u0430 2 \u0447\u0430\u0441\u0430\n\u0423\u0436\u0438\u043d, \u0433\u043e\u0441\u0442\u0438\u043d\u043d\u0438\u0446\u0430 \u0432 \u0446\u0435\u043d\u0442\u0440\u0435\ud83e\udd42\n\u041a\u043b\u0430\u0441\u0441\u0438\u043a\u0430 \u0438 \u043c\u0431\u0440  \n\u0422\u0430\u043a\u0441\u0438 \u0432 \u043e\u0431\u0435 \u0441\u0442\u043e\u0440\u043e\u043d\u044b \n**\u0417\u0430 \u0432\u0441\u0442\u0440\u0435\u0447\u0443 20\u043a \u0447\u0438\u0441\u0442\u044b\u043c\u0438          **\n\u0414\u043e 27 \u043b\u0435\u0442, \u043a\u0442\u043e \u043c\u043e\u0436\u0435\u0442? \n\u0416\u0434\u0443 \u0430\u043d\u043a\u0435\u0442\u043a\u0438 \u0432 \u043b\u0441 \ud83d\udcf2",
+              "source_chat_id": "-1002904509105",
+              "city": "\u0421\u0430\u043d\u043a\u0442-\u041f\u0435\u0442\u0435\u0440\u0431\u0443\u0440\u0433",
+              "budget": "20 000",
+              "category": "evento",
+              "text_es": "Cliente busca chica joven (hasta 27 a\u00f1os) para una cita hoy a las 22:00. Duraci\u00f3n: 2 horas. Incluye cena, hotel en el centro, cl\u00e1sico y MBR. Taxi ida y vuelta. Presupuesto: 20 000 limpios. Enviar perfiles al DM.",
+              "title_es": "Cita en San Petersburgo esta noche",
+              "text_en": "Client is looking for a young girl (up to 27) for a meeting today at 22:00. Duration: 2 hours. Includes dinner, hotel in the center, classic and MBR. Taxi both ways. Budget: 20k clean. Send profiles to DM.",
+              "title_en": "Meeting in St. Petersburg tonight",
+              "text_ru": "\u041a\u043b\u0438\u0435\u043d\u0442 \u0438\u0449\u0435\u0442 \u043c\u043e\u043b\u043e\u0434\u0443\u044e \u0434\u0435\u0432\u0443\u0448\u043a\u0443 (\u0434\u043e 27 \u043b\u0435\u0442) \u043d\u0430 \u0432\u0441\u0442\u0440\u0435\u0447\u0443 \u0441\u0435\u0433\u043e\u0434\u043d\u044f \u043a 22:00. \u041f\u0440\u043e\u0434\u043e\u043b\u0436\u0438\u0442\u0435\u043b\u044c\u043d\u043e\u0441\u0442\u044c: 2 \u0447\u0430\u0441\u0430. \u0423\u0436\u0438\u043d, \u0433\u043e\u0441\u0442\u0438\u043d\u0438\u0446\u0430 \u0432 \u0446\u0435\u043d\u0442\u0440\u0435, \u043a\u043b\u0430\u0441\u0441\u0438\u043a\u0430 \u0438 \u041c\u0411\u0420. \u0422\u0430\u043a\u0441\u0438 \u0432 \u043e\u0431\u0435 \u0441\u0442\u043e\u0440\u043e\u043d\u044b. \u0411\u044e\u0434\u0436\u0435\u0442 20 \u0442\u044b\u0441. \u0447\u0438\u0441\u0442\u044b\u043c\u0438. \u0416\u0434\u0443 \u0430\u043d\u043a\u0435\u0442\u043a\u0438 \u0432 \u043b\u0441.",
+              "title_ru": "\u0412\u0441\u0442\u0440\u0435\u0447\u0430 \u0432 \u0421\u0430\u043d\u043a\u0442-\u041f\u0435\u0442\u0435\u0440\u0431\u0443\u0440\u0433\u0435 \u0441\u0435\u0433\u043e\u0434\u043d\u044f",
+              "text_pt": "Cliente procura uma jovem (at\u00e9 27 anos) para um encontro hoje \u00e0s 22:00. Dura\u00e7\u00e3o: 2 horas. Inclui jantar, hotel no centro, cl\u00e1ssico e MBR. T\u00e1xi ida e volta. Or\u00e7amento: 20k limpos. Enviar perfis no direct.",
+              "title_pt": "Encontro em S\u00e3o Petersburgo hoje",
+              "trash": false,
+              "final_score": 75,
+              "route_lang": "PT",
+              "tg_chat": "-1003727383883",
+              "tg_text": "<b>Encontro em S\u00e3o Petersburgo hoje</b>\n\ud83c\udff7\ufe0f <b>Eventos</b>\n\ud83d\udccd <b>\u0421\u0430\u043d\u043a\u0442-\u041f\u0435\u0442\u0435\u0440\u0431\u0443\u0440\u0433</b>\n\ud83d\udcb0 <b>20 000</b>\n\nCliente procura uma jovem (at\u00e9 27 anos) para um encontro hoje \u00e0s 22:00. Dura\u00e7\u00e3o: 2 horas. Inclui jantar, hotel no centro, cl\u00e1ssico e MBR. T\u00e1xi ida e volta. Or\u00e7amento: 20k limpos. Enviar perfis no direct.\n\n\ud83d\udc64 <b>Remetente:</b> <a href=\"https://t.me/Rechaelalexa\">@Rechaelalexa</a>\n\ud83d\udd0c <b>Fuente:</b> Telegram",
+              "wa_chat": "120363426262586004@g.us"
+            },
+            "pairedItem": {
+              "item": 0
+            }
+          }
+        ]
+      ]
+    }
+  }
+]
+
+Dynamic Routing Engine output:
+[
+  {
+    "startTime": 1782219393943,
+    "executionIndex": 12,
+    "source": [
+      {
+        "previousNode": "Quality Score",
+        "previousNodeOutput": 0,
+        "previousNodeRun": 0
+      }
+    ],
+    "hints": [],
+    "executionTime": 53,
+    "executionStatus": "success",
+    "data": {
+      "main": [
+        [
+          {
+            "json": {
+              "platform": "Telegram",
+              "contact": "@Rechaelalexa",
+              "texto_limpio": "\ud83d\udc8e**\u0421\u0410\u041d\u041a\u0422**-\u041f\u0415\u0422\u0415\u0420\u0411\u0423\u0420\u0413 \ud83d\udc8e\n\n**\u0412\u0441\u0442\u0440\u0435\u0447\u0430 \u0441\u0435\u0433\u043e\u0434\u043d\u044f \u043a 22**:00\n\u041a \u043c\u043e\u043b\u043e\u0434\u043e\u043c\u0443, \u043a\u043b\u0430\u0441\u0441\u043d\u043e\u043c\u0443 \u043f\u043e\u0441\u0442\u0443 \u043d\u0430 2 \u0447\u0430\u0441\u0430\n\u0423\u0436\u0438\u043d, \u0433\u043e\u0441\u0442\u0438\u043d\u043d\u0438\u0446\u0430 \u0432 \u0446\u0435\u043d\u0442\u0440\u0435\ud83e\udd42\n\u041a\u043b\u0430\u0441\u0441\u0438\u043a\u0430 \u0438 \u043c\u0431\u0440  \n\u0422\u0430\u043a\u0441\u0438 \u0432 \u043e\u0431\u0435 \u0441\u0442\u043e\u0440\u043e\u043d\u044b \n**\u0417\u0430 \u0432\u0441\u0442\u0440\u0435\u0447\u0443 20\u043a \u0447\u0438\u0441\u0442\u044b\u043c\u0438          **\n\u0414\u043e 27 \u043b\u0435\u0442, \u043a\u0442\u043e \u043c\u043e\u0436\u0435\u0442? \n\u0416\u0434\u0443 \u0430\u043d\u043a\u0435\u0442\u043a\u0438 \u0432 \u043b\u0441 \ud83d\udcf2",
+              "source_chat_id": "-1002904509105",
+              "city": "\u0421\u0430\u043d\u043a\u0442-\u041f\u0435\u0442\u0435\u0440\u0431\u0443\u0440\u0433",
+              "budget": "20 000",
+              "category": "evento",
+              "text_es": "Cliente busca chica joven (hasta 27 a\u00f1os) para una cita hoy a las 22:00. Duraci\u00f3n: 2 horas. Incluye cena, hotel en el centro, cl\u00e1sico y MBR. Taxi ida y vuelta. Presupuesto: 20 000 limpios. Enviar perfiles al DM.",
+              "title_es": "Cita en San Petersburgo esta noche",
+              "text_en": "Client is looking for a young girl (up to 27) for a meeting today at 22:00. Duration: 2 hours. Includes dinner, hotel in the center, classic and MBR. Taxi both ways. Budget: 20k clean. Send profiles to DM.",
+              "title_en": "Meeting in St. Petersburg tonight",
+              "text_ru": "\u041a\u043b\u0438\u0435\u043d\u0442 \u0438\u0449\u0435\u0442 \u043c\u043e\u043b\u043e\u0434\u0443\u044e \u0434\u0435\u0432\u0443\u0448\u043a\u0443 (\u0434\u043e 27 \u043b\u0435\u0442) \u043d\u0430 \u0432\u0441\u0442\u0440\u0435\u0447\u0443 \u0441\u0435\u0433\u043e\u0434\u043d\u044f \u043a 22:00. \u041f\u0440\u043e\u0434\u043e\u043b\u0436\u0438\u0442\u0435\u043b\u044c\u043d\u043e\u0441\u0442\u044c: 2 \u0447\u0430\u0441\u0430. \u0423\u0436\u0438\u043d, \u0433\u043e\u0441\u0442\u0438\u043d\u0438\u0446\u0430 \u0432 \u0446\u0435\u043d\u0442\u0440\u0435, \u043a\u043b\u0430\u0441\u0441\u0438\u043a\u0430 \u0438 \u041c\u0411\u0420. \u0422\u0430\u043a\u0441\u0438 \u0432 \u043e\u0431\u0435 \u0441\u0442\u043e\u0440\u043e\u043d\u044b. \u0411\u044e\u0434\u0436\u0435\u0442 20 \u0442\u044b\u0441. \u0447\u0438\u0441\u0442\u044b\u043c\u0438. \u0416\u0434\u0443 \u0430\u043d\u043a\u0435\u0442\u043a\u0438 \u0432 \u043b\u0441.",
+              "title_ru": "\u0412\u0441\u0442\u0440\u0435\u0447\u0430 \u0432 \u0421\u0430\u043d\u043a\u0442-\u041f\u0435\u0442\u0435\u0440\u0431\u0443\u0440\u0433\u0435 \u0441\u0435\u0433\u043e\u0434\u043d\u044f",
+              "text_pt": "Cliente procura uma jovem (at\u00e9 27 anos) para um encontro hoje \u00e0s 22:00. Dura\u00e7\u00e3o: 2 horas. Inclui jantar, hotel no centro, cl\u00e1ssico e MBR. T\u00e1xi ida e volta. Or\u00e7amento: 20k limpos. Enviar perfis no direct.",
+              "title_pt": "Encontro em S\u00e3o Petersburgo hoje",
+              "trash": false,
+              "target_wa": "120363425790792660@g.us",
+              "city_label": "\u0421\u0410\u041d\u041a\u0422-\u041f\u0415\u0422\u0415\u0420\u0411\u0423\u0420\u0413"
+            },
+            "pairedItem": {
+              "item": 0
+            }
+          }
+        ]
+      ]
+    }
+  }
+]
+
+Dynamic WhatsApp Alert output:
+[
+  {
+    "startTime": 1782219395997,
+    "executionIndex": 14,
+    "source": [
+      {
+        "previousNode": "Global Alert Waiter",
+        "previousNodeOutput": 0,
+        "previousNodeRun": 0
+      }
+    ],
+    "hints": [],
+    "executionTime": 1433,
+    "executionStatus": "success",
+    "data": {
+      "main": [
+        [
+          {
+            "json": {
+              "error": {
+                "message": "500 - \"{\\\"error\\\":\\\"Failed to forward to Whapi (Juana)\\\"}\"",
+                "name": "AxiosError",
+                "stack": "AxiosError: Request failed with status code 500\n    at settle (/usr/local/lib/node_modules/n8n/node_modules/.pnpm/axios@1.13.5/node_modules/axios/lib/core/settle.js:19:12)\n    at RedirectableRequest.handleResponse (/usr/local/lib/node_modules/n8n/node_modules/.pnpm/axios@1.13.5/node_modules/axios/lib/adapters/http.js:746:9)\n    at RedirectableRequest.emit (node:events:520:35)\n    at RedirectableRequest._processResponse (/usr/local/lib/node_modules/n8n/node_modules/.pnpm/follow-redirects@1.15.11/node_modules/follow-redirects/index.js:409:10)\n    at ClientRequest.RedirectableRequest._onNativeResponse (/usr/local/lib/node_modules/n8n/node_modules/.pnpm/follow-redirects@1.15.11/node_modules/follow-redirects/index.js:102:12)\n    at Object.onceWrapper (node:events:623:26)\n    at ClientRequest.emit (node:events:508:28)\n    at HTTPParser.parserOnIncomingClient (node:_http_client:780:27)\n    at HTTPParser.parserOnHeadersComplete (node:_http_common:125:17)\n    at Socket.socketOnData (node:_http_client:615:22)\n    at Axios.request (/usr/local/lib/node_modules/n8n/node_modules/.pnpm/axios@1.13.5/node_modules/axios/lib/core/Axios.js:46:41)\n    at processTicksAndRejections (node:internal/process/task_queues:103:5)\n    at invokeAxios (/usr/local/lib/node_modules/n8n/node_modules/.pnpm/n8n-core@file+packages+core_@opentelemetry+api@1.9.0_@opentelemetry+exporter-trace-otlp_9f358c3eeaef0d2736f54ac9757ada43/node_modules/n8n-core/src/execution-engine/node-execution-context/utils/request-helper-functions.ts:303:10)\n    at proxyRequestToAxios (/usr/local/lib/node_modules/n8n/node_modules/.pnpm/n8n-core@file+packages+core_@opentelemetry+api@1.9.0_@opentelemetry+exporter-trace-otlp_9f358c3eeaef0d2736f54ac9757ada43/node_modules/n8n-core/src/execution-engine/node-execution-context/utils/request-helper-functions.ts:684:20)\n    at Object.request (/usr/local/lib/node_modules/n8n/node_modules/.pnpm/n8n-core@file+packages+core_@opentelemetry+api@1.9.0_@opentelemetry+exporter-trace-otlp_9f358c3eeaef0d2736f54ac9757ada43/node_modules/n8n-core/src/execution-engine/node-execution-context/utils/request-helper-functions.ts:1841:4)",
+                "code": "ERR_BAD_RESPONSE",
+                "status": 500
+              }
+            },
+            "pairedItem": {
+              "item": 0
+            }
+          }
+        ]
+      ]
+    }
+  }
+]

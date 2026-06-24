@@ -1,0 +1,25 @@
+import sqlite3
+import json
+
+db_path = '/var/lib/docker/volumes/worldmodels-jobs_n8n_data/_data/database.sqlite'
+
+try:
+    conn = sqlite3.connect(db_path)
+    conn.row_factory = sqlite3.Row
+    c = conn.cursor()
+
+    c.execute("SELECT id, name, nodes FROM workflow_entity")
+    for row in c.fetchall():
+        nodes = json.loads(row['nodes'])
+        for node in nodes:
+            if 'parameters' in node and 'jsCode' in node['parameters']:
+                js = node['parameters']['jsCode']
+                if '120363425790792660@g.us' in js:
+                    print(f"Workflow ID: {row['id']}, Node: {node['name']}")
+                    if node['name'] == 'Dynamic Routing Engine':
+                        print("JS CODE:")
+                        print(js)
+            
+    conn.close()
+except Exception as e:
+    print(f"Error: {e}")
