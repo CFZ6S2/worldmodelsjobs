@@ -111,10 +111,34 @@ router.get('/ads', async (req, res) => {
     let mainQuery = db.collection('ofertas').orderBy('timestamp', 'desc').limit(100);
     if (category && category !== 'all') {
       const catKey = category.toUpperCase().startsWith('CAT_') ? category.toUpperCase() : `CAT_${category.toUpperCase()}`;
-      mainQuery = db.collection('ofertas').where('category', '==', catKey).orderBy('timestamp', 'desc').limit(100);
+      // Los docs viejos usan 'categoria', los nuevos 'category' — consultamos ambos y mergeamos
+      const [snap1, snap2] = await Promise.all([
+        db.collection('ofertas').where('category', '==', catKey).orderBy('timestamp', 'desc').limit(100).get(),
+        db.collection('ofertas').where('categoria', '==', catKey).orderBy('timestamp', 'desc').limit(100).get(),
+      ]);
+      const seen = new Set();
+      const merged = [];
+      [...snap1.docs, ...snap2.docs].forEach(doc => {
+        if (!seen.has(doc.id)) { seen.add(doc.id); merged.push(doc); }
+      });
+      merged.sort((a, b) => (b.data().timestamp || '') > (a.data().timestamp || '') ? 1 : -1);
+      const items = merged.slice(0, 100).map(doc => {
+        const d = doc.data();
+        d.category = d.category || d.categoria;
+        d.city = d.city || d.ubicacion;
+        d.content = d.content || d.descripcion;
+        return { id: doc.id, ...d };
+      });
+      return res.json({ ok: true, items });
     }
     const snap = await mainQuery.get();
-    const items = snap.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+    const items = snap.docs.map(doc => {
+      const d = doc.data();
+      d.category = d.category || d.categoria;
+      d.city = d.city || d.ubicacion;
+      d.content = d.content || d.descripcion;
+      return { id: doc.id, ...d };
+    });
     res.json({ ok: true, items });
   } catch (err) { res.status(500).json({ ok: false, error: err.message }); }
 });
