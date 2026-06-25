@@ -118,6 +118,10 @@ const adsHandler = async (req, res) => {
     if (!desc) return res.status(200).json({ ok: false, message: 'Empty' });
 
     const hash = getLeadHash(desc);
+
+    const existing = await db.collection('lead_hashes').doc(hash).get();
+    if (existing.exists) return res.status(200).json({ ok: false, message: 'Duplicate', hash });
+
     const category = body.categoria || body.category || autoCategorize(desc);
 
     const payload = {
