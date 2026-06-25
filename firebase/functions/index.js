@@ -1,8 +1,11 @@
 const { onRequest } = require('firebase-functions/v2/https');
+const { defineSecret } = require('firebase-functions/params');
 const admin = require('firebase-admin');
 const express = require('express');
 const cors = require('cors');
 const crypto = require('crypto');
+
+const secretRoutingPassword = defineSecret('ROUTING_PASSWORD');
 
 admin.initializeApp();
 const db = admin.firestore();
@@ -313,7 +316,7 @@ router.post('/auth/link-channel', async (req, res) => {
   } catch(e) { res.status(500).json({error: e.message}); }
 });
 
-exports.api = onRequest({ region: 'europe-west1', cors: true }, app)
+exports.api = onRequest({ region: 'europe-west1', cors: true, secrets: [secretRoutingPassword] }, app)
 
 // ============================================================
 // WEB — proxy Next.js desde VPS (puerto 3000 via nginx)
