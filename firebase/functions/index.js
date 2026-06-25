@@ -23,16 +23,29 @@ function getLeadHash(text) {
   return crypto.createHash('sha256').update(normalized).digest('hex');
 }
 
-// Intelligent Categorization Engine
 function autoCategorize(text) {
   const content = (text || '').toLowerCase();
-  const plazasKeywords = ['plaza', 'vacante', 'contratando', 'puesto', 'oferta de trabajo', 'trabajo', 'job', 'hiring', 'contratacion', 'se busca', 'requisito', 'reponedor', 'mozo', 'limpieza', 'camarer'];
-  const eventosKeywords = ['evento', 'party', 'fiesta', 'show', 'bolo', 'presentacion', 'casting', 'event', 'party', 'club', 'vuelo', 'hotel', 'modelo', 'imagen', 'azafata'];
 
-  if (plazasKeywords.some(kw => content.includes(kw))) return 'CAT_PLAZAS';
+  const eventosKeywords = [
+    'evento', 'party', 'fiesta', 'show', 'bolo', 'presentacion', 'casting',
+    'club nocturno', 'club de noche', 'discoteca', 'vuelo privado', 'yate',
+    'azafata', 'hostess', 'promotora', 'imagen', 'modelo evento',
+    'inauguracion', 'gala', 'desfile', 'photoshoot', 'sesion de fotos',
+  ];
+
+  const plazasKeywords = [
+    'vacante', 'contratando', 'puesto', 'oferta de trabajo', 'oferta laboral',
+    'hiring', 'contratacion', 'se busca', 'buscamos', 'requisito', 'salario',
+    'sueldo', 'reponedor', 'mozo', 'limpieza', 'camarero', 'camarera',
+    'cocinero', 'cocinera', 'recepcionista', 'dependienta', 'dependiente',
+    'plaza', 'jornada', 'turno', 'contrato',
+  ];
+
+  // Eventos primero — más específico y fácil de confirmar
   if (eventosKeywords.some(kw => content.includes(kw))) return 'CAT_EVENTOS';
-  
-  return 'CAT_PLAZAS'; 
+  if (plazasKeywords.some(kw => content.includes(kw))) return 'CAT_PLAZAS';
+
+  return 'CAT_GENERAL';
 }
 
 const allowedOrigins = ['*'];
