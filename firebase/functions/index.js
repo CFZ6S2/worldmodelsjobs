@@ -1,5 +1,6 @@
 const { onRequest } = require('firebase-functions/v2/https');
 const { defineSecret } = require('firebase-functions/params');
+const rateLimit = require('express-rate-limit');
 const admin = require('firebase-admin');
 const express = require('express');
 const cors = require('cors');
@@ -50,6 +51,14 @@ function autoCategorize(text) {
 
 const allowedOrigins = ['*'];
 app.use(cors({ origin: allowedOrigins }));
+
+app.use(rateLimit({
+  windowMs: 60 * 1000,
+  max: 60,
+  standardHeaders: true,
+  legacyHeaders: false,
+  message: { error: 'Too many requests' },
+}));
 app.use((req, res, next) => {
   if (req.originalUrl.includes('/webhook')) next();
   else express.json()(req, res, next);
@@ -340,6 +349,15 @@ exports.api = onRequest({ region: 'europe-west1', cors: true, secrets: [secretRo
 // ============================================================
 const webApp = express();
 const VPS_WEB = VPS_BASE;
+
+const webRateLimit = rateLimit({
+  windowMs: 60 * 1000,
+  max: 120,
+  standardHeaders: true,
+  legacyHeaders: false,
+  message: { error: 'Too many requests' },
+});
+webApp.use(webRateLimit);
 
 webApp.use(async (req, res) => {
   try {
