@@ -1,0 +1,1 @@
+ssh root@178.156.186.149 "docker exec n8n n8n update:workflow --id=worldmodels-v5-fixed-global --active=false && docker exec n8n n8n update:workflow --id=A0QpoDzX559wzRXQ --active=true && docker restart n8n"

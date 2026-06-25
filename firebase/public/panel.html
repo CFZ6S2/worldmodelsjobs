@@ -1,0 +1,513 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>WorldModels Panel</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;background:#080808;color:#e0e0e0;min-height:100vh}
+/* LOGIN */
+.login-wrap{display:flex;align-items:center;justify-content:center;min-height:100vh}
+.login-box{background:#111;border:1px solid #222;border-radius:20px;padding:40px;width:320px;text-align:center}
+.login-logo{font-size:28px;font-weight:800;color:#c9a84c;letter-spacing:2px;margin-bottom:4px}
+.login-sub{font-size:12px;color:#555;margin-bottom:28px;text-transform:uppercase;letter-spacing:3px}
+.login-box input{width:100%;padding:13px;border-radius:12px;border:1px solid #2a2a2a;background:#0d0d0d;color:#fff;font-size:15px;margin-bottom:12px;outline:none}
+.login-box input:focus{border-color:#c9a84c}
+.btn-gold{background:#c9a84c;color:#000;border:none;border-radius:12px;padding:13px 24px;font-size:14px;font-weight:700;cursor:pointer;width:100%}
+.btn-gold:hover{background:#d4b35a}
+/* LAYOUT */
+.app{display:none;min-height:100vh}
+.sidebar{position:fixed;top:0;left:0;width:220px;height:100vh;background:#0d0d0d;border-right:1px solid #1a1a1a;padding:20px 0;z-index:100}
+.sidebar-logo{padding:0 20px 24px;border-bottom:1px solid #1a1a1a;margin-bottom:16px}
+.sidebar-logo .name{font-size:16px;font-weight:800;color:#c9a84c}
+.sidebar-logo .ver{font-size:10px;color:#444;text-transform:uppercase;letter-spacing:2px}
+.nav-item{display:flex;align-items:center;gap:10px;padding:11px 20px;cursor:pointer;font-size:13px;color:#666;transition:all .15s;border-left:3px solid transparent}
+.nav-item:hover{color:#aaa;background:#111}
+.nav-item.active{color:#c9a84c;background:#0f0d00;border-left-color:#c9a84c}
+.nav-icon{font-size:16px;width:20px;text-align:center}
+.main{margin-left:220px;padding:28px;max-width:1100px}
+.page{display:none}
+.page.active{display:block}
+/* CARDS */
+.page-title{font-size:22px;font-weight:700;color:#fff;margin-bottom:6px}
+.page-sub{font-size:13px;color:#555;margin-bottom:24px}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:20px}
+.grid3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:16px;margin-bottom:20px}
+.stat-card{background:#111;border:1px solid #1e1e1e;border-radius:16px;padding:20px}
+.stat-num{font-size:32px;font-weight:800;color:#c9a84c}
+.stat-label{font-size:12px;color:#555;text-transform:uppercase;letter-spacing:1px;margin-top:4px}
+.stat-sub{font-size:11px;color:#444;margin-top:8px}
+/* TABLE */
+.table-card{background:#111;border:1px solid #1e1e1e;border-radius:16px;overflow:hidden;margin-bottom:20px}
+.table-head{padding:16px 20px;border-bottom:1px solid #1a1a1a;display:flex;justify-content:space-between;align-items:center}
+.table-head h3{font-size:14px;font-weight:600;color:#888}
+table{width:100%;border-collapse:collapse}
+th{padding:10px 16px;text-align:left;font-size:11px;color:#555;text-transform:uppercase;letter-spacing:1px;border-bottom:1px solid #1a1a1a}
+td{padding:12px 16px;font-size:13px;border-bottom:1px solid #0f0f0f;vertical-align:middle}
+tr:last-child td{border-bottom:none}
+tr:hover td{background:#0d0d0d}
+.badge{display:inline-block;padding:3px 9px;border-radius:20px;font-size:11px;font-weight:600}
+.badge-green{background:#0d2b0d;color:#4caf50;border:1px solid #1a5a1a}
+.badge-red{background:#2b0d0d;color:#f44;border:1px solid #5a1a1a}
+.badge-yellow{background:#2b2000;color:#c9a84c;border:1px solid #4a3800}
+.badge-gray{background:#1a1a1a;color:#666;border:1px solid #2a2a2a}
+/* FORMS */
+.form-card{background:#111;border:1px solid #1e1e1e;border-radius:16px;padding:24px;margin-bottom:16px}
+.form-card h3{font-size:14px;font-weight:600;color:#888;margin-bottom:16px;text-transform:uppercase;letter-spacing:1px}
+.field{margin-bottom:14px}
+.field label{display:block;font-size:11px;color:#555;margin-bottom:6px;text-transform:uppercase;letter-spacing:1px}
+.field input,.field select{width:100%;padding:11px 14px;border-radius:10px;border:1px solid #222;background:#0a0a0a;color:#fff;font-size:14px;outline:none}
+.field input:focus,.field select:focus{border-color:#c9a84c}
+.field select option{background:#111}
+.btn-sm{padding:7px 14px;border-radius:8px;border:none;cursor:pointer;font-size:12px;font-weight:600}
+.btn-primary{background:#c9a84c;color:#000}
+.btn-danger{background:#c0392b;color:#fff}
+.btn-gray{background:#222;color:#aaa}
+.btn-blue{background:#1a4a7a;color:#7ab3f0}
+.row-actions{display:flex;gap:6px}
+/* PROCESS LIST */
+.proc-row{display:flex;align-items:center;gap:12px;padding:12px 0;border-bottom:1px solid #111}
+.proc-row:last-child{border-bottom:none}
+.proc-dot{width:8px;height:8px;border-radius:50%;flex-shrink:0}
+.dot-green{background:#4caf50;box-shadow:0 0 6px #4caf5066}
+.dot-red{background:#f44}
+.dot-yellow{background:#c9a84c}
+.proc-name{font-size:13px;color:#ccc;flex:1}
+.proc-meta{font-size:11px;color:#555}
+/* TOAST */
+.toast{position:fixed;bottom:24px;right:24px;padding:12px 20px;border-radius:12px;font-size:13px;font-weight:600;z-index:9999;opacity:0;transition:opacity .3s;pointer-events:none}
+.toast.show{opacity:1}
+.toast.ok{background:#0d2b0d;border:1px solid #1a5a1a;color:#4caf50}
+.toast.err{background:#2b0d0d;border:1px solid #5a1a1a;color:#f44}
+/* MISC */
+.divider{height:1px;background:#1a1a1a;margin:20px 0}
+.tag{display:inline-block;padding:2px 8px;border-radius:6px;font-size:11px;background:#1a1500;color:#c9a84c;border:1px solid #2a2200;margin:1px}
+.empty{color:#444;font-size:13px;padding:24px;text-align:center}
+.chip-grid{display:flex;flex-wrap:wrap;gap:6px}
+input[type=number]{-moz-appearance:textfield}
+.search-bar{padding:10px 14px;border-radius:10px;border:1px solid #222;background:#0a0a0a;color:#fff;font-size:13px;outline:none;width:240px}
+.search-bar:focus{border-color:#c9a84c}
+</style>
+</head>
+<body>
+
+<!-- LOGIN -->
+<div class="login-wrap" id="LS">
+  <div class="login-box">
+    <div class="login-logo">WORLDMODELS</div>
+    <div class="login-sub">Panel de Control</div>
+    <input type="password" id="pw" placeholder="Contraseña..." onkeydown="if(event.key==='Enter')login()">
+    <button class="btn-gold" onclick="login()">Entrar</button>
+    <div id="lerr" style="color:#f44;font-size:12px;margin-top:10px"></div>
+  </div>
+</div>
+
+<!-- APP -->
+<div class="app" id="APP">
+  <!-- Sidebar -->
+  <div class="sidebar">
+    <div class="sidebar-logo">
+      <div class="name">WORLDMODELS</div>
+      <div class="ver">Control Panel v2</div>
+    </div>
+    <div class="nav-item active" onclick="nav('dashboard')"><span class="nav-icon">⬡</span> Dashboard</div>
+    <div class="nav-item" onclick="nav('clientes')"><span class="nav-icon">👥</span> Clientes</div>
+    <div class="nav-item" onclick="nav('registro')"><span class="nav-icon">✚</span> Nueva Clienta</div>
+    <div class="nav-item" onclick="nav('bans')"><span class="nav-icon">🚫</span> Bans</div>
+    <div class="nav-item" onclick="nav('sistema')"><span class="nav-icon">⚙</span> Sistema</div>
+  </div>
+
+  <!-- Main -->
+  <div class="main">
+
+    <!-- DASHBOARD -->
+    <div class="page active" id="page-dashboard">
+      <div class="page-title">Dashboard</div>
+      <div class="page-sub">Estado general del sistema</div>
+      <div class="grid3" id="STATS">
+        <div class="stat-card"><div class="stat-num" id="s-total">—</div><div class="stat-label">Clientes totales</div></div>
+        <div class="stat-card"><div class="stat-num" id="s-active">—</div><div class="stat-label">Activas</div></div>
+        <div class="stat-card"><div class="stat-num" id="s-trial">—</div><div class="stat-label">En prueba</div></div>
+        <div class="stat-card"><div class="stat-num" id="s-banned">—</div><div class="stat-label">Números baneados</div></div>
+        <div class="stat-card"><div class="stat-num" id="s-prefixes">—</div><div class="stat-label">Prefijos bloqueados</div></div>
+        <div class="stat-card"><div class="stat-num" id="s-proc">—</div><div class="stat-label">Procesos online</div></div>
+      </div>
+      <div class="table-card">
+        <div class="table-head"><h3>Procesos del servidor</h3><button class="btn-sm btn-gray" onclick="loadStatus()">Actualizar</button></div>
+        <div style="padding:16px 20px" id="PROCS"><div class="empty">Cargando...</div></div>
+      </div>
+    </div>
+
+    <!-- CLIENTES -->
+    <div class="page" id="page-clientes">
+      <div class="page-title">Clientes</div>
+      <div class="page-sub">Gestión de todas las clientas registradas</div>
+      <div style="display:flex;gap:10px;margin-bottom:16px;align-items:center">
+        <input class="search-bar" id="client-search" placeholder="Buscar por nombre, WA o ciudad..." oninput="renderClients()">
+        <button class="btn-sm btn-gray" onclick="loadClients()">Actualizar</button>
+      </div>
+      <div id="CLIENT_LIST"><div class="empty">Cargando...</div></div>
+    </div>
+
+    <!-- NUEVA CLIENTA (admin manual) -->
+    <div class="page" id="page-registro">
+      <div class="page-title">Nueva Clienta</div>
+      <div class="page-sub">Añadir clienta manualmente al sistema de routing</div>
+      <div class="form-card">
+        <h3>Datos</h3>
+        <div class="grid2">
+          <div class="field"><label>Nombre / Etiqueta</label><input type="text" id="r-label" placeholder="Ej: SOFIA_LONDON"></div>
+          <div class="field"><label>WhatsApp (con prefijo país)</label><input type="tel" id="r-wa" placeholder="447XXXXXXXXX"></div>
+        </div>
+        <div class="grid2">
+          <div class="field"><label>Telegram ID (opcional)</label><input type="text" id="r-tg" placeholder="ID numérico o @username"></div>
+          <div class="field"><label>Categoría</label>
+            <select id="r-cat">
+              <option value="">Todo (plazas + eventos)</option>
+              <option value="plaza">Solo plazas</option>
+              <option value="evento">Solo eventos</option>
+            </select>
+          </div>
+        </div>
+        <div class="field"><label>Ciudades</label>
+          <div class="chip-grid" id="CITY_CHIPS" style="margin-top:8px"></div>
+        </div>
+        <div style="margin-top:16px;display:flex;gap:10px">
+          <button class="btn-sm btn-primary" onclick="saveClient()">Guardar y activar routing</button>
+          <button class="btn-sm btn-gray" onclick="clearForm()">Limpiar</button>
+        </div>
+        <div id="r-msg" style="margin-top:12px;font-size:13px"></div>
+      </div>
+    </div>
+
+    <!-- BANS -->
+    <div class="page" id="page-bans">
+      <div class="page-title">Números Baneados</div>
+      <div class="page-sub">Números y prefijos de países bloqueados del sistema</div>
+      <div class="grid2">
+        <div class="form-card">
+          <h3>Añadir número individual</h3>
+          <div class="field"><label>Número (con prefijo país, sin +)</label><input type="tel" id="ban-num" placeholder="34647607330"></div>
+          <button class="btn-sm btn-danger" onclick="addBan('number')">Banear número</button>
+        </div>
+        <div class="form-card">
+          <h3>Añadir prefijo de país</h3>
+          <div class="field"><label>Prefijo (sin +)</label><input type="tel" id="ban-prefix" placeholder="234 = Nigeria"></div>
+          <button class="btn-sm btn-danger" onclick="addBan('prefix')">Banear prefijo</button>
+        </div>
+      </div>
+
+      <div class="table-card">
+        <div class="table-head"><h3>Prefijos de países baneados (<span id="prefix-count">0</span>)</h3></div>
+        <div style="padding:16px 20px">
+          <div class="chip-grid" id="PREFIX_LIST"><div class="empty">Cargando...</div></div>
+        </div>
+      </div>
+
+      <div class="table-card">
+        <div class="table-head">
+          <h3>Números individuales (<span id="num-count">0</span>)</h3>
+          <input class="search-bar" id="ban-search" placeholder="Filtrar..." oninput="renderBans()" style="width:180px">
+        </div>
+        <table>
+          <thead><tr><th>Número</th><th>Prefijo</th><th>Acción</th></tr></thead>
+          <tbody id="NUM_LIST"><tr><td colspan="3" class="empty">Cargando...</td></tr></tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- SISTEMA -->
+    <div class="page" id="page-sistema">
+      <div class="page-title">Sistema</div>
+      <div class="page-sub">Procesos PM2 y control del servidor</div>
+      <div class="table-card">
+        <div class="table-head"><h3>Procesos activos</h3><button class="btn-sm btn-gray" onclick="loadStatus()">Actualizar</button></div>
+        <table>
+          <thead><tr><th>Proceso</th><th>Estado</th><th>Memoria</th><th>Reinicios</th><th>Acción</th></tr></thead>
+          <tbody id="PROC_TABLE"><tr><td colspan="5" class="empty">Cargando...</td></tr></tbody>
+        </table>
+      </div>
+    </div>
+
+  </div><!-- /main -->
+</div><!-- /app -->
+
+<div class="toast" id="TOAST"></div>
+
+<script>
+var API = '/api';
+var pw = '';
+var clients = [];
+var bansData = { numbers: [], prefixes: [] };
+
+var CITIES = {
+  ibiza:'Ibiza', marbella:'Marbella/Costa Sol', madrid:'Madrid', barcelona:'Barcelona',
+  monaco:'Monaco/Niza/Cannes', london:'Londres/UK', russia_turkey:'Rusia/Turquia/Baku',
+  suiza:'Suiza', amsterdam:'Amsterdam', dubai:'Dubai', paris:'Paris',
+  berlin:'Berlin/Munich', new_york:'New York', miami:'Miami',
+  los_angeles:'Los Angeles', boston:'Boston'
+};
+
+var PRICES = {1:'20€',2:'30€',3:'36€',4:'40€'};
+function priceFor(n){ return n>=5?'150€':PRICES[Math.min(n,4)]||'20€'; }
+
+// ---------------------------------------------------------------
+// AUTH
+// ---------------------------------------------------------------
+function login(){
+  pw = document.getElementById('pw').value;
+  Promise.all([
+    fetch(API+'/routing/clients', {headers:{'x-routing-password':pw}}).then(r=>r.status===401?Promise.reject():r.json()),
+  ]).then(function(results){
+    clients = results[0];
+    document.getElementById('LS').style.display='none';
+    document.getElementById('APP').style.display='block';
+    buildCityChips();
+    loadAll();
+  }).catch(function(){ document.getElementById('lerr').textContent='Contraseña incorrecta'; });
+}
+document.getElementById('pw').focus();
+
+// ---------------------------------------------------------------
+// NAVIGATION
+// ---------------------------------------------------------------
+function nav(page){
+  document.querySelectorAll('.page').forEach(function(el){ el.classList.remove('active'); });
+  document.querySelectorAll('.nav-item').forEach(function(el){ el.classList.remove('active'); });
+  document.getElementById('page-'+page).classList.add('active');
+  event.currentTarget.classList.add('active');
+  if(page==='clientes') loadClients();
+  if(page==='bans') loadBans();
+  if(page==='sistema') loadStatus();
+  if(page==='dashboard') loadAll();
+}
+
+// ---------------------------------------------------------------
+// LOAD ALL
+// ---------------------------------------------------------------
+function loadAll(){
+  loadClients();
+  loadBans();
+  loadStatus();
+}
+
+// ---------------------------------------------------------------
+// CLIENTS
+// ---------------------------------------------------------------
+function loadClients(){
+  fetch(API+'/routing/clients',{headers:{'x-routing-password':pw}})
+    .then(function(r){return r.json();})
+    .then(function(d){ clients=d; renderClients(); updateStats(); })
+    .catch(function(){ toast('Error cargando clientes',false); });
+}
+
+function renderClients(){
+  var q = (document.getElementById('client-search').value||'').toLowerCase();
+  var filtered = clients.filter(function(c){
+    if(!q) return true;
+    return (c.label||'').toLowerCase().includes(q)||(c.wa||'').includes(q)||
+           (c.cities||[]).some(function(x){ return x.includes(q); });
+  });
+
+  if(!filtered.length){ document.getElementById('CLIENT_LIST').innerHTML='<div class="empty">Sin resultados</div>'; return; }
+
+  var html = '<div class="table-card"><table><thead><tr><th>Nombre</th><th>WhatsApp</th><th>Ciudades</th><th>Estado</th><th>Tipo</th><th>Acciones</th></tr></thead><tbody>';
+  filtered.forEach(function(c){
+    var now = Date.now();
+    var isTrial = c.source==='self-register' && c.trialUntil && now < c.trialUntil && c.active!==false;
+    var isExpired = c.source==='self-register' && c.trialUntil && now > c.trialUntil;
+    var isActive = c.active !== false;
+    var statusBadge = isExpired ? '<span class="badge badge-red">Trial expirado</span>'
+      : isTrial ? '<span class="badge badge-yellow">Trial</span>'
+      : isActive ? '<span class="badge badge-green">Activa</span>'
+      : '<span class="badge badge-red">Inactiva</span>';
+    var cities = (c.cities||[]).map(function(x){ return '<span class="tag">'+(CITIES[x]||x)+'</span>'; }).join('');
+    var tipo = c.categoryFilter ? '<span class="badge badge-gray">Solo '+c.categoryFilter+'</span>' : '<span class="badge badge-gray">Todo</span>';
+    var trialInfo = isTrial ? ' <span style="font-size:10px;color:#666">hasta '+new Date(c.trialUntil).toLocaleString('es')+'</span>' : '';
+
+    var actions = '<div class="row-actions">';
+    if(!isActive) actions += '<button class="btn-sm btn-primary" onclick="reactivate(\''+c.wa+'\')">Reactivar</button>';
+    if(isActive && c.source==='self-register') actions += '<button class="btn-sm btn-gray" onclick="deactivate(\''+c.wa+'\')">Desactivar</button>';
+    actions += '<button class="btn-sm btn-danger" onclick="deleteClient(\''+c.id+'\')">Borrar</button></div>';
+
+    html += '<tr><td><b style="color:#c9a84c">'+c.label+'</b>'+(c.tg?'<br><span style="font-size:11px;color:#555">TG: '+c.tg+'</span>':'')+'</td>';
+    html += '<td style="font-family:monospace;font-size:12px">+'+c.wa+'</td>';
+    html += '<td>'+cities+'</td>';
+    html += '<td>'+statusBadge+trialInfo+'</td>';
+    html += '<td>'+tipo+'</td>';
+    html += '<td>'+actions+'</td></tr>';
+  });
+  html += '</tbody></table></div>';
+  document.getElementById('CLIENT_LIST').innerHTML = html;
+}
+
+function reactivate(wa){
+  fetch(API+'/registro/reactivate',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({wa:wa,password:pw})})
+    .then(function(r){return r.json();})
+    .then(function(d){ if(d.ok){toast('Clienta reactivada',true);loadClients();}else toast('Error: '+d.error,false); });
+}
+
+function deactivate(wa){
+  if(!confirm('Desactivar esta clienta?')) return;
+  var updated = clients.map(function(c){ return c.wa===wa ? Object.assign({},c,{active:false}) : c; });
+  saveClientsArray(updated);
+}
+
+function deleteClient(id){
+  if(!confirm('Borrar esta clienta permanentemente?')) return;
+  var updated = clients.filter(function(c){ return c.id!==id; });
+  saveClientsArray(updated);
+}
+
+function saveClientsArray(arr){
+  fetch(API+'/routing/clients',{method:'POST',headers:{'Content-Type':'application/json','x-routing-password':pw},body:JSON.stringify(arr)})
+    .then(function(r){return r.json();})
+    .then(function(d){ if(d.ok){toast('Guardado y routing actualizado',true);clients=arr;renderClients();updateStats();}else toast('Error: '+d.error,false); });
+}
+
+// ---------------------------------------------------------------
+// ADD CLIENT (manual)
+// ---------------------------------------------------------------
+function buildCityChips(){
+  var html='';
+  Object.keys(CITIES).forEach(function(k){
+    html += '<div onclick="togChip(this,\''+k+'\')" data-city="'+k+'" style="padding:7px 14px;border-radius:20px;border:1px solid #2a2a2a;background:#0d0d0d;color:#666;font-size:12px;font-weight:600;cursor:pointer;user-select:none;transition:all .15s">'+CITIES[k]+'</div>';
+  });
+  document.getElementById('CITY_CHIPS').innerHTML = html;
+}
+function togChip(el,k){
+  el.classList.toggle('SEL');
+  if(el.classList.contains('SEL')){ el.style.borderColor='#c9a84c';el.style.background='#1c1500';el.style.color='#c9a84c'; }
+  else { el.style.borderColor='#2a2a2a';el.style.background='#0d0d0d';el.style.color='#666'; }
+}
+function saveClient(){
+  var label=document.getElementById('r-label').value.trim().toUpperCase().replace(/\s+/g,'_');
+  var wa=document.getElementById('r-wa').value.replace(/\D/g,'');
+  var tg=document.getElementById('r-tg').value.trim();
+  var cat=document.getElementById('r-cat').value;
+  var cities=[];
+  document.querySelectorAll('#CITY_CHIPS .SEL').forEach(function(el){ cities.push(el.dataset.city); });
+  if(!label||!wa||!cities.length){ toast('Rellena nombre, WA y al menos una ciudad',false); return; }
+  var existing = clients.find(function(c){ return c.wa===wa; });
+  if(existing){ toast('Este número ya existe en el sistema',false); return; }
+  var nc={id:label+'_'+Date.now(),label:label,wa:wa,tg:tg,cities:cities,categoryFilter:cat,active:true};
+  var updated=[].concat(clients,[nc]);
+  fetch(API+'/routing/clients',{method:'POST',headers:{'Content-Type':'application/json','x-routing-password':pw},body:JSON.stringify(updated)})
+    .then(function(r){return r.json();})
+    .then(function(d){ if(d.ok){toast('Clienta añadida y routing actualizado',true);clients=updated;clearForm();}else toast('Error: '+d.error,false); });
+}
+function clearForm(){
+  document.getElementById('r-label').value='';
+  document.getElementById('r-wa').value='';
+  document.getElementById('r-tg').value='';
+  document.getElementById('r-cat').value='';
+  document.querySelectorAll('#CITY_CHIPS div').forEach(function(el){
+    el.classList.remove('SEL');
+    el.style.borderColor='#2a2a2a';el.style.background='#0d0d0d';el.style.color='#666';
+  });
+}
+
+// ---------------------------------------------------------------
+// BANS
+// ---------------------------------------------------------------
+function loadBans(){
+  fetch(API+'/admin/bans',{headers:{'x-routing-password':pw}})
+    .then(function(r){return r.json();})
+    .then(function(d){ bansData=d; renderBans(); updateStats(); })
+    .catch(function(){});
+}
+
+function renderBans(){
+  var q=(document.getElementById('ban-search').value||'').toLowerCase();
+  // Prefixes
+  document.getElementById('prefix-count').textContent=bansData.prefixes.length;
+  var ph='';
+  bansData.prefixes.forEach(function(p){
+    ph+='<div style="display:inline-flex;align-items:center;gap:5px;padding:5px 10px;border-radius:20px;border:1px solid #3a1a1a;background:#1a0a0a;color:#f06;font-size:12px;margin:2px">+'+p+'<span onclick="removeBan(\'prefix\',\''+p+'\')" style="cursor:pointer;color:#555;font-size:14px;line-height:1">×</span></div>';
+  });
+  document.getElementById('PREFIX_LIST').innerHTML=ph||'<div class="empty">Sin prefijos</div>';
+
+  // Numbers
+  var nums=bansData.numbers.filter(function(n){ return !q||n.includes(q); });
+  document.getElementById('num-count').textContent=bansData.numbers.length;
+  var rows=nums.map(function(n){
+    return '<tr><td style="font-family:monospace">+'+n+'</td><td><span class="badge badge-gray">+'+n.substring(0,3)+'</span></td><td><button class="btn-sm btn-danger" onclick="removeBan(\'number\',\''+n+'\')">Borrar</button></td></tr>';
+  }).join('');
+  document.getElementById('NUM_LIST').innerHTML=rows||'<tr><td colspan="3" class="empty">Sin números</td></tr>';
+}
+
+function addBan(type){
+  var val=document.getElementById(type==='number'?'ban-num':'ban-prefix').value.replace(/[^0-9]/g,'');
+  if(!val){ toast('Introduce un valor válido',false); return; }
+  fetch(API+'/admin/bans/'+type,{method:'POST',headers:{'Content-Type':'application/json','x-routing-password':pw},body:JSON.stringify(type==='number'?{number:val,password:pw}:{prefix:val,password:pw})})
+    .then(function(r){return r.json();})
+    .then(function(d){ if(d.ok){toast(type==='number'?'Número baneado':'Prefijo baneado',true);document.getElementById(type==='number'?'ban-num':'ban-prefix').value='';loadBans();}else toast('Error: '+d.error,false); });
+}
+
+function removeBan(type,val){
+  fetch(API+'/admin/bans/'+type,{method:'DELETE',headers:{'Content-Type':'application/json','x-routing-password':pw},body:JSON.stringify(type==='number'?{number:val,password:pw}:{prefix:val,password:pw})})
+    .then(function(r){return r.json();})
+    .then(function(d){ if(d.ok){toast('Eliminado',true);loadBans();}else toast('Error',false); });
+}
+
+// ---------------------------------------------------------------
+// STATUS
+// ---------------------------------------------------------------
+function loadStatus(){
+  fetch(API+'/admin/status',{headers:{'x-routing-password':pw}})
+    .then(function(r){return r.json();})
+    .then(function(d){
+      if(!d.ok) return;
+      // Dashboard procs
+      var onlineCount=d.processes.filter(function(p){ return p.status==='online'; }).length;
+      document.getElementById('s-proc').textContent=onlineCount+'/'+d.processes.length;
+      var ph='';
+      d.processes.forEach(function(p){
+        var dot=p.status==='online'?'dot-green':p.status==='errored'?'dot-red':'dot-yellow';
+        ph+='<div class="proc-row"><div class="proc-dot '+dot+'"></div><div class="proc-name">'+p.name+'</div><div class="proc-meta">'+p.memory+' &nbsp;|&nbsp; '+p.restarts+' reinicios</div></div>';
+      });
+      document.getElementById('PROCS').innerHTML=ph;
+      // System table
+      var rows=d.processes.map(function(p){
+        var badge=p.status==='online'?'badge-green':p.status==='errored'?'badge-red':'badge-yellow';
+        return '<tr><td><b>'+p.name+'</b></td><td><span class="badge '+badge+'">'+p.status+'</span></td><td>'+p.memory+'</td><td>'+p.restarts+'</td><td><button class="btn-sm btn-blue" onclick="restartProc(\''+p.name+'\')">Reiniciar</button></td></tr>';
+      }).join('');
+      document.getElementById('PROC_TABLE').innerHTML=rows;
+    }).catch(function(){});
+}
+
+function restartProc(name){
+  if(!confirm('Reiniciar '+name+'?')) return;
+  fetch(API+'/admin/restart',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({name:name,password:pw})})
+    .then(function(r){return r.json();})
+    .then(function(d){ toast(d.ok?name+' reiniciado':'Error',d.ok); setTimeout(loadStatus,3000); });
+}
+
+// ---------------------------------------------------------------
+// STATS
+// ---------------------------------------------------------------
+function updateStats(){
+  var now=Date.now();
+  var total=clients.length;
+  var active=clients.filter(function(c){ return c.active!==false; }).length;
+  var trial=clients.filter(function(c){ return c.source==='self-register'&&c.active!==false&&c.trialUntil&&now<c.trialUntil; }).length;
+  document.getElementById('s-total').textContent=total;
+  document.getElementById('s-active').textContent=active;
+  document.getElementById('s-trial').textContent=trial;
+  document.getElementById('s-banned').textContent=bansData.numbers.length;
+  document.getElementById('s-prefixes').textContent=bansData.prefixes.length;
+}
+
+// ---------------------------------------------------------------
+// TOAST
+// ---------------------------------------------------------------
+function toast(msg,ok){
+  var el=document.getElementById('TOAST');
+  el.textContent=msg;
+  el.className='toast '+(ok?'ok':'err')+' show';
+  setTimeout(function(){ el.classList.remove('show'); },3000);
+}
+</script>
+</body>
+</html>

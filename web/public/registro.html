@@ -1,0 +1,254 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>WorldModels - Acceso a Leads</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;background:#0a0a0a;color:#fff;min-height:100vh}
+.wrap{max-width:480px;margin:0 auto;padding:24px 16px 60px}
+.logo{text-align:center;padding:32px 0 24px}
+.logo-txt{font-size:28px;font-weight:800;color:#c9a84c;letter-spacing:1px}
+.logo-sub{font-size:13px;color:#555;margin-top:4px}
+.card{background:#141414;border:1px solid #222;border-radius:18px;padding:24px;margin-bottom:16px}
+.step-label{font-size:11px;font-weight:700;color:#c9a84c;text-transform:uppercase;letter-spacing:2px;margin-bottom:14px}
+.field{margin-bottom:16px}
+.field label{display:block;font-size:12px;color:#777;margin-bottom:6px;font-weight:500}
+.field input,.field select{width:100%;padding:13px 14px;border-radius:12px;border:1px solid #2a2a2a;background:#0d0d0d;color:#fff;font-size:15px;outline:none;transition:border-color .2s}
+.field input:focus,.field select:focus{border-color:#c9a84c}
+.field select option{background:#141414}
+.chip-group{display:flex;gap:8px;flex-wrap:wrap}
+.chip{padding:9px 16px;border-radius:24px;border:1px solid #2a2a2a;background:#0d0d0d;color:#888;font-size:13px;font-weight:600;cursor:pointer;transition:all .15s;user-select:none}
+.chip.sel{border-color:#c9a84c;background:#1c1500;color:#c9a84c}
+.city-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:12px}
+.cbox{display:flex;align-items:center;gap:8px;background:#0d0d0d;border:1px solid #2a2a2a;border-radius:10px;padding:9px 11px;cursor:pointer;transition:all .15s}
+.cbox input{width:16px;height:16px;accent-color:#c9a84c;flex-shrink:0;margin:0}
+.cbox label{font-size:13px;color:#aaa;cursor:pointer;line-height:1.2}
+.cbox.sel{border-color:#c9a84c44;background:#130f00}
+.cbox.sel label{color:#c9a84c}
+.toggle-row{display:flex;align-items:center;justify-content:space-between;padding:14px 0;border-top:1px solid #1e1e1e;margin-top:4px}
+.toggle-row span{font-size:14px;color:#bbb}
+.toggle{position:relative;width:44px;height:24px;flex-shrink:0}
+.toggle input{opacity:0;width:0;height:0}
+.slider{position:absolute;inset:0;background:#2a2a2a;border-radius:24px;transition:.2s;cursor:pointer}
+.slider:before{content:'';position:absolute;width:18px;height:18px;left:3px;top:3px;background:#fff;border-radius:50%;transition:.2s}
+.toggle input:checked+.slider{background:#c9a84c}
+.toggle input:checked+.slider:before{transform:translateX(20px)}
+.tg-section{display:none;margin-top:16px;padding-top:16px;border-top:1px solid #1e1e1e}
+.tg-box{background:#0d1520;border:1px solid #1a3050;border-radius:12px;padding:16px;text-align:center}
+.tg-box p{font-size:13px;color:#7aabdb;margin-bottom:12px;line-height:1.5}
+.tg-btn{display:inline-flex;align-items:center;gap:8px;background:#2481cc;color:#fff;padding:10px 20px;border-radius:10px;font-size:14px;font-weight:600;text-decoration:none;margin-bottom:14px}
+.tg-btn svg{width:18px;height:18px;fill:#fff}
+.tg-id-row{display:flex;align-items:center;gap:10px}
+.tg-id-row input{flex:1;margin:0}
+.tg-status{font-size:12px;margin-top:8px;display:none}
+.tg-ok{color:#4caf50}
+.tg-wait{color:#888}
+.divider{height:1px;background:#1a1a1a;margin:4px 0 16px}
+.trial-banner{background:linear-gradient(135deg,#1a1500,#0d0d00);border:1px solid #c9a84c33;border-radius:14px;padding:20px;text-align:center;margin-bottom:16px}
+.trial-banner h3{font-size:16px;color:#c9a84c;margin-bottom:6px}
+.trial-banner p{font-size:13px;color:#888;line-height:1.5}
+.trial-banner strong{color:#fff}
+.btn-main{width:100%;padding:16px;border-radius:14px;border:none;background:#c9a84c;color:#000;font-size:16px;font-weight:700;cursor:pointer;transition:opacity .2s;letter-spacing:.3px}
+.btn-main:active{opacity:.85}
+.btn-main:disabled{opacity:.4;cursor:not-allowed}
+.st{padding:12px 16px;border-radius:12px;font-size:13px;margin-bottom:12px;display:none;line-height:1.5}
+.stok{background:#0a200a;border:1px solid #1a5a1a;color:#4caf50;display:block}
+.sterr{background:#200a0a;border:1px solid #5a1a1a;color:#f55;display:block}
+.success-screen{display:none;text-align:center;padding:40px 20px}
+.success-screen .icon{font-size:56px;margin-bottom:20px}
+.success-screen h2{font-size:22px;color:#c9a84c;margin-bottom:12px}
+.success-screen p{font-size:14px;color:#888;line-height:1.6;margin-bottom:24px}
+.wa-num{font-size:18px;font-weight:700;color:#25d366;margin:8px 0}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="logo">
+    <div class="logo-txt">WorldModels</div>
+    <div class="logo-sub">Plataforma de leads</div>
+  </div>
+
+  <div id="FORM">
+    <!-- STEP 1: Tipo de lead -->
+    <div class="card">
+      <div class="step-label">Que tipo de leads quieres</div>
+      <div class="chip-group">
+        <div class="chip sel" id="c_ambos" onclick="setTipo('ambos')">Plaza + Evento</div>
+        <div class="chip" id="c_plaza" onclick="setTipo('plaza')">Solo Plazas</div>
+        <div class="chip" id="c_evento" onclick="setTipo('evento')">Solo Eventos</div>
+      </div>
+    </div>
+
+    <!-- STEP 2: Ciudades -->
+    <div class="card">
+      <div class="step-label">Ciudades</div>
+      <div class="city-grid" id="CGRID"></div>
+      <div class="field" style="margin-bottom:0">
+        <label>Otra ciudad que no este en la lista (opcional)</label>
+        <input type="text" id="custom_city" placeholder="Ej: Maldivas, Cancun..." oninput="updatePrice()">
+      </div>
+    </div>
+
+    <!-- STEP 3: Contacto -->
+    <div class="card">
+      <div class="step-label">Tu contacto</div>
+      <div class="field">
+        <label>Tu WhatsApp (con prefijo de pais, sin +)</label>
+        <input type="tel" id="wa" placeholder="34XXXXXXXXX" inputmode="numeric">
+      </div>
+      <div class="divider"></div>
+      <div class="toggle-row">
+        <span>Recibir leads tambien por Telegram</span>
+        <label class="toggle"><input type="checkbox" id="tg_toggle" onchange="toggleTG()"><span class="slider"></span></label>
+      </div>
+      <div class="tg-section" id="TG_SEC">
+        <div class="tg-box">
+          <p>Para enlazar tu Telegram, abre el bot y pulsa <strong>Iniciar</strong>. El bot te dara tu ID y lo rellenara aqui automaticamente.</p>
+          <a class="tg-btn" id="TG_LINK" href="#" target="_blank">
+            <svg viewBox="0 0 24 24"><path d="M12 0C5.373 0 0 5.373 0 12s5.373 12 12 12 12-5.373 12-12S18.627 0 12 0zm5.562 8.248l-2.032 9.579c-.145.658-.537.818-1.084.508l-3-2.21-1.447 1.394c-.16.16-.295.295-.605.295l.213-3.053 5.56-5.023c.242-.213-.054-.333-.373-.12l-6.871 4.326-2.962-.924c-.643-.204-.657-.643.136-.953l11.57-4.461c.537-.194 1.006.131.895.642z"/></svg>
+            Abrir bot de Telegram
+          </a>
+          <div class="tg-id-row">
+            <input type="text" id="tg_id" placeholder="Tu ID aparecera aqui automaticamente" readonly style="background:#070707;color:#7aabdb">
+          </div>
+          <div class="tg-status tg-wait" id="TG_WAIT">Esperando que abras el bot...</div>
+          <div class="tg-status tg-ok" id="TG_OK">Telegram conectado</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Trial banner -->
+    <div class="trial-banner">
+      <h3>24 horas gratis</h3>
+      <p>Empieza a recibir leads ahora mismo sin pagar nada.<br>Despues de 24 horas te enviamos el link de pago por WhatsApp.</p>
+      <div id="PRICE_BOX" style="margin-top:12px;font-size:22px;font-weight:800;color:#c9a84c">20€ <span style="font-size:14px;font-weight:400;color:#888">/ semana</span></div>
+      <div id="PRICE_NOTE" style="font-size:12px;color:#555;margin-top:4px">1 ciudad seleccionada</div>
+    </div>
+
+    <div class="st" id="ST"></div>
+    <button class="btn-main" id="BTN" onclick="submit()">Empezar gratis 24h</button>
+  </div>
+
+  <div class="success-screen" id="SUCCESS">
+    <div class="icon">✅</div>
+    <h2>Ya estas dentro</h2>
+    <p>Vas a empezar a recibir leads ahora mismo en tu WhatsApp.</p>
+    <div class="wa-num" id="S_WA"></div>
+    <p style="margin-bottom:8px">Tienes <strong style="color:#c9a84c">24 horas gratis</strong>. Pasado ese tiempo te mandamos el link de pago por WhatsApp para continuar.</p>
+    <p style="font-size:12px;color:#444;margin-top:24px">WorldModels &bull; Solo leads reales</p>
+  </div>
+</div>
+
+<script>
+var PRICES={1:20,2:30,3:36,4:40,99:150};
+var CITIES={ibiza:'Ibiza',marbella:'Marbella',madrid:'Madrid',barcelona:'Barcelona',monaco:'Monaco/Niza',london:'Londres',russia_turkey:'Rusia/Turquia',suiza:'Suiza',amsterdam:'Amsterdam',paris:'Paris',berlin:'Berlin',new_york:'New York',miami:'Miami',los_angeles:'Los Angeles',boston:'Boston'};
+var tipo='ambos', tgPollTimer=null, regToken='', API='/api';
+
+// build city grid
+(function(){
+  var g=document.getElementById('CGRID');
+  Object.keys(CITIES).forEach(function(k){
+    g.innerHTML+='<div class="cbox" id="cw_'+k+'" onclick="togCity(\''+k+'\')"><input type="checkbox" id="cb_'+k+'"><label for="cb_'+k+'">'+CITIES[k]+'</label></div>';
+  });
+})();
+
+function setTipo(t){
+  tipo=t;
+  ['ambos','plaza','evento'].forEach(function(x){document.getElementById('c_'+x).className='chip'+(x===t?' sel':'');});
+}
+
+function togCity(k){
+  var cb=document.getElementById('cb_'+k);cb.checked=!cb.checked;
+  document.getElementById('cw_'+k).className='cbox'+(cb.checked?' sel':'');
+  updatePrice();
+}
+
+function updatePrice(){
+  var n=Object.keys(CITIES).filter(function(k){return document.getElementById('cb_'+k)&&document.getElementById('cb_'+k).checked;}).length;
+  var custom=document.getElementById('custom_city').value.trim();
+  if(custom) n++;
+  var key=n>=5?99:Math.min(Math.max(n,1),4);
+  var price=PRICES[key]||(n>=5?150:20);
+  document.getElementById('PRICE_BOX').innerHTML=price+'€ <span style="font-size:14px;font-weight:400;color:#888">/ semana</span>';
+  var note=n===0?'Elige al menos una ciudad':n>=5?'Todos los leads del grupo':n+' ciudad'+(n>1?'es':'')+' seleccionada'+(n>1?'s':'');
+  document.getElementById('PRICE_NOTE').textContent=note;
+}
+
+function toggleTG(){
+  var on=document.getElementById('tg_toggle').checked;
+  document.getElementById('TG_SEC').style.display=on?'block':'none';
+  if(on) startTGPoll();
+  else stopTGPoll();
+}
+
+function startTGPoll(){
+  // Generate a token to link TG bot response to this session
+  regToken = Math.random().toString(36).slice(2)+'_'+Date.now();
+  document.getElementById('TG_LINK').href='https://t.me/WMJIDBOT?start='+regToken;
+  document.getElementById('TG_WAIT').style.display='block';
+  document.getElementById('TG_OK').style.display='none';
+  document.getElementById('tg_id').value='';
+  tgPollTimer=setInterval(pollTGId,3000);
+}
+
+function stopTGPoll(){
+  if(tgPollTimer){clearInterval(tgPollTimer);tgPollTimer=null;}
+}
+
+function pollTGId(){
+  if(!regToken)return;
+  fetch(API+'/registro/tg-poll?token='+regToken)
+    .then(function(r){return r.json();})
+    .then(function(d){
+      if(d.tg_id){
+        document.getElementById('tg_id').value=d.tg_id;
+        document.getElementById('TG_WAIT').style.display='none';
+        document.getElementById('TG_OK').style.display='block';
+        stopTGPoll();
+      }
+    }).catch(function(){});
+}
+
+function submit(){
+  var wa=document.getElementById('wa').value.replace(/\D/g,'');
+  var cities=Object.keys(CITIES).filter(function(k){return document.getElementById('cb_'+k).checked;});
+  var custom=document.getElementById('custom_city').value.trim();
+  var tgOn=document.getElementById('tg_toggle').checked;
+  var tgId=document.getElementById('tg_id').value.trim();
+
+  if(!wa||wa.length<9){showSt('Pon tu numero de WhatsApp con prefijo de pais',false);return;}
+  if(!cities.length&&!custom){showSt('Elige al menos una ciudad',false);return;}
+
+  document.getElementById('BTN').disabled=true;
+  showSt('Registrando...', true, true);
+
+  fetch(API+'/registro/register',{
+    method:'POST',
+    headers:{'Content-Type':'application/json'},
+    body:JSON.stringify({wa:wa,tipo:tipo,cities:cities,customCity:custom,tgId:tgOn?tgId:'',token:regToken})
+  }).then(function(r){return r.json();}).then(function(d){
+    if(d.ok){
+      document.getElementById('FORM').style.display='none';
+      document.getElementById('SUCCESS').style.display='block';
+      document.getElementById('S_WA').textContent='+'+wa;
+    } else {
+      showSt(d.error||'Error al registrar',false);
+      document.getElementById('BTN').disabled=false;
+    }
+  }).catch(function(){
+    showSt('Error de conexion',false);
+    document.getElementById('BTN').disabled=false;
+  });
+}
+
+function showSt(msg,ok,neutral){
+  var el=document.getElementById('ST');
+  el.className='st '+(neutral?'':ok?'stok':'sterr');
+  el.textContent=msg;el.style.display='block';
+  if(!neutral)setTimeout(function(){el.style.display='none';},5000);
+}
+</script>
+</body>
+</html>

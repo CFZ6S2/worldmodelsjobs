@@ -1,0 +1,272 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Packs de Publicidad VIP</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Montserrat:wght@300;500;700;900&display=swap');
+
+        body {
+            background-color: #0d0d0d;
+            background-image: 
+                radial-gradient(at 0% 0%, hsla(288, 80%, 15%, 1) 0, transparent 50%), 
+                radial-gradient(at 50% 0%, hsla(333, 80%, 20%, 1) 0, transparent 50%), 
+                radial-gradient(at 100% 0%, hsla(271, 70%, 15%, 1) 0, transparent 50%);
+            color: #ffffff;
+            font-family: 'Montserrat', sans-serif;
+            margin: 0;
+            padding: 40px 20px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            min-height: 100vh;
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 40px;
+        }
+
+        .header h1 {
+            font-size: 3rem;
+            text-transform: uppercase;
+            font-weight: 900;
+            background: linear-gradient(to right, #ff00cc, #3333ff);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            margin: 0;
+            text-shadow: 0px 0px 20px rgba(255, 0, 204, 0.4);
+        }
+
+        .header p {
+            font-size: 1.2rem;
+            color: #aaaaaa;
+            margin-top: 10px;
+        }
+
+        .grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 25px;
+            max-width: 1400px;
+            width: 100%;
+        }
+
+        .card {
+            background: rgba(255, 255, 255, 0.03);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 20px;
+            padding: 30px;
+            transition: transform 0.3s, box-shadow 0.3s;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .card:hover {
+            transform: translateY(-10px);
+            border-color: #ff00cc;
+            box-shadow: 0 15px 30px rgba(255, 0, 204, 0.2);
+        }
+
+        /* Top highlight bar */
+        .card::before {
+            content: "";
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 4px;
+            background: linear-gradient(90deg, #ff00cc, #3333ff);
+        }
+
+        .price-badge {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            background: linear-gradient(45deg, #ff00cc, #ff0066);
+            color: white;
+            font-weight: 800;
+            font-size: 1.5rem;
+            padding: 5px 15px;
+            border-radius: 30px;
+            box-shadow: 0 0 15px rgba(255, 0, 204, 0.5);
+        }
+
+        .pack-name {
+            font-size: 2rem;
+            font-weight: 700;
+            margin-bottom: 20px;
+            margin-top: 10px;
+        }
+
+        .premium-glow {
+            color: #ffd700;
+            text-shadow: 0 0 10px rgba(255, 215, 0, 0.5);
+        }
+
+        .feature-list {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+        }
+
+        .feature-list li {
+            margin-bottom: 12px;
+            font-size: 0.95rem;
+            display: flex;
+            align-items: flex-start;
+        }
+
+        .feature-list li::before {
+            content: "✦";
+            color: #ff00cc;
+            margin-right: 10px;
+            font-size: 1.1rem;
+        }
+
+        .portal {
+            font-weight: 700;
+            color: #d8b4fe;
+            margin-right: 5px;
+        }
+
+        .special {
+            margin-top: 20px;
+            padding-top: 20px;
+            border-top: 1px dashed rgba(255, 255, 255, 0.2);
+            font-size: 0.85rem;
+            color: #a78bfa;
+            font-style: italic;
+        }
+
+        /* Highlight specific cards */
+        .card-premium {
+            background: rgba(30, 10, 40, 0.6);
+            border: 1px solid rgba(255, 0, 204, 0.3);
+        }
+        .card-premium::before {
+            height: 6px;
+            background: linear-gradient(90deg, #ffd700, #ff8c00);
+        }
+
+    </style>
+</head>
+<body>
+
+    <div class="header">
+        <h1>Packs Publicidad VIP</h1>
+        <p>Posicionamiento extremo. Más visibilidad, más contactos.</p>
+    </div>
+
+    <div class="grid">
+        
+        <!-- Pack 1 -->
+        <div class="card">
+            <div class="price-badge">45€</div>
+            <div class="pack-name">Pack 1</div>
+            <ul class="feature-list">
+                <li><span class="portal">Destacamos:</span> 2 Top (24h) + 12 subidas/día</li>
+                <li><span class="portal">Nuevapasion:</span> 48 subidas/día</li>
+            </ul>
+        </div>
+
+        <!-- Pack 2 -->
+        <div class="card">
+            <div class="price-badge">60€</div>
+            <div class="pack-name">Pack 2</div>
+            <ul class="feature-list">
+                <li><span class="portal">Destacamos:</span> 2 Top (24h) + 12 subidas/día</li>
+                <li><span class="portal">Nuevapasion:</span> 48 subidas/día</li>
+                <li><span class="portal">Loquosex:</span> 1 Anuncio Top (24h)</li>
+                <li><span class="portal">Pasión.net:</span> 6 subidas/día</li>
+            </ul>
+        </div>
+
+        <!-- Pack 3 -->
+        <div class="card">
+            <div class="price-badge">70€</div>
+            <div class="pack-name">Pack 3</div>
+            <ul class="feature-list">
+                <li><span class="portal">Destacamos:</span> 2 Top (24h) + 12 subidas/día + <span class="premium-glow">Premium</span></li>
+                <li><span class="portal">Nuevapasion:</span> 48 subidas/día</li>
+                <li><span class="portal">Loquosex:</span> 1 Anuncio Top (24h)</li>
+                <li><span class="portal">Pasión.net:</span> 6 subidas/día</li>
+                <li><span class="portal">Mundosex:</span> 2 subidas/día</li>
+            </ul>
+        </div>
+
+        <!-- Pack 5 -->
+        <div class="card">
+            <div class="price-badge">90€</div>
+            <div class="pack-name">Pack 5</div>
+            <ul class="feature-list">
+                <li><span class="portal">Destacamos:</span> 2 Top (24h) + 12 subidas/día + <span class="premium-glow">Premium</span></li>
+                <li><span class="portal">Nuevapasion:</span> 48 subidas/día + <span class="premium-glow">Premium</span></li>
+                <li><span class="portal">Loquosex:</span> 2 Anuncios Top (24h)</li>
+                <li><span class="portal">Pasión.net:</span> 6 subidas/día</li>
+                <li><span class="portal">Mundosex:</span> 2 subidas/día</li>
+                <li><span class="portal">Scompy:</span> 1 subida/día</li>
+                <li><span class="portal">Euroguirls:</span> Anuncio Normal</li>
+            </ul>
+        </div>
+
+        <!-- Pack 7 -->
+        <div class="card card-premium">
+            <div class="price-badge" style="background: linear-gradient(45deg, #ffd700, #ff8c00);">120€</div>
+            <div class="pack-name">Pack 7</div>
+            <ul class="feature-list">
+                <li><span class="portal">Destacamos:</span> 2 Top (24h) + 38 subidas/día + <span class="premium-glow">Premium</span></li>
+                <li><span class="portal">Nuevapasion:</span> 48 subidas/día + <span class="premium-glow">Premium</span></li>
+                <li><span class="portal">Loquosex:</span> 2 Anuncios Top (24h)</li>
+                <li><span class="portal">Pasión.net:</span> 6 subidas/día</li>
+                <li><span class="portal">Mundosex:</span> 2 subidas/día</li>
+                <li><span class="portal">Scompy:</span> 1 subida/día</li>
+                <li><span class="portal">Euroguirls:</span> Anuncio Top (24h)</li>
+                <li><span class="portal">Hottescorts:</span> Rotando en primera página</li>
+            </ul>
+        </div>
+
+        <!-- Pack 8 -->
+        <div class="card card-premium">
+            <div class="price-badge" style="background: linear-gradient(45deg, #ffd700, #ff8c00);">140€</div>
+            <div class="pack-name">Pack 8</div>
+            <ul class="feature-list">
+                <li><span class="portal">Destacamos:</span> 2 Top (24h) + 38 subidas/día + <span class="premium-glow">Premium</span></li>
+                <li><span class="portal">Nuevapasion:</span> 48 subidas/día + <span class="premium-glow">Premium</span></li>
+                <li><span class="portal">Loquosex:</span> 2 Anuncios Top (24h)</li>
+                <li><span class="portal">Pasión.net:</span> 6 subidas/día</li>
+                <li><span class="portal">Mundosex & Scompy:</span> Mismas subidas</li>
+                <li><span class="portal">Euroguirls:</span> Anuncio <span class="premium-glow">Top Premium</span> (24h)</li>
+                <li><span class="portal">Hottescorts:</span> Rotando en primera página</li>
+            </ul>
+            <div class="special">
+                ✨ <b>Continuidad:</b> Anuncios GRATIS en páginas internacionales (Happyescorts, Escortsnews, Topescortbabes, Ladys...)
+            </div>
+        </div>
+
+        <!-- Pack 9 -->
+        <div class="card card-premium" style="border-color: #ffd700; box-shadow: 0 0 20px rgba(255, 215, 0, 0.2);">
+            <div class="price-badge" style="background: linear-gradient(45deg, #ffd700, #ff8c00);">150€</div>
+            <div class="pack-name" style="color: #ffd700;">Pack 9 MAX</div>
+            <ul class="feature-list">
+                <li><span class="portal">TODO EL PACK 8</span></li>
+                <li><span class="portal">Nuevoloquo:</span> Anuncio Top (24h)</li>
+            </ul>
+            <div class="special" style="color: #ffd700;">
+                ✨ <b>Continuidad:</b> Anuncios GRATIS en páginas internacionales VIP
+            </div>
+        </div>
+
+        <!-- Pack 10 -->
+        <div class="card" style="display: flex; flex-direction: column; justify-content: center; align-items: center; text-align: center;">
+            <div class="pack-name" style="font-size: 2.5rem; margin-bottom: 5px;">A Medida</div>
+            <p style="color: #aaaaaa; margin-bottom: 20px;">Tú eliges las páginas, nosotros lo hacemos realidad.</p>
+            <div class="price-badge" style="position: relative; top: 0; right: 0; display: inline-block;">Presupuesto Custom</div>
+        </div>
+
+    </div>
+
+</body>
+</html>
