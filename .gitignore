@@ -49,6 +49,11 @@ worldmodelsjobs-mirror.git/
 *.sql.gz
 local_db_dump*
 
+# Duplicados obsoletos
+web/functions/
+.agents/
+.claude/
+
 # ─── ARCHIVOS TEMPORALES / DEBUG ─────────────────────────────────────────────
 tmp_*
 *.tmp
