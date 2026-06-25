@@ -9,11 +9,25 @@
     ],
     "rewrites": [
       {
+        "source": "/api/**",
+        "function": "api",
+        "region": "europe-west1"
+      },
+      {
+        "source": "/routing",
+        "destination": "/routing.html"
+      },
+      {
+        "source": "/registro",
+        "destination": "/registro.html"
+      },
+      {
+        "source": "/panel",
+        "destination": "/panel.html"
+      },
+      {
         "source": "**",
-        "run": {
-          "serviceId": "ssrworldmodelsjobs",
-          "region": "europe-west2"
-        }
+        "destination": "/index.html"
       }
     ]
   }

@@ -56,32 +56,13 @@ export default function FeedPage() {
   const t = useTranslations('feed');
   const locale = useLocale();
   const router = useRouter();
-  const { user, userData, isPremium, isAdmin, isTrialExpired, loading: authLoading } = useAuth();
+  const { userData } = useAuth();
   const [ofertas, setOfertas] = useState<Ad[]>([]);
-  const [leads, setLeads] = useState<Ad[]>([]);
   const [loading, setLoading] = useState(true);
   const [category, setCategory] = useState('all');
   const [search, setSearch] = useState('');
   const [showLangMenu, setShowLangMenu] = useState(false);
   const [error, setError] = useState<string | null>(null);
-
-  const hasRedirectedRef = React.useRef(false);
-
-  // 🛡️ AUTH PROTECTION & REDIRECT TO LOGIN
-  useEffect(() => {
-    if (!authLoading && !user && !hasRedirectedRef.current) {
-      hasRedirectedRef.current = true;
-      router.push(`/${locale}/auth/login`);
-    }
-  }, [user, authLoading, locale, router]);
-
-  // 🛡️ TRIAL PROTECTION
-  useEffect(() => {
-    if (!authLoading && user && isTrialExpired && !hasRedirectedRef.current) {
-      hasRedirectedRef.current = true;
-      router.push(`/${locale}/pricing`);
-    }
-  }, [isTrialExpired, authLoading, user, locale, router]);
 
   useEffect(() => {
     if (typeof window === 'undefined') return;
@@ -119,11 +100,9 @@ export default function FeedPage() {
     };
 
     const unsubOfertas = setupListener('ofertas', setOfertas);
-    const unsubLeads = setupListener('leads', setLeads);
 
     return () => {
       unsubOfertas();
-      unsubLeads();
     };
   }, []);
 
@@ -131,8 +110,6 @@ export default function FeedPage() {
   const ads = React.useMemo(() => {
     const adMap = new Map();
     
-    // Process leads first, then ofertas to let ofertas overwrite (primary source)
-    leads.forEach(ad => adMap.set(ad.id, ad));
     ofertas.forEach(ad => adMap.set(ad.id, ad));
 
     return Array.from(adMap.values()).sort((a, b) => {
@@ -144,7 +121,7 @@ export default function FeedPage() {
       };
       return getT(b) - getT(a);
     });
-  }, [ofertas, leads]);
+  }, [ofertas]);
 
   const filteredAds = ads.filter(ad => {
     const { title, description, location } = getAdData(ad, locale);
@@ -176,37 +153,8 @@ export default function FeedPage() {
     return `${Math.floor(diff / 86400)}d`;
   };
 
-  if (authLoading || !user || isTrialExpired) {
-    return (
-      <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', minHeight: '80vh' }}>
-        <div className="animate-pulse flex flex-col items-center gap-4">
-          <Zap size={32} className="text-gold" />
-          <div className="text-gold font-black tracking-widest uppercase text-xs">
-            {t('loading') || 'Loading...'}
-          </div>
-        </div>
-      </div>
-    );
-  }
-
   return (
     <div className="animate-fade" style={{ padding: '0 16px 100px 16px' }}>
-      {/* Trial Notice */}
-      {!isPremium && !isAdmin && (
-        <div style={{ 
-          background: 'rgba(201, 168, 76, 0.1)', 
-          border: '1px solid rgba(201, 168, 76, 0.2)',
-          padding: '12px',
-          borderRadius: '16px',
-          marginTop: '16px',
-          textAlign: 'center'
-        }}>
-          <p style={{ color: '#c9a84c', fontSize: '11px', fontWeight: 800, textTransform: 'uppercase', letterSpacing: '0.05em', margin: 0 }}>
-            ✨ Explorer Trial Mode Active (7 Days)
-          </p>
-        </div>
-      )}
-
       {/* Premium Header Sticky */}
       <div className="sticky top-0 z-50 pt-4 pb-2 bg-black/80 backdrop-blur-md" style={{ margin: '0 -16px 16px -16px', padding: '16px 16px 8px 16px' }}>
         <div style={{ 
@@ -383,57 +331,9 @@ export default function FeedPage() {
                   padding: '24px'
                 }}>
                   <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '16px' }}>
-                    <div style={{ display: 'flex', gap: '8px', alignItems: 'center', flexWrap: 'wrap' }}>
-                      {(() => {
-                        const isEvent = ad.category === 'CAT_EVENTOS' || ad.categoria === 'CAT_EVENTOS';
-                        return (
-                          <span 
-                            className="badge" 
-                            style={{ 
-                              padding: '4px 10px', 
-                              fontSize: '9px', 
-                              fontWeight: 900,
-                              background: isEvent ? 'rgba(168, 85, 247, 0.15)' : 'rgba(201, 168, 76, 0.15)',
-                              color: isEvent ? '#d8b4fe' : '#c9a84c',
-                              border: `1px solid ${isEvent ? 'rgba(168, 85, 247, 0.3)' : 'rgba(201, 168, 76, 0.3)'}`
-                            }}
-                          >
-                            {isEvent ? t('category_eventos') : t('category_plazas')}
-                          </span>
-                        );
-                      })()}
-                      
-                      {ad.continent && (
-                        <span style={{ 
-                          padding: '4px 8px', 
-                          fontSize: '9px', 
-                          fontWeight: 800,
-                          background: 'rgba(56, 189, 248, 0.1)',
-                          color: '#7dd3fc',
-                          border: '1px solid rgba(56, 189, 248, 0.2)',
-                          borderRadius: '8px',
-                          textTransform: 'uppercase'
-                        }}>
-                          🌍 {ad.continent}
-                        </span>
-                      )}
-
-                      {(ad.urgency || (ad.timestamp && (new Date().getTime() - (ad.timestamp.seconds ? ad.timestamp.seconds * 1000 : new Date(ad.timestamp).getTime()) < 1800000))) ? (
-                        <span style={{ 
-                          padding: '4px 8px', 
-                          fontSize: '9px', 
-                          fontWeight: 800,
-                          background: 'rgba(239, 68, 68, 0.15)',
-                          color: '#fca5a5',
-                          border: '1px solid rgba(239, 68, 68, 0.3)',
-                          borderRadius: '8px',
-                          textTransform: 'uppercase',
-                          animation: 'pulse 2s infinite'
-                        }}>
-                          🔥 URGENTE
-                        </span>
-                      ) : null}
-                    </div>
+                    <span className="badge" style={{ padding: '4px 10px', fontSize: '9px', fontWeight: 900 }}>
+                      {ad.category === 'CAT_EVENTOS' || ad.categoria === 'CAT_EVENTOS' ? t('category_eventos') : t('category_plazas')}
+                    </span>
                     <div style={{ display: 'flex', alignItems: 'center', gap: '4px', color: 'rgba(255,255,255,0.3)', fontSize: '10px', fontWeight: 700 }}>
                       <Clock size={12} />
                       <span>{getRelativeTime(ad.timestamp)}</span>
