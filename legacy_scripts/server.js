@@ -249,7 +249,6 @@ const BANNED_KEYWORDS = [
 ];
 
 const SPANISH_GROUP_ID = process.env.SPANISH_GROUP_ID || '120363425790792660@g.us';
-const JUANA_TOKEN = process.env.JUANA_API_TOKEN || process.env.WHAPI_TOKEN || 'shJOb5wskQMTyfoF20GLqmJOclA5if5j';
 const VIP_TARGET_NUMBER = process.env.VIP_TARGET_NUMBER || '34664266926@s.whatsapp.net';
 
 // 🛡️ ANTI-BAN HUMANIZER
@@ -292,12 +291,13 @@ app.post('/api/juana/send', async (req, res) => {
         }
 
         const humanText = humanizeMessage(messageText);
+        console.log(`🚀 [JUANA DEBUG] Sending to target: "${targetChat}" (length: ${targetChat.length})`);
 
         const response = await axios.post('https://gate.whapi.cloud/messages/text', {
             to: targetChat,
             body: humanText
         }, {
-            headers: { 'Authorization': `Bearer ${JUANA_TOKEN}` }
+            headers: { 'Authorization': `Bearer ${process.env.WHAPI_TOKEN || 'shJOb5wskQMTyfoF20GLqmJOclA5if5j'}` }
         });
         
         lastJuanaSend = Date.now();
@@ -622,7 +622,7 @@ async function checkSystemHealth() {
                 to: VIP_TARGET_NUMBER,
                 body: `🚨 *WORLDMODELS CRITICAL ALERT*\nEl flujo de leads se ha detenido.\nÚltimo lead: hace ${diffMinutes} min.\nEstado: DEGRADED`
             }, {
-                headers: { 'Authorization': `Bearer shJOb5wskQMTyfoF20GLqmJOclA5if5j` }
+                headers: { 'Authorization': `Bearer ${process.env.WHAPI_TOKEN || 'shJOb5wskQMTyfoF20GLqmJOclA5if5j'}` }
             });
         }
     } catch (err) {

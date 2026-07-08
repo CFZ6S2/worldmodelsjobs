@@ -1,0 +1,1530 @@
+[
+  {
+    "version": 1,
+    "startData": "1",
+    "resultData": "2",
+    "executionData": "3"
+  },
+  {},
+  {
+    "runData": "4",
+    "lastNodeExecuted": "5"
+  },
+  {
+    "contextData": "6",
+    "nodeExecutionStack": "7",
+    "metadata": "8",
+    "waitingExecution": "9",
+    "waitingExecutionSource": "10",
+    "runtimeData": "11"
+  },
+  {
+    "Webhook Telegram": "12",
+    "Extract Metadata TG1": "13",
+    "Pre-Filter Unified1": "14",
+    "Dedup Hash1": "15",
+    "DeepSeek Chat Model1": "16",
+    "IA Extract1": "17",
+    "Parse JSON1": "18",
+    "Final Guard1": "19",
+    "Quality Score": "20",
+    "Message Router": "21",
+    "Telegram Fanout": "22",
+    "Post Backend": "23",
+    "Dynamic Routing Engine": "24",
+    "Global Alert Waiter": "25",
+    "Dynamic WhatsApp Alert": "26",
+    "Link Extractor": "27"
+  },
+  "Link Extractor",
+  {},
+  [],
+  {
+    "DeepSeek Chat Model1": "28"
+  },
+  {},
+  {},
+  {
+    "version": 1,
+    "establishedAt": 1782219384368,
+    "source": "29",
+    "redaction": "30",
+    "triggerNode": "31"
+  },
+  [
+    "32"
+  ],
+  [
+    "33"
+  ],
+  [
+    "34"
+  ],
+  [
+    "35"
+  ],
+  [
+    "36"
+  ],
+  [
+    "37"
+  ],
+  [
+    "38"
+  ],
+  [
+    "39"
+  ],
+  [
+    "40"
+  ],
+  [
+    "41"
+  ],
+  [
+    "42"
+  ],
+  [
+    "43"
+  ],
+  [
+    "44"
+  ],
+  [
+    "45"
+  ],
+  [
+    "46"
+  ],
+  [
+    "47"
+  ],
+  [
+    "48"
+  ],
+  "webhook",
+  {
+    "version": 1,
+    "policy": "49"
+  },
+  {
+    "name": "50",
+    "type": "51"
+  },
+  {
+    "startTime": 1782219384371,
+    "executionIndex": 0,
+    "source": "52",
+    "hints": "53",
+    "executionTime": 0,
+    "executionStatus": "54",
+    "data": "55"
+  },
+  {
+    "startTime": 1782219384372,
+    "executionIndex": 1,
+    "source": "56",
+    "hints": "57",
+    "executionTime": 32,
+    "executionStatus": "54",
+    "data": "58"
+  },
+  {
+    "startTime": 1782219384405,
+    "executionIndex": 2,
+    "source": "59",
+    "hints": "60",
+    "executionTime": 34,
+    "executionStatus": "54",
+    "data": "61"
+  },
+  {
+    "startTime": 1782219384439,
+    "executionIndex": 3,
+    "source": "62",
+    "hints": "63",
+    "executionTime": 44,
+    "executionStatus": "54",
+    "data": "64"
+  },
+  {
+    "startTime": 1782219384529,
+    "executionTime": 6518,
+    "executionIndex": 5,
+    "executionStatus": "54",
+    "source": "65",
+    "data": "66",
+    "inputOverride": "67",
+    "metadata": "68"
+  },
+  {
+    "startTime": 1782219384486,
+    "executionIndex": 4,
+    "source": "69",
+    "hints": "70",
+    "executionTime": 6562,
+    "executionStatus": "54",
+    "data": "71"
+  },
+  {
+    "startTime": 1782219391048,
+    "executionIndex": 6,
+    "source": "72",
+    "hints": "73",
+    "executionTime": 30,
+    "executionStatus": "54",
+    "data": "74"
+  },
+  {
+    "startTime": 1782219391078,
+    "executionIndex": 7,
+    "source": "75",
+    "hints": "76",
+    "executionTime": 3,
+    "executionStatus": "54",
+    "data": "77"
+  },
+  {
+    "startTime": 1782219391081,
+    "executionIndex": 8,
+    "source": "78",
+    "hints": "79",
+    "executionTime": 27,
+    "executionStatus": "54",
+    "data": "80"
+  },
+  {
+    "startTime": 1782219391108,
+    "executionIndex": 9,
+    "source": "81",
+    "hints": "82",
+    "executionTime": 31,
+    "executionStatus": "54",
+    "data": "83"
+  },
+  {
+    "startTime": 1782219391139,
+    "executionIndex": 10,
+    "source": "84",
+    "hints": "85",
+    "executionTime": 2251,
+    "executionStatus": "54",
+    "data": "86"
+  },
+  {
+    "startTime": 1782219393390,
+    "executionIndex": 11,
+    "source": "87",
+    "hints": "88",
+    "executionTime": 553,
+    "executionStatus": "54",
+    "data": "89"
+  },
+  {
+    "startTime": 1782219393943,
+    "executionIndex": 12,
+    "source": "90",
+    "hints": "91",
+    "executionTime": 53,
+    "executionStatus": "54",
+    "data": "92"
+  },
+  {
+    "startTime": 1782219393996,
+    "executionIndex": 13,
+    "source": "93",
+    "hints": "94",
+    "executionTime": 2001,
+    "executionStatus": "54",
+    "data": "95"
+  },
+  {
+    "startTime": 1782219395997,
+    "executionIndex": 14,
+    "source": "96",
+    "hints": "97",
+    "executionTime": 1433,
+    "executionStatus": "54",
+    "data": "98"
+  },
+  {
+    "startTime": 1782219397430,
+    "executionIndex": 15,
+    "source": "99",
+    "hints": "100",
+    "executionTime": 26,
+    "executionStatus": "54",
+    "data": "101"
+  },
+  {
+    "subRun": "102"
+  },
+  "none",
+  "Webhook Telegram",
+  "n8n-nodes-base.webhook",
+  [],
+  [],
+  "success",
+  {
+    "main": "103"
+  },
+  [
+    "104"
+  ],
+  [],
+  {
+    "main": "105"
+  },
+  [
+    "106"
+  ],
+  [],
+  {
+    "main": "107"
+  },
+  [
+    "108"
+  ],
+  [],
+  {
+    "main": "109"
+  },
+  [
+    "110"
+  ],
+  {
+    "ai_languageModel": "111"
+  },
+  {
+    "ai_languageModel": "112"
+  },
+  {
+    "subRun": "102"
+  },
+  [
+    "113"
+  ],
+  [],
+  {
+    "main": "114"
+  },
+  [
+    "115"
+  ],
+  [],
+  {
+    "main": "116"
+  },
+  [
+    "117"
+  ],
+  [],
+  {
+    "main": "118"
+  },
+  [
+    "119"
+  ],
+  [],
+  {
+    "main": "120"
+  },
+  [
+    "121"
+  ],
+  [],
+  {
+    "main": "122"
+  },
+  [
+    "123"
+  ],
+  [],
+  {
+    "main": "124"
+  },
+  [
+    "125"
+  ],
+  [],
+  {
+    "main": "126"
+  },
+  [
+    "127"
+  ],
+  [],
+  {
+    "main": "128"
+  },
+  [
+    "129"
+  ],
+  [],
+  {
+    "main": "130"
+  },
+  [
+    "131"
+  ],
+  [],
+  {
+    "main": "132"
+  },
+  [
+    "133"
+  ],
+  [],
+  {
+    "main": "134"
+  },
+  [
+    "135"
+  ],
+  [
+    "136"
+  ],
+  {
+    "previousNode": "50",
+    "previousNodeOutput": 0,
+    "previousNodeRun": 0
+  },
+  [
+    "137"
+  ],
+  {
+    "previousNode": "138",
+    "previousNodeOutput": 0,
+    "previousNodeRun": 0
+  },
+  [
+    "139"
+  ],
+  {
+    "previousNode": "140",
+    "previousNodeOutput": 0,
+    "previousNodeRun": 0
+  },
+  [
+    "141"
+  ],
+  {
+    "previousNode": "142",
+    "previousNodeRun": 0
+  },
+  [
+    "143"
+  ],
+  [
+    "144"
+  ],
+  {
+    "previousNode": "145",
+    "previousNodeOutput": 0,
+    "previousNodeRun": 0
+  },
+  [
+    "146"
+  ],
+  {
+    "previousNode": "142",
+    "previousNodeOutput": 0,
+    "previousNodeRun": 0
+  },
+  [
+    "147"
+  ],
+  {
+    "previousNode": "148",
+    "previousNodeOutput": 0,
+    "previousNodeRun": 0
+  },
+  [
+    "149",
+    "150"
+  ],
+  {
+    "previousNode": "151",
+    "previousNodeOutput": 0,
+    "previousNodeRun": 0
+  },
+  [
+    "152"
+  ],
+  {
+    "previousNode": "153",
+    "previousNodeOutput": 0,
+    "previousNodeRun": 0
+  },
+  [
+    "154"
+  ],
+  {
+    "previousNode": "155",
+    "previousNodeOutput": 0,
+    "previousNodeRun": 0
+  },
+  [
+    "156"
+  ],
+  {
+    "previousNode": "153",
+    "previousNodeOutput": 0,
+    "previousNodeRun": 0
+  },
+  [
+    "157"
+  ],
+  {
+    "previousNode": "153",
+    "previousNodeOutput": 0,
+    "previousNodeRun": 0
+  },
+  [
+    "158"
+  ],
+  {
+    "previousNode": "159",
+    "previousNodeOutput": 0,
+    "previousNodeRun": 0
+  },
+  [
+    "160"
+  ],
+  {
+    "previousNode": "161",
+    "previousNodeOutput": 0,
+    "previousNodeRun": 0
+  },
+  [
+    "162"
+  ],
+  {
+    "previousNode": "140",
+    "previousNodeOutput": 0,
+    "previousNodeRun": 0
+  },
+  [
+    "163"
+  ],
+  {
+    "node": "164",
+    "runIndex": 0
+  },
+  [
+    "165"
+  ],
+  [
+    "166"
+  ],
+  "Extract Metadata TG1",
+  [
+    "167"
+  ],
+  "Pre-Filter Unified1",
+  [
+    "168"
+  ],
+  "IA Extract1",
+  [
+    "169"
+  ],
+  [
+    "170"
+  ],
+  "Dedup Hash1",
+  [
+    "171"
+  ],
+  [
+    "172"
+  ],
+  "Parse JSON1",
+  [
+    "173"
+  ],
+  [],
+  "Final Guard1",
+  [
+    "174"
+  ],
+  "Quality Score",
+  [
+    "175",
+    "176",
+    "177",
+    "178",
+    "179"
+  ],
+  "Message Router",
+  [
+    "180",
+    "181",
+    "182",
+    "183",
+    "184"
+  ],
+  [
+    "185"
+  ],
+  [
+    "186"
+  ],
+  "Dynamic Routing Engine",
+  [
+    "187"
+  ],
+  "Global Alert Waiter",
+  [
+    "188"
+  ],
+  [],
+  "DeepSeek Chat Model1",
+  {
+    "json": "189",
+    "pairedItem": "190"
+  },
+  {
+    "json": "191",
+    "pairedItem": "192"
+  },
+  {
+    "json": "193",
+    "pairedItem": "194"
+  },
+  {
+    "json": "195",
+    "pairedItem": "196"
+  },
+  {
+    "json": "197"
+  },
+  {
+    "json": "198"
+  },
+  {
+    "json": "199",
+    "pairedItem": "200"
+  },
+  {
+    "json": "201",
+    "pairedItem": "202"
+  },
+  {
+    "json": "201",
+    "pairedItem": "203"
+  },
+  {
+    "json": "204",
+    "pairedItem": "205"
+  },
+  {
+    "json": "206",
+    "pairedItem": "207"
+  },
+  {
+    "json": "208",
+    "pairedItem": "209"
+  },
+  {
+    "json": "210",
+    "pairedItem": "211"
+  },
+  {
+    "json": "212",
+    "pairedItem": "213"
+  },
+  {
+    "json": "214",
+    "pairedItem": "215"
+  },
+  {
+    "json": "216",
+    "pairedItem": "217"
+  },
+  {
+    "json": "218",
+    "pairedItem": "219"
+  },
+  {
+    "json": "220",
+    "pairedItem": "221"
+  },
+  {
+    "json": "222",
+    "pairedItem": "223"
+  },
+  {
+    "json": "224",
+    "pairedItem": "225"
+  },
+  {
+    "json": "226",
+    "pairedItem": "227"
+  },
+  {
+    "json": "228",
+    "pairedItem": "229"
+  },
+  {
+    "json": "228",
+    "pairedItem": "230"
+  },
+  {
+    "json": "231",
+    "pairedItem": "232"
+  },
+  {
+    "headers": "233",
+    "params": "234",
+    "query": "235",
+    "body": "236",
+    "webhookUrl": "237",
+    "executionMode": "238"
+  },
+  {
+    "item": 0
+  },
+  {
+    "platform": "239",
+    "from": "240",
+    "sender": "240",
+    "chatId": "241",
+    "remoteJid": "242",
+    "isGroup": true,
+    "text": "243",
+    "contact": "240",
+    "whatsapp": "240",
+    "source": "244",
+    "pushName": "245",
+    "timestamp": "246",
+    "sender_contact": "247",
+    "final_contact": "247",
+    "source_chat_id": "241",
+    "texto_limpio": "243",
+    "looksValuable": true
+  },
+  {
+    "item": 0
+  },
+  {
+    "platform": "239",
+    "from": "240",
+    "sender": "240",
+    "chatId": "241",
+    "remoteJid": "242",
+    "isGroup": true,
+    "text": "243",
+    "contact": "240",
+    "whatsapp": "240",
+    "source": "244",
+    "pushName": "245",
+    "timestamp": "246",
+    "sender_contact": "247",
+    "final_contact": "247",
+    "source_chat_id": "241",
+    "texto_limpio": "243",
+    "looksValuable": true,
+    "reject_reason": null
+  },
+  {
+    "item": 0
+  },
+  {
+    "platform": "239",
+    "from": "240",
+    "sender": "240",
+    "chatId": "241",
+    "remoteJid": "242",
+    "isGroup": true,
+    "text": "243",
+    "contact": "240",
+    "whatsapp": "240",
+    "source": "244",
+    "pushName": "245",
+    "timestamp": "246",
+    "sender_contact": "247",
+    "final_contact": "247",
+    "source_chat_id": "241",
+    "texto_limpio": "243",
+    "looksValuable": true,
+    "reject_reason": null
+  },
+  {
+    "item": 0
+  },
+  {
+    "response": "248",
+    "tokenUsage": "249"
+  },
+  {
+    "messages": "250",
+    "estimatedTokens": 674,
+    "options": "251"
+  },
+  {
+    "text": "252"
+  },
+  {
+    "item": 0
+  },
+  {
+    "platform": "239",
+    "contact": "247",
+    "texto_limpio": "243",
+    "source_chat_id": "241",
+    "city": "253",
+    "budget": "254",
+    "category": "255",
+    "text_es": "256",
+    "title_es": "257",
+    "text_en": "258",
+    "title_en": "259",
+    "text_ru": "260",
+    "title_ru": "261",
+    "text_pt": "262",
+    "title_pt": "263",
+    "trash": false
+  },
+  {
+    "item": 0
+  },
+  {
+    "item": 0
+  },
+  {
+    "platform": "239",
+    "contact": "247",
+    "texto_limpio": "243",
+    "source_chat_id": "241",
+    "city": "253",
+    "budget": "254",
+    "category": "255",
+    "text_es": "256",
+    "title_es": "257",
+    "text_en": "258",
+    "title_en": "259",
+    "text_ru": "260",
+    "title_ru": "261",
+    "text_pt": "262",
+    "title_pt": "263",
+    "trash": false,
+    "final_score": 75
+  },
+  {
+    "item": 0
+  },
+  {
+    "platform": "239",
+    "contact": "247",
+    "texto_limpio": "243",
+    "source_chat_id": "241",
+    "city": "253",
+    "budget": "254",
+    "category": "255",
+    "text_es": "256",
+    "title_es": "257",
+    "text_en": "258",
+    "title_en": "259",
+    "text_ru": "260",
+    "title_ru": "261",
+    "text_pt": "262",
+    "title_pt": "263",
+    "trash": false,
+    "final_score": 75,
+    "route_lang": "264",
+    "tg_chat": "265",
+    "tg_text": "266",
+    "wa_chat": "267"
+  },
+  {
+    "item": 0
+  },
+  {
+    "platform": "239",
+    "contact": "247",
+    "texto_limpio": "243",
+    "source_chat_id": "241",
+    "city": "253",
+    "budget": "254",
+    "category": "255",
+    "text_es": "256",
+    "title_es": "257",
+    "text_en": "258",
+    "title_en": "259",
+    "text_ru": "260",
+    "title_ru": "261",
+    "text_pt": "262",
+    "title_pt": "263",
+    "trash": false,
+    "final_score": 75,
+    "route_lang": "268",
+    "tg_chat": "269",
+    "tg_text": "270",
+    "wa_chat": "271"
+  },
+  {
+    "item": 0
+  },
+  {
+    "platform": "239",
+    "contact": "247",
+    "texto_limpio": "243",
+    "source_chat_id": "241",
+    "city": "253",
+    "budget": "254",
+    "category": "255",
+    "text_es": "256",
+    "title_es": "257",
+    "text_en": "258",
+    "title_en": "259",
+    "text_ru": "260",
+    "title_ru": "261",
+    "text_pt": "262",
+    "title_pt": "263",
+    "trash": false,
+    "final_score": 75,
+    "route_lang": "272",
+    "tg_chat": "273",
+    "tg_text": "274",
+    "wa_chat": "275"
+  },
+  {
+    "item": 0
+  },
+  {
+    "platform": "239",
+    "contact": "247",
+    "texto_limpio": "243",
+    "source_chat_id": "241",
+    "city": "253",
+    "budget": "254",
+    "category": "255",
+    "text_es": "256",
+    "title_es": "257",
+    "text_en": "258",
+    "title_en": "259",
+    "text_ru": "260",
+    "title_ru": "261",
+    "text_pt": "262",
+    "title_pt": "263",
+    "trash": false,
+    "final_score": 75,
+    "route_lang": "276",
+    "tg_chat": "277",
+    "tg_text": "274"
+  },
+  {
+    "item": 0
+  },
+  {
+    "platform": "239",
+    "contact": "247",
+    "texto_limpio": "243",
+    "source_chat_id": "241",
+    "city": "253",
+    "budget": "254",
+    "category": "255",
+    "text_es": "256",
+    "title_es": "257",
+    "text_en": "258",
+    "title_en": "259",
+    "text_ru": "260",
+    "title_ru": "261",
+    "text_pt": "262",
+    "title_pt": "263",
+    "trash": false,
+    "final_score": 75,
+    "route_lang": "278",
+    "tg_chat": "279",
+    "tg_text": "280",
+    "wa_chat": "281"
+  },
+  {
+    "item": 0
+  },
+  {
+    "ok": true,
+    "result": "282"
+  },
+  {
+    "item": 0
+  },
+  {
+    "ok": true,
+    "result": "283"
+  },
+  {
+    "item": 1
+  },
+  {
+    "ok": true,
+    "result": "284"
+  },
+  {
+    "item": 2
+  },
+  {
+    "ok": true,
+    "result": "285"
+  },
+  {
+    "item": 3
+  },
+  {
+    "ok": true,
+    "result": "286"
+  },
+  {
+    "item": 4
+  },
+  {
+    "success": true,
+    "id": "287"
+  },
+  {
+    "item": 0
+  },
+  {
+    "platform": "239",
+    "contact": "247",
+    "texto_limpio": "243",
+    "source_chat_id": "241",
+    "city": "253",
+    "budget": "254",
+    "category": "255",
+    "text_es": "256",
+    "title_es": "257",
+    "text_en": "258",
+    "title_en": "259",
+    "text_ru": "260",
+    "title_ru": "261",
+    "text_pt": "262",
+    "title_pt": "263",
+    "trash": false,
+    "target_wa": "267",
+    "city_label": "288"
+  },
+  {
+    "item": 0
+  },
+  {
+    "item": 0
+  },
+  {
+    "error": "289"
+  },
+  {
+    "item": 0
+  },
+  {
+    "connection": "290",
+    "host": "291",
+    "content-length": "292",
+    "content-type": "293",
+    "accept": "294",
+    "user-agent": "295",
+    "accept-encoding": "296"
+  },
+  {},
+  {},
+  {
+    "platform": "297",
+    "from": "240",
+    "sender": "240",
+    "chatId": "241",
+    "remoteJid": "242",
+    "isGroup": true,
+    "text": "243",
+    "contact": "240",
+    "whatsapp": "240",
+    "source": "244",
+    "pushName": "245",
+    "timestamp": "246"
+  },
+  "http://178.156.186.149/n8n/webhook/telegram-wm-2024",
+  "production",
+  "Telegram",
+  "t.me/Rechaelalexa",
+  "-1002904509105",
+  "-1002904509105@g.us",
+  "\ud83d\udc8e**\u0421\u0410\u041d\u041a\u0422**-\u041f\u0415\u0422\u0415\u0420\u0411\u0423\u0420\u0413 \ud83d\udc8e\n\n**\u0412\u0441\u0442\u0440\u0435\u0447\u0430 \u0441\u0435\u0433\u043e\u0434\u043d\u044f \u043a 22**:00\n\u041a \u043c\u043e\u043b\u043e\u0434\u043e\u043c\u0443, \u043a\u043b\u0430\u0441\u0441\u043d\u043e\u043c\u0443 \u043f\u043e\u0441\u0442\u0443 \u043d\u0430 2 \u0447\u0430\u0441\u0430\n\u0423\u0436\u0438\u043d, \u0433\u043e\u0441\u0442\u0438\u043d\u043d\u0438\u0446\u0430 \u0432 \u0446\u0435\u043d\u0442\u0440\u0435\ud83e\udd42\n\u041a\u043b\u0430\u0441\u0441\u0438\u043a\u0430 \u0438 \u043c\u0431\u0440  \n\u0422\u0430\u043a\u0441\u0438 \u0432 \u043e\u0431\u0435 \u0441\u0442\u043e\u0440\u043e\u043d\u044b \n**\u0417\u0430 \u0432\u0441\u0442\u0440\u0435\u0447\u0443 20\u043a \u0447\u0438\u0441\u0442\u044b\u043c\u0438          **\n\u0414\u043e 27 \u043b\u0435\u0442, \u043a\u0442\u043e \u043c\u043e\u0436\u0435\u0442? \n\u0416\u0434\u0443 \u0430\u043d\u043a\u0435\u0442\u043a\u0438 \u0432 \u043b\u0441 \ud83d\udcf2",
+  "telegram_sniffer",
+  "Alexaaahh | Manager",
+  "2026-06-23T12:56:24.326Z",
+  "@Rechaelalexa",
+  {
+    "generations": "298"
+  },
+  {
+    "completionTokens": 675,
+    "promptTokens": 733,
+    "totalTokens": 1408
+  },
+  [
+    "299"
+  ],
+  {
+    "openai_api_key": "300",
+    "model": "301",
+    "max_retries": 2,
+    "configuration": "302",
+    "model_kwargs": "303"
+  },
+  "{\n  \"city\": \"\u0421\u0430\u043d\u043a\u0442-\u041f\u0435\u0442\u0435\u0440\u0431\u0443\u0440\u0433\",\n  \"budget\": \"20 000\",\n  \"category\": \"evento\",\n  \"detected_lang\": \"RU\",\n  \"title_es\": \"Cita en San Petersburgo esta noche\",\n  \"text_es\": \"Cliente busca chica joven (hasta 27 a\u00f1os) para una cita hoy a las 22:00. Duraci\u00f3n: 2 horas. Incluye cena, hotel en el centro, cl\u00e1sico y MBR. Taxi ida y vuelta. Presupuesto: 20 000 limpios. Enviar perfiles al DM.\",\n  \"title_en\": \"Meeting in St. Petersburg tonight\",\n  \"text_en\": \"Client is looking for a young girl (up to 27) for a meeting today at 22:00. Duration: 2 hours. Includes dinner, hotel in the center, classic and MBR. Taxi both ways. Budget: 20k clean. Send profiles to DM.\",\n  \"title_ru\": \"\u0412\u0441\u0442\u0440\u0435\u0447\u0430 \u0432 \u0421\u0430\u043d\u043a\u0442-\u041f\u0435\u0442\u0435\u0440\u0431\u0443\u0440\u0433\u0435 \u0441\u0435\u0433\u043e\u0434\u043d\u044f\",\n  \"text_ru\": \"\u041a\u043b\u0438\u0435\u043d\u0442 \u0438\u0449\u0435\u0442 \u043c\u043e\u043b\u043e\u0434\u0443\u044e \u0434\u0435\u0432\u0443\u0448\u043a\u0443 (\u0434\u043e 27 \u043b\u0435\u0442) \u043d\u0430 \u0432\u0441\u0442\u0440\u0435\u0447\u0443 \u0441\u0435\u0433\u043e\u0434\u043d\u044f \u043a 22:00. \u041f\u0440\u043e\u0434\u043e\u043b\u0436\u0438\u0442\u0435\u043b\u044c\u043d\u043e\u0441\u0442\u044c: 2 \u0447\u0430\u0441\u0430. \u0423\u0436\u0438\u043d, \u0433\u043e\u0441\u0442\u0438\u043d\u0438\u0446\u0430 \u0432 \u0446\u0435\u043d\u0442\u0440\u0435, \u043a\u043b\u0430\u0441\u0441\u0438\u043a\u0430 \u0438 \u041c\u0411\u0420. \u0422\u0430\u043a\u0441\u0438 \u0432 \u043e\u0431\u0435 \u0441\u0442\u043e\u0440\u043e\u043d\u044b. \u0411\u044e\u0434\u0436\u0435\u0442 20 \u0442\u044b\u0441. \u0447\u0438\u0441\u0442\u044b\u043c\u0438. \u0416\u0434\u0443 \u0430\u043d\u043a\u0435\u0442\u043a\u0438 \u0432 \u043b\u0441.\",\n  \"title_pt\": \"Encontro em S\u00e3o Petersburgo hoje\",\n  \"text_pt\": \"Cliente procura uma jovem (at\u00e9 27 anos) para um encontro hoje \u00e0s 22:00. Dura\u00e7\u00e3o: 2 horas. Inclui jantar, hotel no centro, cl\u00e1ssico e MBR. T\u00e1xi ida e volta. Or\u00e7amento: 20k limpos. Enviar perfis no direct.\",\n  \"trash\": false\n}",
+  "\u0421\u0430\u043d\u043a\u0442-\u041f\u0435\u0442\u0435\u0440\u0431\u0443\u0440\u0433",
+  "20 000",
+  "evento",
+  "Cliente busca chica joven (hasta 27 a\u00f1os) para una cita hoy a las 22:00. Duraci\u00f3n: 2 horas. Incluye cena, hotel en el centro, cl\u00e1sico y MBR. Taxi ida y vuelta. Presupuesto: 20 000 limpios. Enviar perfiles al DM.",
+  "Cita en San Petersburgo esta noche",
+  "Client is looking for a young girl (up to 27) for a meeting today at 22:00. Duration: 2 hours. Includes dinner, hotel in the center, classic and MBR. Taxi both ways. Budget: 20k clean. Send profiles to DM.",
+  "Meeting in St. Petersburg tonight",
+  "\u041a\u043b\u0438\u0435\u043d\u0442 \u0438\u0449\u0435\u0442 \u043c\u043e\u043b\u043e\u0434\u0443\u044e \u0434\u0435\u0432\u0443\u0448\u043a\u0443 (\u0434\u043e 27 \u043b\u0435\u0442) \u043d\u0430 \u0432\u0441\u0442\u0440\u0435\u0447\u0443 \u0441\u0435\u0433\u043e\u0434\u043d\u044f \u043a 22:00. \u041f\u0440\u043e\u0434\u043e\u043b\u0436\u0438\u0442\u0435\u043b\u044c\u043d\u043e\u0441\u0442\u044c: 2 \u0447\u0430\u0441\u0430. \u0423\u0436\u0438\u043d, \u0433\u043e\u0441\u0442\u0438\u043d\u0438\u0446\u0430 \u0432 \u0446\u0435\u043d\u0442\u0440\u0435, \u043a\u043b\u0430\u0441\u0441\u0438\u043a\u0430 \u0438 \u041c\u0411\u0420. \u0422\u0430\u043a\u0441\u0438 \u0432 \u043e\u0431\u0435 \u0441\u0442\u043e\u0440\u043e\u043d\u044b. \u0411\u044e\u0434\u0436\u0435\u0442 20 \u0442\u044b\u0441. \u0447\u0438\u0441\u0442\u044b\u043c\u0438. \u0416\u0434\u0443 \u0430\u043d\u043a\u0435\u0442\u043a\u0438 \u0432 \u043b\u0441.",
+  "\u0412\u0441\u0442\u0440\u0435\u0447\u0430 \u0432 \u0421\u0430\u043d\u043a\u0442-\u041f\u0435\u0442\u0435\u0440\u0431\u0443\u0440\u0433\u0435 \u0441\u0435\u0433\u043e\u0434\u043d\u044f",
+  "Cliente procura uma jovem (at\u00e9 27 anos) para um encontro hoje \u00e0s 22:00. Dura\u00e7\u00e3o: 2 horas. Inclui jantar, hotel no centro, cl\u00e1ssico e MBR. T\u00e1xi ida e volta. Or\u00e7amento: 20k limpos. Enviar perfis no direct.",
+  "Encontro em S\u00e3o Petersburgo hoje",
+  "ES",
+  "-5283488138",
+  "<b>Cita en San Petersburgo esta noche</b>\n\ud83c\udff7\ufe0f <b>Eventos</b>\n\ud83d\udccd <b>\u0421\u0430\u043d\u043a\u0442-\u041f\u0435\u0442\u0435\u0440\u0431\u0443\u0440\u0433</b>\n\ud83d\udcb0 <b>20 000</b>\n\nCliente busca chica joven (hasta 27 a\u00f1os) para una cita hoy a las 22:00. Duraci\u00f3n: 2 horas. Incluye cena, hotel en el centro, cl\u00e1sico y MBR. Taxi ida y vuelta. Presupuesto: 20 000 limpios. Enviar perfiles al DM.\n\n\ud83d\udc64 <b>Remitente:</b> <a href=\"https://t.me/Rechaelalexa\">@Rechaelalexa</a>\n\ud83d\udd0c <b>Fuente:</b> Telegram",
+  "120363425790792660@g.us",
+  "EN",
+  "-1003757267210",
+  "<b>Meeting in St. Petersburg tonight</b>\n\ud83c\udff7\ufe0f <b>Eventos</b>\n\ud83d\udccd <b>\u0421\u0430\u043d\u043a\u0442-\u041f\u0435\u0442\u0435\u0440\u0431\u0443\u0440\u0433</b>\n\ud83d\udcb0 <b>20 000</b>\n\nClient is looking for a young girl (up to 27) for a meeting today at 22:00. Duration: 2 hours. Includes dinner, hotel in the center, classic and MBR. Taxi both ways. Budget: 20k clean. Send profiles to DM.\n\n\ud83d\udc64 <b>Sender:</b> <a href=\"https://t.me/Rechaelalexa\">@Rechaelalexa</a>\n\ud83d\udd0c <b>Fuente:</b> Telegram",
+  "120363408216646972@g.us",
+  "RU",
+  "-1003920309636",
+  "<b>\u0412\u0441\u0442\u0440\u0435\u0447\u0430 \u0432 \u0421\u0430\u043d\u043a\u0442-\u041f\u0435\u0442\u0435\u0440\u0431\u0443\u0440\u0433\u0435 \u0441\u0435\u0433\u043e\u0434\u043d\u044f</b>\n\ud83c\udff7\ufe0f <b>Eventos</b>\n\ud83d\udccd <b>\u0421\u0430\u043d\u043a\u0442-\u041f\u0435\u0442\u0435\u0440\u0431\u0443\u0440\u0433</b>\n\ud83d\udcb0 <b>20 000</b>\n\n\u041a\u043b\u0438\u0435\u043d\u0442 \u0438\u0449\u0435\u0442 \u043c\u043e\u043b\u043e\u0434\u0443\u044e \u0434\u0435\u0432\u0443\u0448\u043a\u0443 (\u0434\u043e 27 \u043b\u0435\u0442) \u043d\u0430 \u0432\u0441\u0442\u0440\u0435\u0447\u0443 \u0441\u0435\u0433\u043e\u0434\u043d\u044f \u043a 22:00. \u041f\u0440\u043e\u0434\u043e\u043b\u0436\u0438\u0442\u0435\u043b\u044c\u043d\u043e\u0441\u0442\u044c: 2 \u0447\u0430\u0441\u0430. \u0423\u0436\u0438\u043d, \u0433\u043e\u0441\u0442\u0438\u043d\u0438\u0446\u0430 \u0432 \u0446\u0435\u043d\u0442\u0440\u0435, \u043a\u043b\u0430\u0441\u0441\u0438\u043a\u0430 \u0438 \u041c\u0411\u0420. \u0422\u0430\u043a\u0441\u0438 \u0432 \u043e\u0431\u0435 \u0441\u0442\u043e\u0440\u043e\u043d\u044b. \u0411\u044e\u0434\u0436\u0435\u0442 20 \u0442\u044b\u0441. \u0447\u0438\u0441\u0442\u044b\u043c\u0438. \u0416\u0434\u0443 \u0430\u043d\u043a\u0435\u0442\u043a\u0438 \u0432 \u043b\u0441.\n\n\ud83d\udc64 <b>\u041e\u0442\u043f\u0440\u0430\u0432\u0438\u0442\u0435\u043b\u044c:</b> <a href=\"https://t.me/Rechaelalexa\">@Rechaelalexa</a>\n\ud83d\udd0c <b>Fuente:</b> Telegram",
+  "120363408298375271@g.us",
+  "RU_CHANNEL",
+  "-1003934906353",
+  "PT",
+  "-1003727383883",
+  "<b>Encontro em S\u00e3o Petersburgo hoje</b>\n\ud83c\udff7\ufe0f <b>Eventos</b>\n\ud83d\udccd <b>\u0421\u0430\u043d\u043a\u0442-\u041f\u0435\u0442\u0435\u0440\u0431\u0443\u0440\u0433</b>\n\ud83d\udcb0 <b>20 000</b>\n\nCliente procura uma jovem (at\u00e9 27 anos) para um encontro hoje \u00e0s 22:00. Dura\u00e7\u00e3o: 2 horas. Inclui jantar, hotel no centro, cl\u00e1ssico e MBR. T\u00e1xi ida e volta. Or\u00e7amento: 20k limpos. Enviar perfis no direct.\n\n\ud83d\udc64 <b>Remetente:</b> <a href=\"https://t.me/Rechaelalexa\">@Rechaelalexa</a>\n\ud83d\udd0c <b>Fuente:</b> Telegram",
+  "120363426262586004@g.us",
+  {
+    "message_id": 37955,
+    "from": "304",
+    "chat": "305",
+    "date": 1782219391,
+    "text": "306",
+    "entities": "307",
+    "link_preview_options": "308"
+  },
+  {
+    "message_id": 19851,
+    "from": "309",
+    "chat": "310",
+    "date": 1782219391,
+    "text": "311",
+    "entities": "312",
+    "link_preview_options": "313"
+  },
+  {
+    "message_id": 20531,
+    "from": "314",
+    "chat": "315",
+    "date": 1782219392,
+    "text": "316",
+    "entities": "317",
+    "link_preview_options": "318"
+  },
+  {
+    "message_id": 9295,
+    "sender_chat": "319",
+    "chat": "320",
+    "date": 1782219392,
+    "text": "316",
+    "entities": "321",
+    "link_preview_options": "322"
+  },
+  {
+    "message_id": 19848,
+    "from": "323",
+    "chat": "324",
+    "date": 1782219393,
+    "text": "325",
+    "entities": "326",
+    "link_preview_options": "327"
+  },
+  "374709cffbd1f9a5d1bf7a5fc08fc14e8ee97765a1670bee4d59d9f21f1c989b",
+  "\u0421\u0410\u041d\u041a\u0422-\u041f\u0415\u0422\u0415\u0420\u0411\u0423\u0420\u0413",
+  {
+    "message": "328",
+    "name": "329",
+    "stack": "330",
+    "code": "331",
+    "status": 500
+  },
+  "upgrade",
+  "178.156.186.149",
+  "729",
+  "application/json",
+  "*/*",
+  "node-fetch/1.0 (+https://github.com/bitinn/node-fetch)",
+  "gzip,deflate",
+  "telegram",
+  [
+    "332"
+  ],
+  "Human: ### WORLDMODELS QUALITY ENGINE v5.2 (ULTRA PRECISION) ###\nTEXT: \"\ud83d\udc8e**\u0421\u0410\u041d\u041a\u0422**-\u041f\u0415\u0422\u0415\u0420\u0411\u0423\u0420\u0413 \ud83d\udc8e\n\n**\u0412\u0441\u0442\u0440\u0435\u0447\u0430 \u0441\u0435\u0433\u043e\u0434\u043d\u044f \u043a 22**:00\n\u041a \u043c\u043e\u043b\u043e\u0434\u043e\u043c\u0443, \u043a\u043b\u0430\u0441\u0441\u043d\u043e\u043c\u0443 \u043f\u043e\u0441\u0442\u0443 \u043d\u0430 2 \u0447\u0430\u0441\u0430\n\u0423\u0436\u0438\u043d, \u0433\u043e\u0441\u0442\u0438\u043d\u043d\u0438\u0446\u0430 \u0432 \u0446\u0435\u043d\u0442\u0440\u0435\ud83e\udd42\n\u041a\u043b\u0430\u0441\u0441\u0438\u043a\u0430 \u0438 \u043c\u0431\u0440  \n\u0422\u0430\u043a\u0441\u0438 \u0432 \u043e\u0431\u0435 \u0441\u0442\u043e\u0440\u043e\u043d\u044b \n**\u0417\u0430 \u0432\u0441\u0442\u0440\u0435\u0447\u0443 20\u043a \u0447\u0438\u0441\u0442\u044b\u043c\u0438          **\n\u0414\u043e 27 \u043b\u0435\u0442, \u043a\u0442\u043e \u043c\u043e\u0436\u0435\u0442? \n\u0416\u0434\u0443 \u0430\u043d\u043a\u0435\u0442\u043a\u0438 \u0432 \u043b\u0441 \ud83d\udcf2\"\n\nCLASSIFICATION RULES:\n\n1. EVENTO (Client Requests / Immediate Leads) - HIGH PRIORITY:\n   - DIRECT REQUESTS: \"Busco chica para ahora\", \"Disponible en Madrid?\", \"Outcall 1h\", \"Dinner tonight\".\n   - REAL TIME: Messages mentioning \"Ahora\", \"Hoy\", \"Esta noche\", \"ASAP\", or specific times.\n   - TOURS & CASTINGS: \"Casting para marca\", \"Haciendo tour en Ibiza\".\n   - CONTEXT: A client or agency looking for someone for something SPECIFIC and immediate.\n\n2. PLAZA (Job Offers / Vacancies):\n   - FIXED POSITIONS: \"Buscamos chica fija para club\", \"Plaza libre en agencia\", \"Hiring for season\".\n   - AGENCY CASTINGS: \"Buscando caras nuevas\", \"Env\u00eden disponibilidad para mayo\".\n   - ACCOMMODATION: \"Habitaci\u00f3n para modelos\", \"Piso disponible para trabajar\".\n   - CONTEXT: An agency or organizer offering stable work, vacancies, or housing.\n\n3. TRASH (Discard):\n   - INDIVIDUAL SELF-PROMOTION: \"Hola soy Maria, disponible en Madrid\", \"Soy modelo, contratadme\". (Only if the model is offering HERSELF).\n   - CASUAL CHAT: Greetings, questions without an offer, or maintenance messages.\n   - SPAM: Crypto, random links, unrelated ads.\n\nCRITICAL: \n- If an AGENCY or CLUB asks \"Who is available?\", \"Seeking models\", or posts a job offer (even for the future), it is a PLAZA or EVENTO, NOT trash.\n- If a CLIENT asks to meet, it is an EVENTO, NOT trash.\n- If the city is NOT mentioned but the text mentions a club name (like Mansour, Lio, Pacha), try to infer the city or output \"Ibiza\" if it's a known Ibiza spot.\n\nOUTPUT JSON:\n{\n  \"city\": \"City Name (e.g. Ibiza, Madrid, Miami, Paris)\",\n  \"budget\": \"Value\",\n  \"category\": \"plaza|evento|trash\",\n  \"detected_lang\": \"ES|EN|RU|PT\",\n  \"title_es\": \"Short descriptive title\",\n  \"text_es\": \"Clean and translated text\",\n  \"title_en\": \"Short descriptive title in English\",\n  \"text_en\": \"Clean and translated text in English\",\n  \"title_ru\": \"Short descriptive title in Russian\",\n  \"text_ru\": \"Clean and translated text in Russian\",\n  \"title_pt\": \"Short descriptive title in Portuguese\",\n  \"text_pt\": \"Clean and translated text in Portuguese\",\n  \"trash\": false\n}",
+  {
+    "lc": 1,
+    "type": "333",
+    "id": "334"
+  },
+  "deepseek-v4-flash",
+  {
+    "baseURL": "335",
+    "fetchOptions": "336"
+  },
+  {},
+  {
+    "id": 8566658948,
+    "is_bot": true,
+    "first_name": "337",
+    "username": "338"
+  },
+  {
+    "id": -5283488138,
+    "title": "339",
+    "type": "340",
+    "all_members_are_administrators": false,
+    "accepted_gift_types": "341"
+  },
+  "Cita en San Petersburgo esta noche\n\ud83c\udff7\ufe0f Eventos\n\ud83d\udccd \u0421\u0430\u043d\u043a\u0442-\u041f\u0435\u0442\u0435\u0440\u0431\u0443\u0440\u0433\n\ud83d\udcb0 20 000\n\nCliente busca chica joven (hasta 27 a\u00f1os) para una cita hoy a las 22:00. Duraci\u00f3n: 2 horas. Incluye cena, hotel en el centro, cl\u00e1sico y MBR. Taxi ida y vuelta. Presupuesto: 20 000 limpios. Enviar perfiles al DM.\n\n\ud83d\udc64 Remitente: @Rechaelalexa\n\ud83d\udd0c Fuente: Telegram",
+  [
+    "342",
+    "343",
+    "344",
+    "345",
+    "346",
+    "347",
+    "348"
+  ],
+  {
+    "url": "349"
+  },
+  {
+    "id": 8566658948,
+    "is_bot": true,
+    "first_name": "337",
+    "username": "338"
+  },
+  {
+    "id": -1003757267210,
+    "title": "350",
+    "type": "351"
+  },
+  "Meeting in St. Petersburg tonight\n\ud83c\udff7\ufe0f Eventos\n\ud83d\udccd \u0421\u0430\u043d\u043a\u0442-\u041f\u0435\u0442\u0435\u0440\u0431\u0443\u0440\u0433\n\ud83d\udcb0 20 000\n\nClient is looking for a young girl (up to 27) for a meeting today at 22:00. Duration: 2 hours. Includes dinner, hotel in the center, classic and MBR. Taxi both ways. Budget: 20k clean. Send profiles to DM.\n\n\ud83d\udc64 Sender: @Rechaelalexa\n\ud83d\udd0c Fuente: Telegram",
+  [
+    "352",
+    "353",
+    "354",
+    "355",
+    "356",
+    "357",
+    "358"
+  ],
+  {
+    "url": "349"
+  },
+  {
+    "id": 8566658948,
+    "is_bot": true,
+    "first_name": "337",
+    "username": "338"
+  },
+  {
+    "id": -1003920309636,
+    "title": "359",
+    "type": "351"
+  },
+  "\u0412\u0441\u0442\u0440\u0435\u0447\u0430 \u0432 \u0421\u0430\u043d\u043a\u0442-\u041f\u0435\u0442\u0435\u0440\u0431\u0443\u0440\u0433\u0435 \u0441\u0435\u0433\u043e\u0434\u043d\u044f\n\ud83c\udff7\ufe0f Eventos\n\ud83d\udccd \u0421\u0430\u043d\u043a\u0442-\u041f\u0435\u0442\u0435\u0440\u0431\u0443\u0440\u0433\n\ud83d\udcb0 20 000\n\n\u041a\u043b\u0438\u0435\u043d\u0442 \u0438\u0449\u0435\u0442 \u043c\u043e\u043b\u043e\u0434\u0443\u044e \u0434\u0435\u0432\u0443\u0448\u043a\u0443 (\u0434\u043e 27 \u043b\u0435\u0442) \u043d\u0430 \u0432\u0441\u0442\u0440\u0435\u0447\u0443 \u0441\u0435\u0433\u043e\u0434\u043d\u044f \u043a 22:00. \u041f\u0440\u043e\u0434\u043e\u043b\u0436\u0438\u0442\u0435\u043b\u044c\u043d\u043e\u0441\u0442\u044c: 2 \u0447\u0430\u0441\u0430. \u0423\u0436\u0438\u043d, \u0433\u043e\u0441\u0442\u0438\u043d\u0438\u0446\u0430 \u0432 \u0446\u0435\u043d\u0442\u0440\u0435, \u043a\u043b\u0430\u0441\u0441\u0438\u043a\u0430 \u0438 \u041c\u0411\u0420. \u0422\u0430\u043a\u0441\u0438 \u0432 \u043e\u0431\u0435 \u0441\u0442\u043e\u0440\u043e\u043d\u044b. \u0411\u044e\u0434\u0436\u0435\u0442 20 \u0442\u044b\u0441. \u0447\u0438\u0441\u0442\u044b\u043c\u0438. \u0416\u0434\u0443 \u0430\u043d\u043a\u0435\u0442\u043a\u0438 \u0432 \u043b\u0441.\n\n\ud83d\udc64 \u041e\u0442\u043f\u0440\u0430\u0432\u0438\u0442\u0435\u043b\u044c: @Rechaelalexa\n\ud83d\udd0c Fuente: Telegram",
+  [
+    "360",
+    "361",
+    "362",
+    "363",
+    "364",
+    "365",
+    "366"
+  ],
+  {
+    "url": "349"
+  },
+  {
+    "id": -1003934906353,
+    "title": "367",
+    "type": "368"
+  },
+  {
+    "id": -1003934906353,
+    "title": "367",
+    "type": "368"
+  },
+  [
+    "369",
+    "370",
+    "371",
+    "372",
+    "373",
+    "374",
+    "375"
+  ],
+  {
+    "url": "349"
+  },
+  {
+    "id": 8566658948,
+    "is_bot": true,
+    "first_name": "337",
+    "username": "338"
+  },
+  {
+    "id": -1003727383883,
+    "title": "376",
+    "type": "351"
+  },
+  "Encontro em S\u00e3o Petersburgo hoje\n\ud83c\udff7\ufe0f Eventos\n\ud83d\udccd \u0421\u0430\u043d\u043a\u0442-\u041f\u0435\u0442\u0435\u0440\u0431\u0443\u0440\u0433\n\ud83d\udcb0 20 000\n\nCliente procura uma jovem (at\u00e9 27 anos) para um encontro hoje \u00e0s 22:00. Dura\u00e7\u00e3o: 2 horas. Inclui jantar, hotel no centro, cl\u00e1ssico e MBR. T\u00e1xi ida e volta. Or\u00e7amento: 20k limpos. Enviar perfis no direct.\n\n\ud83d\udc64 Remetente: @Rechaelalexa\n\ud83d\udd0c Fuente: Telegram",
+  [
+    "377",
+    "378",
+    "379",
+    "380",
+    "381",
+    "382",
+    "383"
+  ],
+  {
+    "url": "349"
+  },
+  "500 - \"{\\\"error\\\":\\\"Failed to forward to Whapi (Juana)\\\"}\"",
+  "AxiosError",
+  "AxiosError: Request failed with status code 500\n    at settle (/usr/local/lib/node_modules/n8n/node_modules/.pnpm/axios@1.13.5/node_modules/axios/lib/core/settle.js:19:12)\n    at RedirectableRequest.handleResponse (/usr/local/lib/node_modules/n8n/node_modules/.pnpm/axios@1.13.5/node_modules/axios/lib/adapters/http.js:746:9)\n    at RedirectableRequest.emit (node:events:520:35)\n    at RedirectableRequest._processResponse (/usr/local/lib/node_modules/n8n/node_modules/.pnpm/follow-redirects@1.15.11/node_modules/follow-redirects/index.js:409:10)\n    at ClientRequest.RedirectableRequest._onNativeResponse (/usr/local/lib/node_modules/n8n/node_modules/.pnpm/follow-redirects@1.15.11/node_modules/follow-redirects/index.js:102:12)\n    at Object.onceWrapper (node:events:623:26)\n    at ClientRequest.emit (node:events:508:28)\n    at HTTPParser.parserOnIncomingClient (node:_http_client:780:27)\n    at HTTPParser.parserOnHeadersComplete (node:_http_common:125:17)\n    at Socket.socketOnData (node:_http_client:615:22)\n    at Axios.request (/usr/local/lib/node_modules/n8n/node_modules/.pnpm/axios@1.13.5/node_modules/axios/lib/core/Axios.js:46:41)\n    at processTicksAndRejections (node:internal/process/task_queues:103:5)\n    at invokeAxios (/usr/local/lib/node_modules/n8n/node_modules/.pnpm/n8n-core@file+packages+core_@opentelemetry+api@1.9.0_@opentelemetry+exporter-trace-otlp_9f358c3eeaef0d2736f54ac9757ada43/node_modules/n8n-core/src/execution-engine/node-execution-context/utils/request-helper-functions.ts:303:10)\n    at proxyRequestToAxios (/usr/local/lib/node_modules/n8n/node_modules/.pnpm/n8n-core@file+packages+core_@opentelemetry+api@1.9.0_@opentelemetry+exporter-trace-otlp_9f358c3eeaef0d2736f54ac9757ada43/node_modules/n8n-core/src/execution-engine/node-execution-context/utils/request-helper-functions.ts:684:20)\n    at Object.request (/usr/local/lib/node_modules/n8n/node_modules/.pnpm/n8n-core@file+packages+core_@opentelemetry+api@1.9.0_@opentelemetry+exporter-trace-otlp_9f358c3eeaef0d2736f54ac9757ada43/node_modules/n8n-core/src/execution-engine/node-execution-context/utils/request-helper-functions.ts:1841:4)",
+  "ERR_BAD_RESPONSE",
+  [
+    "384"
+  ],
+  "secret",
+  [
+    "385"
+  ],
+  "https://api.deepseek.com",
+  {
+    "dispatcher": "386"
+  },
+  "Worldmldels",
+  "Worldmodelssbot",
+  "Worldmodels&Jobs",
+  "group",
+  {
+    "unlimited_gifts": false,
+    "limited_gifts": false,
+    "unique_gifts": false,
+    "premium_subscription": false,
+    "gifts_from_channels": false
+  },
+  {
+    "offset": 0,
+    "length": 34,
+    "type": "387"
+  },
+  {
+    "offset": 39,
+    "length": 7,
+    "type": "387"
+  },
+  {
+    "offset": 50,
+    "length": 15,
+    "type": "387"
+  },
+  {
+    "offset": 69,
+    "length": 6,
+    "type": "387"
+  },
+  {
+    "offset": 293,
+    "length": 10,
+    "type": "387"
+  },
+  {
+    "offset": 304,
+    "length": 13,
+    "type": "388",
+    "url": "349"
+  },
+  {
+    "offset": 321,
+    "length": 7,
+    "type": "387"
+  },
+  "https://t.me/Rechaelalexa",
+  "Worldmodels&Jobs EN",
+  "supergroup",
+  {
+    "offset": 0,
+    "length": 33,
+    "type": "387"
+  },
+  {
+    "offset": 38,
+    "length": 7,
+    "type": "387"
+  },
+  {
+    "offset": 49,
+    "length": 15,
+    "type": "387"
+  },
+  {
+    "offset": 68,
+    "length": 6,
+    "type": "387"
+  },
+  {
+    "offset": 286,
+    "length": 7,
+    "type": "387"
+  },
+  {
+    "offset": 294,
+    "length": 13,
+    "type": "388",
+    "url": "349"
+  },
+  {
+    "offset": 311,
+    "length": 7,
+    "type": "387"
+  },
+  "Worldmodels&Jobs RU",
+  {
+    "offset": 0,
+    "length": 34,
+    "type": "387"
+  },
+  {
+    "offset": 39,
+    "length": 7,
+    "type": "387"
+  },
+  {
+    "offset": 50,
+    "length": 15,
+    "type": "387"
+  },
+  {
+    "offset": 69,
+    "length": 6,
+    "type": "387"
+  },
+  {
+    "offset": 281,
+    "length": 12,
+    "type": "387"
+  },
+  {
+    "offset": 294,
+    "length": 13,
+    "type": "388",
+    "url": "349"
+  },
+  {
+    "offset": 311,
+    "length": 7,
+    "type": "387"
+  },
+  "worldmodels jobs RU",
+  "channel",
+  {
+    "offset": 0,
+    "length": 34,
+    "type": "387"
+  },
+  {
+    "offset": 39,
+    "length": 7,
+    "type": "387"
+  },
+  {
+    "offset": 50,
+    "length": 15,
+    "type": "387"
+  },
+  {
+    "offset": 69,
+    "length": 6,
+    "type": "387"
+  },
+  {
+    "offset": 281,
+    "length": 12,
+    "type": "387"
+  },
+  {
+    "offset": 294,
+    "length": 13,
+    "type": "388",
+    "url": "349"
+  },
+  {
+    "offset": 311,
+    "length": 7,
+    "type": "387"
+  },
+  "Worldmodels&Jobs PT",
+  {
+    "offset": 0,
+    "length": 32,
+    "type": "387"
+  },
+  {
+    "offset": 37,
+    "length": 7,
+    "type": "387"
+  },
+  {
+    "offset": 48,
+    "length": 15,
+    "type": "387"
+  },
+  {
+    "offset": 67,
+    "length": 6,
+    "type": "387"
+  },
+  {
+    "offset": 283,
+    "length": 10,
+    "type": "387"
+  },
+  {
+    "offset": 294,
+    "length": 13,
+    "type": "388",
+    "url": "349"
+  },
+  {
+    "offset": 311,
+    "length": 7,
+    "type": "387"
+  },
+  {
+    "text": "252",
+    "generationInfo": "389"
+  },
+  "OPENAI_API_KEY",
+  {
+    "_events": "390",
+    "_eventsCount": 0
+  },
+  "bold",
+  "text_link",
+  {
+    "finish_reason": "391"
+  },
+  {},
+  "stop"
+]

@@ -1,0 +1,160 @@
+[
+  {
+    "id": "russia_turkey",
+    "label": "RUSSIA_TURKEY",
+    "wa": "37257825047",
+    "tg": "1800004016",
+    "cities": [
+      "russia_turkey"
+    ],
+    "categoryFilter": "",
+    "lang": "en"
+  },
+  {
+    "id": "madrid",
+    "label": "PAULA_TOSCANA",
+    "wa": "353830078788",
+    "tg": "7667292228",
+    "cities": [
+      "toscana"
+    ],
+    "categoryFilter": "evento",
+    "lang": "es",
+    "active": true
+  },
+  {
+    "id": "monaco",
+    "label": "COSTA AZUL",
+    "wa": "33672474796",
+    "tg": "",
+    "cities": [
+      "monaco"
+    ],
+    "categoryFilter": "",
+    "lang": "pt"
+  },
+  {
+    "id": "ibiza1",
+    "label": "IBIZA",
+    "wa": "34601169815",
+    "tg": "",
+    "cities": [
+      "ibiza"
+    ],
+    "categoryFilter": "",
+    "lang": "es"
+  },
+  {
+    "id": "ibiza2",
+    "label": "IBIZA/MARBELLA",
+    "wa": "34670652138",
+    "tg": "",
+    "cities": [
+      "ibiza",
+      "marbella"
+    ],
+    "categoryFilter": "",
+    "active": false,
+    "lang": "es"
+  },
+  {
+    "id": "suiza",
+    "label": "SUIZA",
+    "wa": "573183836809",
+    "tg": "",
+    "cities": [
+      "suiza"
+    ],
+    "categoryFilter": "",
+    "lang": "es"
+  },
+  {
+    "id": "london",
+    "label": "LONDON",
+    "wa": "447438757923",
+    "tg": "7190472694",
+    "cities": [
+      "london"
+    ],
+    "categoryFilter": "",
+    "active": false,
+    "lang": "es"
+  },
+  {
+    "id": "london_py_595",
+    "label": "LONDON_PY",
+    "wa": "595976813314",
+    "tg": "8873227046",
+    "cities": [
+      "london"
+    ],
+    "categoryFilter": "",
+    "active": false,
+    "lang": "es"
+  },
+  {
+    "id": "reg_56977280545_1782355442276",
+    "label": "REG_0545_MQSWET0K",
+    "wa": "56977280545",
+    "tg": "",
+    "cities": [
+      "monaco",
+      "london",
+      "suiza",
+      "paris",
+      "new_york",
+      "miami"
+    ],
+    "categoryFilter": "",
+    "trialUntil": 1782356462056,
+    "active": false,
+    "source": "self-register",
+    "lang": "es"
+  },
+  {
+    "id": "cartagena",
+    "label": "CARTAGENA",
+    "wa": "573009070853",
+    "tg": "",
+    "cities": [
+      "cartagena"
+    ],
+    "categoryFilter": "",
+    "active": true,
+    "source": "manual",
+    "lang": "es"
+  },
+  {
+    "id": "cl_1782694747682",
+    "label": "KARLA MARBELLA",
+    "wa": "34690931559",
+    "tg": "",
+    "cities": [
+      "marbella"
+    ],
+    "active": true,
+    "lang": "es"
+  },
+  {
+    "id": "cl_1782694856882",
+    "label": "NATALIA DUBAI",
+    "wa": "971555652823",
+    "tg": "",
+    "cities": [
+      "dubai"
+    ],
+    "active": true,
+    "lang": "en"
+  },
+  {
+    "id": "cl_1783019203686",
+    "label": "LONDON FRIEND",
+    "wa": "447774362202",
+    "tg": "",
+    "lang": "en",
+    "cities": [
+      "london"
+    ],
+    "active": true
+  }
+]

@@ -32,11 +32,13 @@ build/
 *vertex*.txt
 *-key.txt
 *credentials*.json
+firebase-admin.json
 
 # Tokens / sesiones de WhatsApp/Telegram
 sessions/
 *.session
 *.session-journal
+session.txt
 auth_*.json
 bypass_login.sh
 worldmodelsjobs-mirror.git/
@@ -58,8 +60,14 @@ web/functions/
 tmp_*
 *.tmp
 *.bak
+*.bak.orig
+*.old
 *.log
 *.zip
+*.swp
+
+# Dumps de datos scrapeados (grupos, chats)
+juana_groups.json
 
 # Backups
 backups/

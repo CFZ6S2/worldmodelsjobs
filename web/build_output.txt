@@ -1,0 +1,55 @@
+
+> web@0.1.0 build
+> next build --webpack
+
+⚠ Warning: Next.js inferred your workspace root, but it may not be correct.
+ We detected multiple lockfiles and selected the directory of /root/worldmodels-jobs/package-lock.json as the root directory.
+ To silence this warning, set `outputFileTracingRoot` in your Next.js config, or consider removing one of the lockfiles if it's not needed.
+   See https://nextjs.org/docs/app/api-reference/config/next-config-js/output#caveats for more information.
+ Detected additional lockfiles: 
+   * /root/worldmodels-jobs/web/package-lock.json
+
+▲ Next.js 16.1.6 (webpack)
+- Environments: .env.local
+
+⚠ The "middleware" file convention is deprecated. Please use "proxy" instead. Learn more: https://nextjs.org/docs/messages/middleware-to-proxy
+  Creating an optimized production build ...
+✓ Compiled successfully in 6.5s
+  Running TypeScript ...
+  Collecting page data using 1 worker ...
+  Generating static pages using 1 worker (0/3) ...
+✓ Generating static pages using 1 worker (3/3) in 261.2ms
+  Finalizing page optimization ...
+  Collecting build traces ...
+
+Route (app)
+┌ ○ /_not-found
+├ ƒ /[locale]
+├ ƒ /[locale]/account
+├ ƒ /[locale]/admin
+├ ƒ /[locale]/auth/login
+├ ƒ /[locale]/blacklist
+├ ƒ /[locale]/feed
+├ ƒ /[locale]/login
+├ ƒ /[locale]/pricing
+├ ƒ /[locale]/profile
+├ ƒ /[locale]/profile/[id]
+├ ƒ /[locale]/publish
+├ ƒ /[locale]/register
+├ ƒ /[locale]/settings/notifications
+├ ƒ /api/checkout
+├ ƒ /api/leads
+├ ƒ /api/ofertas
+├ ƒ /api/posts
+├ ƒ /api/stripe/checkout
+├ ƒ /api/stripe/webhook
+├ ƒ /api/webhook
+├ ƒ /api/worldmodels-platinum-v5
+└ ƒ /ofertas
+
+
+ƒ Proxy (Middleware)
+
+○  (Static)   prerendered as static content
+ƒ  (Dynamic)  server-rendered on demand
+

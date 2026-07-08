@@ -7,7 +7,7 @@ headers = {
     'Content-Type': 'application/json'
 }
 data = {
-    "to": "34670652138@s.whatsapp.net",
+    "to": "37257825047@s.whatsapp.net",
     "body": "Prueba de sistema"
 }
 

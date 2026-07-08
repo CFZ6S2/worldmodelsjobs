@@ -1,8 +1,12 @@
 #!/bin/bash
 # update_whapi_token_and_restart.sh
-# Uso: ./update_whapi_token_and_restart.sh <WHAPI_TOKEN> [TARGET_NUMBER] [APP_DIR]
-# Ejemplo: ./update_whapi_token_and_restart.sh shJOb5wskQMTyfoF20GLqmJOclA5if5j 34658034597@s.whatsapp.net /root/worldmodels-jobs
 set -euo pipefail
+
+if [ $# -lt 1 ]; then
+  echo "Uso: $0 <WHAPI_TOKEN> [TARGET_NUMBER] [APP_DIR]"
+  exit 2
+fi
+
 TOKEN="$1"
 TARGET_NUMBER="${2:-34658034597@s.whatsapp.net}"
 APP_DIR="${3:-/root/worldmodels-jobs}"
@@ -34,7 +38,6 @@ fi
 if grep -q '^JUANA_API_TOKEN=' "$ENV_FILE"; then
   sed -i "s/^JUANA_API_TOKEN=.*/JUANA_API_TOKEN=$TOKEN/" "$ENV_FILE" || true
 else
-  # no forzamos si no existe
   echo "JUANA_API_TOKEN=$TOKEN" >> "$ENV_FILE"
 fi
 
@@ -42,7 +45,7 @@ echo "[INFO] Variables actualizadas en .env (no se hará commit)."
 
 # Reiniciar PM2
 if command -v pm2 >/dev/null 2>&1; then
-  echo "[INFO] Reiniciando procesos pm2: whapi-gateway y server (si existen)"
+  echo "[INFO] Reiniciando pm2: whapi-gateway y server (si existen)"
   pm2 restart whapi-gateway || true
   pm2 restart server || true
   echo "[INFO] pm2 restart completado"
@@ -50,7 +53,6 @@ else
   echo "[WARN] pm2 no encontrado en PATH. Asegúrate de reiniciar los servicios manualmente."
 fi
 
-# Esperar un par de segundos para que arranquen
 sleep 3
 
 # Prueba de envío local
@@ -59,7 +61,7 @@ HTTP=$(curl -s -o /dev/stderr -w "%{http_code}" -X POST http://127.0.0.1:3001/ap
 
 echo "[INFO] Código HTTP de prueba: $HTTP"
 
-# Mostrar último log breve
+# Mostrar últimos logs
 if command -v pm2 >/dev/null 2>&1; then
   echo "[INFO] Últimas 80 líneas de logs de whapi-gateway (si existe):"
   pm2 logs whapi-gateway --lines 80 --nostream || true
@@ -67,4 +69,4 @@ if command -v pm2 >/dev/null 2>&1; then
   pm2 logs server --lines 80 --nostream || true
 fi
 
-echo "[DONE] Script finalizado. Si la prueba falló, pega los logs aquí para que lo revise."
+echo "[DONE] Script finalizado."

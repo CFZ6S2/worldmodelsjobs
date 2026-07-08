@@ -1,6 +1,7 @@
 {
-  "id": "HeiNR7ik8wTOmbpv",
-  "name": "WorldModels Enterprise Engine v5 (Redis Ready)",
+  "id": "A0QpoDzX559wzRXQ",
+  "name": "WorldModels Enterprise Engine v5 (Fixed & Global)",
+  "active": true,
   "nodes": [
     {
       "parameters": {
@@ -8,7 +9,7 @@
         "path": "telegram-wm-2024",
         "options": {}
       },
-      "id": "a4a23784-9bab-47b8-8a65-382fde22523a",
+      "id": "3c815bb7-95d5-44ac-bc95-deee520e3910",
       "name": "Webhook Telegram",
       "type": "n8n-nodes-base.webhook",
       "typeVersion": 1,
@@ -24,7 +25,7 @@
         "path": "1fd718d6-49f8-43dc-a881-ff7ecf7b94ef",
         "options": {}
       },
-      "id": "04759c00-50b2-4c4d-8180-fe361eaeac42",
+      "id": "4f19a34b-8c59-4db7-8b88-717bbf351714",
       "name": "Webhook WhatsApp",
       "type": "n8n-nodes-base.webhook",
       "typeVersion": 1,
@@ -38,7 +39,7 @@
       "parameters": {
         "jsCode": "const item = $json;\n\n// Solo bloqueamos si es TRASH absoluto o si ya fue rechazado por Guard\nif (item.category === 'trash' || item.trash === true) return [];\n\nlet score = 0;\n// Scoring dinámico para el feed\nif (item.category === 'evento') score += 50;\nif (item.category === 'plaza') score += 20;\nif (item.city && item.city !== 'Global') score += 15;\nif ((item.text_es || '').length > 200) score += 10;\n\nreturn [{ json: { ...item, final_score: score } }];"
       },
-      "id": "fd6a27ba-4dcf-4390-8e6e-fcb400fc879e",
+      "id": "e7adddaa-94ba-421a-9904-c6cf038c4eee",
       "name": "Quality Score",
       "type": "n8n-nodes-base.code",
       "typeVersion": 1,
@@ -49,9 +50,9 @@
     },
     {
       "parameters": {
-        "jsCode": "const item = $input.first()?.json || {};\nfunction escapeHTML(text) { return String(text||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }\nfunction formatContact(val) { \n  if (!val) return 'No disponible';\n  const str = String(val).trim();\n  if (/[a-zA-Z]/.test(str)) return str; \n  const s = str.replace(/[^0-9]/g, ''); \n  return s.length >= 7 ? `+${s}` : str; \n}\n\nconst displayContact = formatContact(item.contact || item.final_contact);\nconst categoryStr = (item.category === 'plaza') ? 'Plazas' : 'Eventos';\n\nconst langs = [\n  { code: 'ES', tg: '-5283488138', wa: '120363425790792660@g.us', title: item.title_es || 'Nuevo Lead', text: item.text_es || item.texto_limpio, tag: 'Remitente' },\n  { code: 'EN', tg: '-1003757267210', wa: '120363408216646972@g.us', title: item.title_en || item.title_es || 'New Lead', text: item.text_en || item.text_es || item.texto_limpio, tag: 'Sender' },\n  { code: 'RU', tg: '-1003920309636', wa: '120363408298375271@g.us', title: item.title_ru || item.title_es || 'Новый Лид', text: item.text_ru || item.text_es || item.texto_limpio, tag: 'Отправитель' },\n  { code: 'PT', tg: '-1003727383883', wa: '120363426262586004@g.us', title: item.title_pt || item.title_es || 'Novo Lead', text: item.text_pt || item.text_es || item.texto_limpio, tag: 'Remetente' }\n];\n\nconst results = [];\nfor (const l of langs) {\n  function formatOutputContact(val, mode) {\n    if (!val) return 'No disponible';\n    if (String(val).startsWith('tg_id_')) {\n      const id = val.replace('tg_id_', '');\n      return mode === 'html' ? `<a href=\"tg://user?id=${id}\">Chat Directo</a>` : `ID: ${id}`;\n    }\n    if (/[a-zA-Z]/.test(val)) {\n       const user = String(val).replace('@', '');\n       return mode === 'html' ? `<a href=\"https://t.me/${user}\">@${user}</a>` : `@${user}`;\n    }\n    const s = String(val).replace(/[^0-9]/g, '');\n    return s.length >= 7 ? `+${s}` : val;\n  }\n\n  const tgContact = formatOutputContact(item.contact || item.final_contact, 'html');\n  const waContact = formatOutputContact(item.contact || item.final_contact, 'text');\n\n  const tgText = `<b>${escapeHTML(l.title)}</b>\\n🏷️ <b>${categoryStr}</b>\\n📍 <b>${escapeHTML(item.city || 'Desconocida')}</b>\\n💰 <b>${escapeHTML(item.budget || 'Negociable')}</b>\\n\\n${escapeHTML(l.text || 'Sin texto')}\\n\\n👤 <b>${l.tag}:</b> ${tgContact}\\n🔌 <b>Fuente:</b> ${escapeHTML(item.platform || 'WhatsApp')}`;\n  const waText = `*📢 ${l.title}*\\n📍 *${item.city || 'Desconocida'}* | 💰 *${item.budget || 'Negociable'}*\\n\\n${l.text || 'Sin texto'}\\n\\n👤 *${l.tag}:* ${waContact}\\n🔌 *Fuente:* ${item.platform || 'WhatsApp'}`;\n  \n  results.push({\n    json: { ...item, route_lang: l.code, tg_chat: l.tg, tg_text: tgText, wa_chat: l.wa, wa_text: waText }\n  });\n}\nreturn results;"
+        "jsCode": "const item = $input.first()?.json || {};\nfunction escapeHTML(text) { return String(text||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }\n\nconst langs = [\n  { code: 'ES', tg: '-5283488138', title: item.title_es || 'Nuevo Lead', text: item.text_es || item.texto_limpio, tag: 'Remitente' },\n  { code: 'EN', tg: '-1003757267210', title: item.title_en || item.title_es || 'New Lead', text: item.text_en || item.text_es || item.texto_limpio, tag: 'Sender' },\n  { code: 'RU', tg: '-1003920309636', title: item.title_ru || item.title_es || 'Новый Лид', text: item.text_ru || item.text_es || item.texto_limpio, tag: 'Отправитель' },\n  { code: 'RU_CHANNEL', tg: '-1003934906353', title: item.title_ru || item.title_es || 'Новый Лид', text: item.text_ru || item.text_es || item.texto_limpio, tag: 'Отправитель' },\n  { code: 'PT', tg: '-1003727383883', title: item.title_pt || item.title_es || 'Novo Lead', text: item.text_pt || item.text_es || item.texto_limpio, tag: 'Remetente' }\n];\n\nfunction normalize(str) { return str.normalize(\"NFD\").replace(/[\\u0300-\\u036f]/g, \"\"); }\nconst cityRaw = normalize(String(item.city || 'Global').toLowerCase());\nconst textRaw = normalize(String(item.text_es || '').toLowerCase());\n\n// MONACO (TG ONLY)\nconst monacoRegex = /(monaco|cannes|\\bniza\\b|monte carlo|cote d'azur)/i;\nif (monacoRegex.test(cityRaw) || monacoRegex.test(textRaw)) {\n  langs.push({ code: 'PT_CLIENT_MONACO', tg: '8799609531', title: item.title_pt || item.title_es || 'Novo Lead', text: item.text_pt || item.text_es || item.texto_limpio, tag: 'Remetente' });\n  langs.push({ code: 'PT_GROUP_MONACO', tg: '-1003918368381', title: item.title_pt || item.title_es || 'Novo Lead', text: item.text_pt || item.text_es || item.texto_limpio, tag: 'Remetente' });\n}\n\n// MADRID (TG ONLY - grupo PT solamente)\nconst madridRegex = /(madrid|barajas|serrano|pozuelo)/i;\nif ((madridRegex.test(cityRaw) || madridRegex.test(textRaw)) ) {\n  langs.push({ code: 'PT_GROUP_MADRID', tg: '-1003918368381', title: item.title_pt || item.title_es || 'Novo Lead', text: item.text_pt || item.text_es || item.texto_limpio, tag: 'Remetente' });\n}\n\n// TOSCANA (TG ONLY)\nconst toscanaRegex = /(toscana|tuscany|florencia|florence|firenze|siena|pisa|lucca)/i;\nif (toscanaRegex.test(cityRaw) || toscanaRegex.test(textRaw)) {\n  langs.push({ code: 'ES_CLIENT_TOSCANA_PAULA', tg: '7667292228', title: item.title_es || 'Nuevo Lead', text: item.text_es || item.texto_limpio, tag: 'Remitente' });\n}\n\n// LONDON (TG ONLY)\nconst londonRegex = /(london|londres|mayfair|soho|chelsea)/i;\nif ((londonRegex.test(cityRaw) || londonRegex.test(textRaw)) ) {\n  langs.push({ code: 'EN_CLIENT_LONDON', tg: '8688528643', title: item.title_en || item.title_es || 'New Lead', text: item.text_en || item.text_es || item.texto_limpio, tag: 'Sender' });\n}\n\n// CARTAGENA COLOMBIA (TG ONLY)\nconst cartagenaRegex = /(cartagena|cartagena de indias|colombia)/i;\nif (cartagenaRegex.test(cityRaw) || cartagenaRegex.test(textRaw)) {\n  langs.push({ code: 'ES_CLIENT_CARTAGENA', tg: '6553314174', title: item.title_es || 'Nuevo Lead', text: item.text_es || item.texto_limpio, tag: 'Remitente' });\n}\n\n// RUSSIA_TURKEY (TG ONLY)\nconst russiaTurkeyRegex = /(rusia|russia|россия|mosc[uú]|moscow|москва|san petersburgo|saint petersburg|st petersburg|санкт-петербург|питер|kaz[aá]n|казань|sochi|сочи|vladivostok|владивосток|novosibirsk|новосибирск|ekaterimburgo|yekaterinburg|екатеринбург|bak[uú]|баку|tiflis|tbilisi|тбилиси|kiev|kyiv|киев|київ|киів|turqu[ií]a|turkey|türkiye|турция|estambul|istanbul|стамбул|ankara|анкара|antalya|анталья|анталия|izmir|esmirna|измир|bodrum|бодрум|bursa|бурса|capadocia|cappadocia|каппадокия)/i;\nif (russiaTurkeyRegex.test(cityRaw) || russiaTurkeyRegex.test(textRaw)) {\n  langs.push({ \n      code: 'RU_CLIENT_RT', \n      tg: '1800004016', \n      title: item.title_ru || item.title_es || 'Новый Лид', \n      text: item.text_ru || item.text_es || item.texto_limpio, \n      tag: 'Отправитель' \n    });\n}\n\n// No publicar si no hay información de contacto\nconst rawContact = String(item.contact || item.final_contact || '');\nif (!rawContact || rawContact === 'No disponible' || rawContact === 'Desconocido' || rawContact === '-') {\n  return [];\n}\n\nconst results = [];\nfor (const l of langs) {\n  function formatOutputContact(val, mode) {\n    if (!val || val === 'Desconocido' || val === 'No disponible') return 'No disponible';\n    if (String(val).startsWith('tg_id_')) {\n      const id = val.replace('tg_id_', '');\n      return mode === 'html' ? `<a href=\"tg://user?id=${id}\">Chat Directo</a>` : `ID: ${id}`;\n    }\n    if (/[a-zA-Z]/.test(val) && !/\\d/.test(val)) {\n       const user = String(val).replace('@', '');\n       return mode === 'html' ? `<a href=\"https://t.me/${user}\">@${user}</a>` : `@${user}`;\n    }\n    const s = String(val).replace(/[^0-9]/g, '');\n    if (s.length >= 7) {\n      return mode === 'html' ? `<a href=\"https://wa.me/${s}\">+${s}</a>` : `+${s}`;\n    }\n    return val;\n  }\n\n  const tgContact = formatOutputContact(item.contact || item.final_contact, 'html');\n  const categoryStr = (item.category === 'plaza') ? 'Plazas' : 'Eventos';\n  const tgText = `<b>${escapeHTML(l.title)}</b>\\n🏷️ <b>${categoryStr}</b>\\n📍 <b>${escapeHTML(item.city || 'Desconocida')}</b>\\n💰 <b>${escapeHTML(item.budget || 'Negociable')}</b>\\n\\n${escapeHTML(l.text || 'Sin texto')}\\n\\n👤 <b>${l.tag}:</b> ${tgContact}\\n🔌 <b>Fuente:</b> ${escapeHTML(item.platform || 'WhatsApp')}`;\n  \n  if (l.tg) {\n      results.push({\n        json: { ...item, route_lang: l.code, tg_chat: l.tg, tg_text: tgText }\n      });\n  }\n}\nreturn results;\n"
       },
-      "id": "0f5e59f0-1492-4b71-b105-9c9685c66904",
+      "id": "9bf8a151-0eee-40f9-abf9-415e52abf897",
       "name": "Message Router",
       "type": "n8n-nodes-base.code",
       "typeVersion": 1,
@@ -68,7 +69,7 @@
           "parse_mode": "HTML"
         }
       },
-      "id": "73aa59be-4813-4a22-b064-e9b38447104a",
+      "id": "e7d42049-0163-4172-b7a5-79886f44f1be",
       "name": "Telegram Fanout",
       "type": "n8n-nodes-base.telegram",
       "typeVersion": 1,
@@ -76,12 +77,14 @@
         0,
         0
       ],
+      "webhookId": "d8d68b16-0b29-41c1-8f44-550a3c8a2254",
       "credentials": {
         "telegramApi": {
-          "id": "TC7QChVOx72xT6Kf",
+          "id": "wNTTBS9Bhu4RrC6o",
           "name": "Telegram account"
         }
-      }
+      },
+      "continueOnFail": true
     },
     {
       "parameters": {
@@ -101,7 +104,7 @@
         "jsonBody": "={{ { \"to\": $json.wa_chat, \"body\": $json.wa_text || $json.tg_text } }}",
         "options": {}
       },
-      "id": "0f912d18-9029-42b2-89a0-bafdcc0612df",
+      "id": "2da22635-294f-44f5-b401-983ee65288a3",
       "name": "WhatsApp Fanout",
       "type": "n8n-nodes-base.httpRequest",
       "typeVersion": 4.1,
@@ -120,7 +123,7 @@
         "jsonBody": "={{ {\n  \"isGroup\": true,\n  \"platform\": $json.platform,\n  \"contact\": $json.contact,\n  \"source_chat_id\": $json.source_chat_id,\n  \"city\": $json.city,\n  \"location\": $json.city,\n  \"budget\": $json.budget,\n  \"category\": $json.category,\n  \"text_es\": $json.text_es,\n  \"title_es\": $json.title_es,\n  \"text_en\": $json.text_en,\n  \"title_en\": $json.title_en,\n  \"text_ru\": $json.text_ru,\n  \"title_ru\": $json.title_ru,\n  \"text_pt\": $json.text_pt,\n  \"title_pt\": $json.title_pt\n} }}",
         "options": {}
       },
-      "id": "5dc94ceb-4152-46fc-a94a-1983778f4f2e",
+      "id": "89b2434c-ae0c-4b95-9a92-e16a924fc75e",
       "name": "Post Backend",
       "type": "n8n-nodes-base.httpRequest",
       "typeVersion": 4.1,
@@ -132,9 +135,9 @@
     },
     {
       "parameters": {
-        "jsCode": "// DYNAMIC ROUTING ENGINE v5.6 (GLOBAL FALLBACK)\nconst leadData = $node[\"Parse JSON1\"].json;\nconst category = String(leadData.category || 'evento').toLowerCase();\nconst city = String(leadData.city || 'global').toLowerCase();\nconst text = String(leadData.text_es || '').toLowerCase();\n\n// Basic Routing Table\nconst routingTable = {\n  \"madrid\": {\n    keywords: [\"madrid\", \"barajas\", \"serrano\", \"pozuelo\"],\n    targets: [\n      { to: \"34664266926@s.whatsapp.net\", label: \"MADRID\" },\n      { to: \"34603346859@s.whatsapp.net\", label: \"MADRID\" }\n    ]\n  },\n  \"ibiza\": {\n    keywords: [\"ibiza\", \"eivissa\", \"mansour\", \"pacha\", \"lio\", \"ushuaia\", \"sant antoni\"],\n    targets: [\n      { to: \"34601169815@s.whatsapp.net\", label: \"IBIZA\" },\n      { to: \"34670652138@s.whatsapp.net\", label: \"IBIZA\" }\n    ]\n  },\n  \"marbella\": {\n    keywords: [\"marbella\", \"puerto banus\", \"costa del sol\"],\n    targets: [\n      { to: \"34601169815@s.whatsapp.net\", label: \"MARBELLA\" },\n      { to: \"34670652138@s.whatsapp.net\", label: \"MARBELLA\" }\n    ]\n  },\n  \"miami\": {\n    keywords: [\"miami\", \"south beach\", \"brickell\", \"miami beach\"],\n    targets: [\n      { to: \"17862812324@s.whatsapp.net\", label: \"MIAMI\" },\n      { to: \"525532110621@s.whatsapp.net\", label: \"MIAMI\" }\n    ]\n  },\n  \"paris\": {\n    keywords: [\"paris\", \"francia\", \"france\", \"champs\"],\n    targets: [\n      { to: \"33744156314@s.whatsapp.net\", label: \"PARIS\" }\n    ]\n  },\n  \"monaco\": {\n    keywords: [\"monaco\", \"viena\", \"vienna\", \"monte carlo\"],\n    targets: [\n      { to: \"120363425790792660@g.us\", label: \"GLOBAL\" }\n    ]\n  }\n};\n\nlet matchedTargets = [];\nfor (const [key, config] of Object.entries(routingTable)) {\n  if (city.includes(key) || config.keywords.some(kw => text.includes(kw))) {\n    matchedTargets = [...matchedTargets, ...config.targets];\n  }\n}\n\n// FALLBACK: If no city match but category is 'evento' or 'plaza', send to GLOBAL feed\nif (matchedTargets.length === 0 && (category === 'evento' || category === 'plaza')) {\n  matchedTargets.push({ to: \"120363425790792660@g.us\", label: \"GLOBAL\" });\n}\n\n// Filter unique targets\nconst uniqueTargets = Array.from(new Set(matchedTargets.map(t => t.to)))\n  .map(to => matchedTargets.find(t => t.to === to));\n\nif (uniqueTargets.length === 0) return [];\n\nreturn uniqueTargets.map(t => ({\n  json: { \n    ...leadData, \n    target_wa: t.to, \n    city_label: t.label \n  }\n}));"
+        "jsCode": "\nconst leadData = $json;\n\nfunction normalize(str) {\n    if (!str) return \"\";\n    return str.normalize(\"NFD\").replace(/[̀-ͯ]/g, \"\");\n}\n\nconst category = String(leadData.category || 'evento').toLowerCase().trim();\nconst cityDetected = normalize(String(leadData.city || 'global').toLowerCase().trim());\nconst text = normalize(String(leadData.texto_limpio || leadData.text_es || leadData.original_text || leadData.text_en || leadData.text_pt || leadData.text || '').toLowerCase());\n\nconst routingTable = {\n  \"russia_turkey\": {\n    \"keywords\": [\n      \"moscow\",\n      \"moscu\",\n      \"russia\",\n      \"rusia\",\n      \"turkey\",\n      \"turquia\",\n      \"istanbul\",\n      \"baku\"\n    ],\n    \"targets\": [\n      {\n        \"to\": \"37257825047@s.whatsapp.net\",\n        \"label\": \"RUSSIA_TURKEY\",\n        \"tg\": \"1800004016\",\n        \"lang\": \"en\"\n      }\n    ]\n  },\n  \"toscana\": {\n    \"keywords\": [\n      \"toscana\"\n    ],\n    \"targets\": [\n      {\n        \"to\": \"353830078788@s.whatsapp.net\",\n        \"label\": \"PAULA_TOSCANA\",\n        \"tg\": \"7667292228\",\n        \"categoryFilter\": \"evento\",\n        \"lang\": \"es\"\n      }\n    ]\n  },\n  \"monaco\": {\n    \"keywords\": [\n      \"monaco\",\n      \"niza\",\n      \"cannes\",\n      \"antibes\",\n      \"nice\"\n    ],\n    \"targets\": [\n      {\n        \"to\": \"33672474796@s.whatsapp.net\",\n        \"label\": \"COSTA AZUL\",\n        \"lang\": \"pt\"\n      }\n    ]\n  },\n  \"ibiza\": {\n    \"keywords\": [\n      \"ibiza\",\n      \"eivissa\",\n      \"pacha\",\n      \"ushuaia\",\n      \"lio\",\n      \"sant antoni\"\n    ],\n    \"targets\": [\n      {\n        \"to\": \"34601169815@s.whatsapp.net\",\n        \"label\": \"IBIZA\",\n        \"lang\": \"es\"\n      }\n    ]\n  },\n  \"suiza\": {\n    \"keywords\": [\n      \"suiza\",\n      \"zurich\",\n      \"ginebra\",\n      \"switzerland\",\n      \"geneva\"\n    ],\n    \"targets\": [\n      {\n        \"to\": \"573183836809@s.whatsapp.net\",\n        \"label\": \"SUIZA\",\n        \"lang\": \"es\"\n      }\n    ]\n  },\n  \"cartagena\": {\n    \"keywords\": [\n      \"cartagena\",\n      \"cartagena de indias\",\n      \"colombia\"\n    ],\n    \"targets\": [\n      {\n        \"to\": \"573009070853@s.whatsapp.net\",\n        \"label\": \"CARTAGENA\",\n        \"lang\": \"es\"\n      }\n    ]\n  },\n  \"marbella\": {\n    \"keywords\": [\n      \"marbella\",\n      \"puerto banus\",\n      \"costa del sol\"\n    ],\n    \"targets\": [\n      {\n        \"to\": \"34690931559@s.whatsapp.net\",\n        \"label\": \"KARLA MARBELLA\",\n        \"lang\": \"es\"\n      }\n    ]\n  },\n  \"dubai\": {\n    \"keywords\": [\n      \"dubai\",\n      \"uae\",\n      \"abu dhabi\"\n    ],\n    \"targets\": [\n      {\n        \"to\": \"971555652823@s.whatsapp.net\",\n        \"label\": \"NATALIA DUBAI\",\n        \"lang\": \"en\"\n      }\n    ]\n  },\n  \"london\": {\n    \"keywords\": [\n      \"london\",\n      \"londres\",\n      \"uk\",\n      \"england\"\n    ],\n    \"targets\": [\n      {\n        \"to\": \"447774362202@s.whatsapp.net\",\n        \"label\": \"LONDON FRIEND\",\n        \"lang\": \"en\"\n      }\n    ]\n  }\n};;;;;;;;;;;;;;;;;;;;;;;;\n\nlet matchedTargets = [];\n\nif (routingTable[cityDetected]) {\n    matchedTargets = [...routingTable[cityDetected].targets];\n} else {\n    for (const [key, config] of Object.entries(routingTable)) {\n        if (cityDetected.includes(key) || config.keywords.some(kw => cityDetected.includes(kw))) {\n             matchedTargets = [...matchedTargets, ...config.targets];\n        }\n    }\n}\n\nif (matchedTargets.length === 0) {\n    for (const [key, config] of Object.entries(routingTable)) {\n        if (config.keywords.some(kw => {\n            if (kw.includes('\\\\b')) return new RegExp(kw, 'i').test(text);\n            return text.includes(kw);\n        })) {\n             matchedTargets = [...matchedTargets, ...config.targets];\n        }\n    }\n}\n\nmatchedTargets = matchedTargets.filter(t => !t.categoryFilter || category.includes(t.categoryFilter) || t.categoryFilter.includes(category));\n\nconst uniqueTargets = Array.from(new Set(matchedTargets.map(t => t.to)))\n  .map(to => matchedTargets.find(t => t.to === to));\n\n// Admin siempre recibe todo\nconst adminTarget = { to: \"34658034597@s.whatsapp.net\", label: \"ADMIN\" };\nif (!uniqueTargets.find(t => t.to === adminTarget.to)) {\n  uniqueTargets.push(adminTarget);\n}\n\nreturn uniqueTargets.map(t => {\n    const result = { ...leadData };\n    result.target_wa = t.to;\n    result.city_label = t.label;\n    return { json: result };\n});\n"
       },
-      "id": "60d0be43-8f1f-49b2-8cb0-7143f3eeb5ff",
+      "id": "713e7bf9-44f9-496c-ab31-0116e3756938",
       "name": "Dynamic Routing Engine",
       "type": "n8n-nodes-base.code",
       "typeVersion": 1,
@@ -145,51 +148,49 @@
     },
     {
       "parameters": {
-        "amount": 2,
-        "unit": "seconds"
+        "amount": 2
       },
-      "id": "0c1dbe43-8f1f-49b2-8cb0-7143f3eeb5fa",
+      "id": "8ba7511b-d8e9-4572-a15f-708ee58eec7d",
       "name": "Global Alert Waiter",
       "type": "n8n-nodes-base.wait",
       "typeVersion": 1.1,
       "position": [
         -112,
         480
-      ]
+      ],
+      "webhookId": "7346090a-61ac-4f37-b4b1-e3bd8cca24c9"
     },
     {
       "parameters": {
-        "method": "POST",
-        "url": "http://178.156.186.149:3001/api/juana/send",
-        "sendHeaders": true,
-        "headerParameters": {
-          "parameters": [
-            {
-              "name": "Authorization",
-              "value": "Bearer shJOb5wskQMTyfoF20GLqmJOclA5if5j"
-            }
-          ]
-        },
-        "sendBody": true,
-        "specifyBody": "json",
-        "jsonBody": "={{ { \"to\": $json.target_wa, \"body\": \"*📢 ALERTA \" + ($json.city_label || \"GLOBAL\") + \"*\\n📍 *\" + ($json.city || \"Global\") + \"* | 💰 *\" + ($json.budget || \"Negociable\") + \"*\\n\\n\" + ($json.text_es || \"Sin descripción\") + \"\\n\\n👤 *Contacto:* \" + ($json.contact || \"Desconocido\") + \"\\n🔌 *Fuente:* \" + ($json.platform || \"WhatsApp\") } }}",
-        "options": {}
+        "authentication": "whapiChannelApi",
+        "resource": "message",
+        "operation": "send",
+        "to": "={{ $json.target_wa || '' }}",
+        "messageType": "text",
+        "body": "={{ (() => {\n  const label = (.city_label || '').toUpperCase().trim();\n  if (label === 'RUSSIA_TURKEY') {\n    return '*ð¢ NEW LEAD ' + label + '*\nð *' + (.city || 'Unknown') + '* | ð° *' + (.budget || 'Negotiable') + '*\n\n' + (.text_en || .text_es || 'No description') + '\n\nð¤ *Sender:* ' + (.contact || 'Unknown') + '\nð *Source:* ' + (.platform || 'WhatsApp');\n  } else if (label === 'COSTA AZUL' || label === 'MADRID (PT)') {\n    return '*ð¢ ALERTA COSTA AZUL*\nð *' + (.city || 'Desconhecida') + '* | ð° *' + (.budget || 'Negociável') + '*\n\n' + (.text_pt || .text_es || 'Sem descrição') + '\n\nð¤ *Remetente:* ' + (.contact || 'Desconhecido') + '\nð *Fonte:* ' + (.platform || 'WhatsApp');\n  } else if (label === 'LONDON' || label === 'LONDRES') {\n    return '*ð¢ LONDON ALERT*\nð *' + (.city || 'Unknown') + '* | ð° *' + (.budget || 'Negotiable') + '*\n\n' + (.text_en || .text_es || 'No description') + '\n\nð¤ *Contact:* ' + (.contact || 'Unknown') + '\nð *Source:* ' + (.platform || 'WhatsApp');\n  } else {\n    return '*ð¢ ALERTA ' + (label || 'GLOBAL') + '*\nð *' + (.city || 'Desconocida') + '* | ð° *' + (.budget || 'Negociable') + '*\n\n' + (.text_es || 'Sin descripción') + '\n\nð¤ *Remitente:* ' + (.contact || 'Desconocido') + '\nð *Fuente:* ' + (.platform || 'WhatsApp');\n  }\n})() }}",
+        "typing_time": 10
       },
-      "id": "7d1dfaa5-3939-4dd0-986e-c2fc827ea559",
+      "id": "6d6af962-ecff-4a39-8012-9d8e4242f1e8",
       "name": "Dynamic WhatsApp Alert",
-      "type": "n8n-nodes-base.httpRequest",
-      "typeVersion": 4.1,
+      "type": "n8n-nodes-whapi.whapi",
+      "typeVersion": 1,
       "position": [
         80,
         480
       ],
-      "continueOnFail": true
+      "continueOnFail": true,
+      "credentials": {
+        "whapiChannelApi": {
+          "id": "3iEVLm8Bb1VjJesI",
+          "name": "Whapi Guas (sender)"
+        }
+      }
     },
     {
       "parameters": {
-        "jsCode": "const input = $input.first().json;\nconst item = input.message || input.body || input;\nconst textBody = item.text || item.caption || item.message?.text || '';\n\nfunction findContact(obj) {\n  if (!obj || typeof obj !== 'object') return null;\n  const contact = obj.contact || obj.sender_contact || obj.from || obj.sender?.wa_id || '';\n  if (typeof contact === 'string') {\n    if (contact.includes('t.me/')) return contact.split('t.me/')[1];\n    if (contact.startsWith('tg_id_')) return contact;\n    if (contact.startsWith('@')) return contact;\n    if (/^\\d{7,15}$/.test(contact)) return 'tg_id_' + contact;\n  }\n  return null;\n}\n\nlet sc = findContact(item) || findContact(input);\nif (sc && !sc.startsWith('tg_id_')) {\n  sc = sc.trim();\n  if (!sc.startsWith('@')) sc = '@' + sc;\n}\n\nconst sourceChatId = item.chatId || item.chat?.id || input.source_chat_id || '';\n\nreturn [{ json: {\n  ...input,\n  platform: 'Telegram',\n  sender_contact: sc || 'No_Username',\n  final_contact: sc || 'No_Username',\n  source_chat_id: sourceChatId,\n  texto_limpio: textBody.trim(),\n  looksValuable: textBody.length > 5\n}}];"
+        "jsCode": "const input = $input.first().json;\nconst item = input.message || input.body || input;\nconst textBody = item.text || item.caption || item.message?.text || '';\n\nfunction findContact(obj) {\n  if (!obj || typeof obj !== 'object') return null;\n  const contact = obj.contact || obj.sender_contact || obj.from || obj.sender?.wa_id || '';\n  if (typeof contact === 'string') {\n    if (contact.includes('t.me/')) return contact.split('t.me/')[1];\n    if (contact.startsWith('tg_id_')) return contact;\n    if (contact.startsWith('@')) return contact;\n    if (/^\\d{7,15}$/.test(contact)) return 'tg_id_' + contact;\n  }\n  return null;\n}\n\nlet sc = findContact(item) || findContact(input);\nif (sc && !sc.startsWith('tg_id_')) {\n  sc = sc.trim();\n  if (!sc.startsWith('@')) sc = '@' + sc;\n}\n\nconst sourceChatId = item.chatId || item.chat?.id || input.source_chat_id || '';\n\nreturn [{ json: {\n  ...item,\n  platform: 'Telegram',\n  sender_contact: sc || 'No_Username',\n  final_contact: sc || 'No_Username',\n  source_chat_id: sourceChatId,\n  texto_limpio: textBody.trim(),\n  looksValuable: textBody.length > 5\n}}];"
       },
-      "id": "00590255-909f-4406-9fe5-c5255b8b7678",
+      "id": "65bba95f-5623-4c6a-b57e-23a2308f5034",
       "name": "Extract Metadata TG1",
       "type": "n8n-nodes-base.code",
       "typeVersion": 1,
@@ -200,9 +201,9 @@
     },
     {
       "parameters": {
-        "jsCode": "const input = $input.first().json;\nconst item = input.message || (input.messages && input.messages[0]) || input.body || input;\nconst textBody = item.text?.body || item.text || item.caption || item.body || '';\n\nfunction getPhone(val) {\n  if (!val) return null;\n  let s = String(typeof val === 'object' ? (val.id || val.phone || val.number || val.wa_id) : val);\n  const digits = s.replace(/\\D/g, '');\n  return (digits.length >= 7) ? digits : null;\n}\n\nconst sc = getPhone(item.from) || getPhone(input.sender?.wa_id) || \"No disponible\";\nconst sourceChatId = item.chat_id || item.chatId || input.source_chat_id || null;\n\nreturn [{ json: {\n  ...input,\n  platform: \"WhatsApp\",\n  sender_contact: sc,\n  final_contact: sc,\n  source_chat_id: sourceChatId,\n  texto_limpio: textBody.toString().trim(),\n  looksValuable: textBody.toString().length > 5\n}}];"
+        "jsCode": "const input = $input.first().json;\n\n// n8n webhook wraps the request body in input.body\n// RAW Whapi format: input.body = { messages: [{from, text, chat_id, ...}], event, channel_id }\n// Gateway format:   input.body = { platform, from, sender, chatId, body:{text}, text, ... }\nconst body = input.body || input;\nconst whapiMsg = (body.messages && body.messages[0]) ? body.messages[0] : null;\n\n// Extract text from all possible formats\nlet textBody = '';\nif (whapiMsg && whapiMsg.text && typeof whapiMsg.text.body === 'string') {\n  textBody = whapiMsg.text.body;  // RAW Whapi format\n}\nif (!textBody && typeof body.text === 'string') textBody = body.text;\nif (!textBody && body.body && typeof body.body.text === 'string') textBody = body.body.text;\nif (!textBody && typeof body.body === 'string') textBody = body.body;\nif (!textBody && input.text && typeof input.text === 'string') textBody = input.text;\nif (!textBody && input.message && typeof input.message.text === 'string') textBody = input.message.text;\n\ntextBody = textBody.replace(/\\*/g, '').replace(/_/g, '').trim();\n\nfunction getPhone(val) {\n  if (!val) return null;\n  let s = String(typeof val === 'object' ? (val.id || val.author || val.from || val.phone || val.number || val.wa_id || val.remoteJid || '') : val);\n  if (s.includes('@g.us') || s.includes('-')) return null;\n  const digits = s.replace(/\\D/g, '');\n  return (digits.length >= 7 && digits.length <= 15) ? digits : null;\n}\n\n// Check RAW Whapi format (messages[0].from) FIRST, then gateway format fields\nlet sc = getPhone(whapiMsg && whapiMsg.from)\n      || getPhone(body.from)\n      || getPhone(body.sender)\n      || getPhone(body.author)\n      || getPhone(input.from)\n      || getPhone(input.sender)\n      || null;\n\n// Final fallback: extract international phone from message text (e.g. 0044XXXX, +44XXXX)\nif (!sc && textBody) {\n  const intlRx = /(?:(?:\\+|00)[1-9][\\d]{8,13})/g;\n  const found = textBody.match(intlRx) || [];\n  for (const p of found) {\n    const d = p.replace(/\\D/g, '');\n    const norm = d.startsWith('00') ? d.substring(2) : d;\n    if (norm.length >= 7 && norm.length <= 15 && !norm.startsWith('0')) {\n      sc = norm;\n      break;\n    }\n  }\n}\n\nconst senderFinal = sc || \"No disponible\";\nconst chatId = (whapiMsg && whapiMsg.chat_id) || body.chatId || body.chat_id || body.jid || input.chatId || input.chat_id || null;\nconst chatName = (whapiMsg && whapiMsg.chat_name) || body.chat_name || input.chat_name || '';\nconst msgType = (whapiMsg && whapiMsg.type) || body.type || input.type || 'text';\n\nif (!textBody || textBody.length < 5 || ['unknown', 'reaction', 'sticker', 'image', 'video', 'audio', 'document', 'location', 'contacts', 'poll'].includes(msgType)) {\n  return [];\n}\n\nreturn [{ json: {\n  platform: \"WhatsApp\",\n  sender_contact: senderFinal,\n  final_contact: senderFinal,\n  from: senderFinal,\n  source_chat_id: chatId,\n  chat_name: chatName,\n  texto_limpio: textBody,\n  looksValuable: true\n}}];"
       },
-      "id": "89ef5f60-436c-4797-9e5b-73f88f0539c3",
+      "id": "fc58ed3c-e4bb-4d4c-bfe7-5ba33c75ec0d",
       "name": "Extract Metadata WA1",
       "type": "n8n-nodes-base.code",
       "typeVersion": 1,
@@ -213,9 +214,9 @@
     },
     {
       "parameters": {
-        "jsCode": "const results = [];\nconst HARD_BLOCK = new Set([\"crypto\", \"binance\", \"casino\", \"usdt\", \"bitcoin\", \"wallet\", \"trading\", \"ganar dinero\", \"инди\", \"контент\", \"onlyfans\", \"вирт\", \"sugar baby\", \"sugar daddy\", \"anal\", \"masaje erotico\", \"ingles\", \"english\"]);\nconst BANNED_PREFIXES = [\"58\", \"57\", \"92\", \"91\", \"62\", \"63\"];\n\nfunction norm(v) { return String(v || \"\").toLowerCase().normalize(\"NFD\").replace(/[\\u0300-\\u036f]/g, \"\"); }\n\nfor (const item of $input.all()) {\n  const data = item.json;\n  const text = norm(data.texto_limpio);\n  const sender = String(data.final_contact).replace(/\\D/g, \"\");\n\n  let rejectReason = null;\n  if (BANNED_PREFIXES.some(p => sender.startsWith(p))) rejectReason = \"prefix_banned\";\n  else if (HARD_BLOCK.has(text)) rejectReason = \"hard_block_match\";\n\n  results.push({ json: { ...data, looksValuable: !rejectReason, reject_reason: rejectReason } });\n}\nreturn results;"
+        "jsCode": "\nconst results = [];\nconst HARD_BLOCK = new Set([\"crypto\", \"binance\", \"casino\", \"usdt\", \"bitcoin\", \"wallet\", \"trading\", \"инди\", \"контент\", \"onlyfans\", \"вирт\", \"sugar baby\", \"sugar daddy\", \"masaje erotico\", \"ingles\", \"english\", \"videollamada\", \"video call\", \"видеозвонок\", \"chamada de video\", \"contenido\", \"conteudo\", \"gratis\", \"бесплатно\", \"grátis\", \"paja\", \"wank\", \"дрочить\", \"punheta\", \"follar\", \"трахать\", \"foder\", \"polvo\", \"трах\", \"foda\", \"telefonista\", \"telefon\", \"телефонист\", \"venta de entradas\", \"vendo entradas\", \"vendo dos entradas\"]);\nconst BANNED_PREFIXES = [\"58\", \"57\", \"92\", \"91\", \"62\", \"244\"];\n\nfunction norm(v) { return String(v || \"\").toLowerCase().normalize(\"NFD\").replace(/[\\u0300-\\u036f]/g, \"\"); }\n\nfor (const item of $input.all()) {\n  const data = item.json;\n  const text = norm(data.texto_limpio);\n  const sender = String(data.final_contact || data.from || \"\").replace(/\\D/g, \"\");\n\n  // Prefijo baneado SOLO para Telegram — grupos de WA tienen miembros internacionales (VE/CO legítimos)\n  if (data.platform !== 'WhatsApp' && BANNED_PREFIXES.some(p => sender.startsWith(p))) continue;\n  \n  // Bloquear por palabra clave prohibida\n  if ([...HARD_BLOCK].some(k => text.includes(k))) continue;\n  \n  // Si no hay texto, no tiene sentido enviarlo a la IA\n  if (!text || text.length < 10) continue;\n\n  // Solo los que pasan todos los filtros salen del nodo\n  results.push(item);\n}\nreturn results;\n"
       },
-      "id": "c1f1ec75-2748-433b-8181-432d4310d655",
+      "id": "11fd4a02-4e94-4d47-8ad9-d007b7c484d1",
       "name": "Pre-Filter Unified1",
       "type": "n8n-nodes-base.code",
       "typeVersion": 1,
@@ -226,23 +227,24 @@
     },
     {
       "parameters": {
-        "jsCode": "const results = [];\nconst store = $getWorkflowStaticData('global');\nif (!store.history) store.history = [];\n\nconst now = Date.now();\nconst TTL = 86400000;\nstore.history = store.history.filter(h => now - h.time < TTL);\n\nfor (const item of $input.all()) {\n  const fp = String(item.json.texto_limpio).substring(0, 100);\n  if (!store.history.some(h => h.fp === fp)) {\n    store.history.push({ time: now, fp });\n    results.push(item);\n  }\n}\nreturn results;"
+        "jsCode": "\nconst results = [];\nconst store = $getWorkflowStaticData('global');\nif (!store.history) store.history = [];\n\nconst now = Date.now();\nconst TTL = 30 * 60 * 1000;\nstore.history = store.history.filter(h => now - h.time < TTL);\n\nfor (const item of $input.all()) {\n  const fp = String(item.json.texto_limpio || '').substring(0, 100);\n  const sender = String(item.json.sender_contact || item.json.from || '');\n\n  // Dedup por contenido solamente (sender puede variar si no se extrae bien)\n  if (!store.history.some(h => h.fp === fp)) {\n    store.history.push({ time: now, fp, sender });\n    results.push(item);\n  }\n}\nreturn results;\n"
       },
-      "id": "a0808dae-1798-45b0-9c35-ddf4b856d24a",
+      "id": "541f29c3-4339-44cb-8888-849e6b806813",
       "name": "Dedup Hash1",
       "type": "n8n-nodes-base.code",
       "typeVersion": 1,
       "position": [
         -2144,
         832
-      ]
+      ],
+      "alwaysOutputData": true
     },
     {
       "parameters": {
         "promptType": "define",
         "text": "=### WORLDMODELS QUALITY ENGINE v5.2 (ULTRA PRECISION) ###\nTEXT: \"{{ $json.texto_limpio }}\"\n\nCLASSIFICATION RULES:\n\n1. EVENTO (Client Requests / Immediate Leads) - HIGH PRIORITY:\n   - DIRECT REQUESTS: \"Busco chica para ahora\", \"Disponible en Madrid?\", \"Outcall 1h\", \"Dinner tonight\".\n   - REAL TIME: Messages mentioning \"Ahora\", \"Hoy\", \"Esta noche\", \"ASAP\", or specific times.\n   - TOURS & CASTINGS: \"Casting para marca\", \"Haciendo tour en Ibiza\".\n   - CONTEXT: A client or agency looking for someone for something SPECIFIC and immediate.\n\n2. PLAZA (Job Offers / Vacancies):\n   - FIXED POSITIONS: \"Buscamos chica fija para club\", \"Plaza libre en agencia\", \"Hiring for season\".\n   - AGENCY CASTINGS: \"Buscando caras nuevas\", \"Envíen disponibilidad para mayo\".\n   - ACCOMMODATION: \"Habitación para modelos\", \"Piso disponible para trabajar\".\n   - CONTEXT: An agency or organizer offering stable work, vacancies, or housing.\n\n3. TRASH (Discard):\n   - INDIVIDUAL SELF-PROMOTION: \"Hola soy Maria, disponible en Madrid\", \"Soy modelo, contratadme\". (Only if the model is offering HERSELF).\n   - CASUAL CHAT: Greetings, questions without an offer, or maintenance messages.\n   - SPAM: Crypto, random links, unrelated ads.\n\nCRITICAL: \n- If an AGENCY or CLUB asks \"Who is available?\", \"Seeking models\", or posts a job offer (even for the future), it is a PLAZA or EVENTO, NOT trash.\n- If a CLIENT asks to meet, it is an EVENTO, NOT trash.\n- If the city is NOT mentioned but the text mentions a club name (like Mansour, Lio, Pacha), try to infer the city or output \"Ibiza\" if it's a known Ibiza spot.\n\nOUTPUT JSON:\n{\n  \"city\": \"City Name (e.g. Ibiza, Madrid, Miami, Paris)\",\n  \"budget\": \"Value\",\n  \"category\": \"plaza|evento|trash\",\n  \"detected_lang\": \"ES|EN|RU|PT\",\n  \"title_es\": \"Short descriptive title\",\n  \"text_es\": \"Clean and translated text\",\n  \"title_en\": \"Short descriptive title in English\",\n  \"text_en\": \"Clean and translated text in English\",\n  \"title_ru\": \"Short descriptive title in Russian\",\n  \"text_ru\": \"Clean and translated text in Russian\",\n  \"title_pt\": \"Short descriptive title in Portuguese\",\n  \"text_pt\": \"Clean and translated text in Portuguese\",\n  \"trash\": false\n}"
       },
-      "id": "344fb711-f057-4631-9cb1-50ed7720ebbe",
+      "id": "6e0c7541-5e98-45a8-b19e-4e2fbd18d6dc",
       "name": "IA Extract1",
       "type": "@n8n/n8n-nodes-langchain.chainLlm",
       "typeVersion": 1.4,
@@ -253,9 +255,10 @@
     },
     {
       "parameters": {
+        "model": "deepseek-v4-flash",
         "options": {}
       },
-      "id": "1b1aaf57-01d5-443e-b704-b859d7528786",
+      "id": "24d38073-3601-423d-a437-09e28432f0b1",
       "name": "DeepSeek Chat Model1",
       "type": "@n8n/n8n-nodes-langchain.lmChatDeepSeek",
       "typeVersion": 1,
@@ -265,16 +268,16 @@
       ],
       "credentials": {
         "deepSeekApi": {
-          "id": "WoSvFWDtEwmPK8Qw",
+          "id": "B7kPB7i2l2oQh9UM",
           "name": "DeepSeek account"
         }
       }
     },
     {
       "parameters": {
-        "jsCode": "// PARSE JSON v5.7 (ULTRA RESILIENT + LOCATION PROTECT)\nconst input = $json;\nconst rawText = input.output || input.text || \"\";\nconst cleanText = rawText.replace(/```json|```/g, '').trim();\n\nlet parsed = {};\ntry {\n  if (cleanText) parsed = JSON.parse(cleanText);\n} catch (e) {\n  const catMatch = cleanText.match(/\"category\"\\s*:\\s*\"(.*?)\"/i);\n  const cityMatch = cleanText.match(/\"city\"\\s*:\\s*\"(.*?)\"/i);\n  if (catMatch) parsed.category = catMatch[1];\n  if (cityMatch) parsed.city = cityMatch[1];\n}\n\nconst lowerRaw = (input.texto_limpio || \"\").toLowerCase();\nconst isJobish = lowerRaw.includes(\"busco\") || lowerRaw.includes(\"disponible\") || lowerRaw.includes(\"casting\") || lowerRaw.includes(\"tour\") || lowerRaw.length > 20;\n\nconst finalData = {\n  platform: input.platform || \"WhatsApp\",\n  contact: input.sender_contact || input.final_contact || \"Desconocido\",\n  source_chat_id: input.source_chat_id || \"0\",\n  city: parsed.city || \"Global\",\n  budget: parsed.budget || \"Negociable\",\n  category: (parsed.category || (isJobish ? \"evento\" : \"trash\")).toLowerCase(),\n  text_es: parsed.text_es || input.texto_limpio || \"Sin descripción\",\n  title_es: parsed.title_es || (input.texto_limpio ? input.texto_limpio.substring(0, 40) : \"Nuevo Lead\"),\n  trash: parsed.trash === true || (parsed.category === 'trash' && !isJobish) || false\n};\n\nconst highValueKeywords = [\"mansour\", \"ibiza\", \"lio\", \"pacha\", \"eivissa\", \"mansur\", \"monaco\", \"viena\", \"vienna\", \"dubai\", \"suiza\", \"switzerland\", \"london\", \"londres\"];\nif (highValueKeywords.some(kw => lowerRaw.includes(kw))) {\n  finalData.trash = false;\n  if (finalData.category === 'trash') finalData.category = \"evento\";\n}\n\nreturn [{ json: finalData }];"
+        "jsCode": "// PARSE JSON v5.9 (ALL LANGS + REAL SENDER RECOVERY)\nconst input = $json;\nconst rawText = input.output || input.text || \"\";\nconst cleanText = rawText.replace(/```json|```/g, '').trim();\n\nlet parsed = {};\ntry {\n  if (cleanText) parsed = JSON.parse(cleanText);\n} catch (e) {\n  const catMatch = cleanText.match(/\"category\"\\s*:\\s*\"(.*?)\"/i);\n  const cityMatch = cleanText.match(/\"city\"\\s*:\\s*\"(.*?)\"/i);\n  if (catMatch) parsed.category = catMatch[1];\n  if (cityMatch) parsed.city = cityMatch[1];\n}\n\n// Safely get texto_limpio from Dedup Hash1\nlet originalText = \"\";\ntry {\n    originalText = $('Dedup Hash1').item.json.texto_limpio || \"\";\n} catch(e) {\n    try {\n        originalText = $('Pre-Filter Unified1').item.json.texto_limpio || \"\";\n    } catch(err) {}\n}\n\nconst lowerRaw = originalText.toLowerCase();\nconst isJobish = lowerRaw.includes(\"busco\") || lowerRaw.includes(\"disponible\") || lowerRaw.includes(\"casting\") || lowerRaw.includes(\"tour\") || lowerRaw.length > 20;\n\n// RECOVER SENDER CONTACT FROM EARLIER NODES!\nlet origContact = \"Desconocido\";\ntry { origContact = $('Extract Metadata WA1').item.json.sender_contact || \"Desconocido\"; } catch(e) {}\nif (origContact === \"Desconocido\" || origContact === \"No disponible\") {\n    try { origContact = $('Extract Metadata TG1').item.json.sender_contact || origContact; } catch(e) {}\n}\nif (origContact === \"Desconocido\" || origContact === \"No disponible\") {\n    try { origContact = $('Dedup Hash1').item.json.sender_contact || origContact; } catch(e) {}\n}\nif (origContact === \"Desconocido\") {\n    origContact = input.sender_contact || input.final_contact || \"Desconocido\";\n}\n\nlet formattedContact = origContact;\nif (formattedContact !== \"Desconocido\" && formattedContact !== \"No disponible\") {\n    if (!String(formattedContact).startsWith('@') && !String(formattedContact).startsWith('tg_id_')) {\n        const s = String(formattedContact).replace(/\\D/g, '');\n        if (s.length >= 7) {\n            formattedContact = \"+\" + s;\n        }\n    }\n}\n\nlet sourceChatId = null;\ntry { sourceChatId = $('Extract Metadata WA1').item.json.source_chat_id; } catch(e) {}\nif (!sourceChatId || sourceChatId === '0') {\n  try { sourceChatId = $('Extract Metadata TG1').item.json.source_chat_id; } catch(e) {}\n}\n\nconst finalData = {\n  platform: \"WhatsApp\", // Default, might be overridden\n  contact: formattedContact,\n  source_chat_id: sourceChatId || null,\n  city: parsed.city || \"Global\",\n  budget: parsed.budget || \"Negociable\",\n  category: (parsed.category || (isJobish ? \"evento\" : \"trash\")).toLowerCase(),\n  text_es: parsed.text_es || originalText || \"Sin descripción\",\n  title_es: parsed.title_es || (originalText ? originalText.substring(0, 40) : \"Nuevo Lead\"),\n  \n  // RESTORE ALL LANGUAGES\n  text_en: parsed.text_en || \"\",\n  title_en: parsed.title_en || \"\",\n  text_ru: parsed.text_ru || \"\",\n  title_ru: parsed.title_ru || \"\",\n  text_pt: parsed.text_pt || \"\",\n  title_pt: parsed.title_pt || \"\",\n\n  trash: parsed.trash === true || (parsed.category === 'trash' && !isJobish) || false,\n  original_text: originalText\n};\n\n// Also recover platform and source chat\ntry { finalData.platform = $('Extract Metadata WA1').item.json.platform || \"WhatsApp\"; } catch(e) {}\nif (finalData.platform === \"WhatsApp\") {\n    try { finalData.platform = $('Extract Metadata TG1').item.json.platform || \"WhatsApp\"; } catch(e) {}\n}\n\nconst highValueKeywords = [\"mansour\", \"ibiza\", \"lio\", \"pacha\", \"eivissa\", \"mansur\", \"monaco\", \"viena\", \"vienna\", \"dubai\", \"suiza\", \"switzerland\", \"london\", \"londres\"];\nif (highValueKeywords.some(kw => lowerRaw.includes(kw))) {\n  finalData.trash = false;\n  if (finalData.category === 'trash') finalData.category = \"evento\";\n}\n\nreturn [{ json: finalData }];\n"
       },
-      "id": "5e0a23a9-a433-418e-abbc-3a03484a3b41",
+      "id": "ae30a518-904f-4758-b590-886dfd748bd4",
       "name": "Parse JSON1",
       "type": "n8n-nodes-base.code",
       "typeVersion": 1,
@@ -286,16 +289,16 @@
     {
       "parameters": {
         "conditions": {
-          "boolean": [
+          "string": [
             {
               "value1": "={{ $json.category }}",
-              "value2": "trash",
-              "operator": "notEqual"
+              "operation": "notEqual",
+              "value2": "trash"
             }
           ]
         }
       },
-      "id": "687598bc-5348-42f0-a594-dedc965835b6",
+      "id": "02fee95b-a98f-4e7e-a04d-0d872c16190f",
       "name": "Final Guard1",
       "type": "n8n-nodes-base.if",
       "typeVersion": 1,
@@ -303,6 +306,43 @@
         -1104,
         832
       ]
+    },
+    {
+      "parameters": {
+        "jsCode": "const text = $json.texto_limpio || \"\";\nconst results = [];\n// Regex flexible para capturar chat.whatsapp.com con su ID\nconst linkRegex = /(?:https?:\\/\\/)?chat\\.whatsapp\\.com\\/[a-zA-Z0-9_-]{20,30}/g;\nconst matches = text.match(linkRegex);\n\nif (matches) {\n  for (let match of matches) {\n    if (!match.startsWith(\"http\")) {\n      match = \"https://\" + match;\n    }\n    results.push({ \n      json: { \n        link: match, \n        platform: $json.platform, \n        source: $json.source_chat_id \n      } \n    });\n  }\n}\nreturn results;"
+      },
+      "id": "link-extractor-node-id",
+      "name": "Link Extractor",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 1,
+      "position": [
+        -2496,
+        1104
+      ]
+    },
+    {
+      "parameters": {
+        "chatId": "-1003900864818",
+        "text": "=🔗 *Nuevo Grupo Detectado*\nEnlace: {{ $json.link }}\nPlataforma: {{ $json.platform }}\nFuente: {{ $json.source }}",
+        "additionalFields": {
+          "parse_mode": "Markdown"
+        }
+      },
+      "id": "link-poster-node-id",
+      "name": "Telegram Link Alert",
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1,
+      "position": [
+        -2304,
+        1104
+      ],
+      "webhookId": "0de194dd-7569-453e-a685-57b13de90441",
+      "credentials": {
+        "telegramApi": {
+          "id": "wNTTBS9Bhu4RrC6o",
+          "name": "Telegram account"
+        }
+      }
     }
   ],
   "connections": {
@@ -355,6 +395,11 @@
         [
           {
             "node": "Dedup Hash1",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Link Extractor",
             "type": "main",
             "index": 0
           }
@@ -444,11 +489,6 @@
             "node": "Telegram Fanout",
             "type": "main",
             "index": 0
-          },
-          {
-            "node": "WhatsApp Fanout",
-            "type": "main",
-            "index": 0
           }
         ]
       ]
@@ -457,18 +497,23 @@
       "main": [
         [
           {
-            "node": "Global Alert Waiter",
+            "node": "Dynamic WhatsApp Alert",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Telegram Fanout",
             "type": "main",
             "index": 0
           }
         ]
       ]
     },
-    "Global Alert Waiter": {
+    "Link Extractor": {
       "main": [
         [
           {
-            "node": "Dynamic WhatsApp Alert",
+            "node": "Telegram Link Alert",
             "type": "main",
             "index": 0
           }
@@ -476,8 +521,10 @@
       ]
     }
   },
-  "active": true,
   "settings": {
-    "executionOrder": "v1"
+    "executionOrder": "v1",
+    "binaryMode": "separate",
+    "callerPolicy": "workflowsFromSameOwner",
+    "availableInMCP": false
   }
 }

@@ -1,0 +1,2 @@
+
+Error: Cannot understand what targets to deploy/serve. No targets in firebase.json match '--only functions:ssrworldmodelsjobs'.

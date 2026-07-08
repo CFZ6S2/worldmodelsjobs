@@ -1,10 +1,12 @@
+require('dotenv').config({ path: '/root/worldmodels-jobs/.env' });
 const { TelegramClient } = require('telegram');
 const { StringSession } = require('telegram/sessions');
 const fs = require('fs');
 
-const apiId = 21743603;
-const apiHash = '0b2e3e5512b9195b072120e2e92c2323';
-const sessionString = fs.readFileSync('session.txt', 'utf-8').trim();
+const apiId = Number(process.env.TELEGRAM_API_ID);
+const apiHash = String(process.env.TELEGRAM_API_HASH);
+const sessionFile = '/root/worldmodels-jobs/telegram_sniffer/session.txt';
+let sessionString = fs.readFileSync(sessionFile, 'utf8');
 
 const targetGroup = '-1001689881186';
 
@@ -15,14 +17,13 @@ const targetGroup = '-1001689881186';
 
   try {
     const participants = await client.getParticipants(targetGroup, { limit: 5000 });
-    console.log(`Total de participantes encontrados: ${participants.length}`);
+    console.log('Total de participantes encontrados:', participants.length);
 
     let bots = 0;
     let deleted = 0;
     let online = 0;
     let recently = 0;
     let offline = 0;
-    let validUsers = [];
 
     for (const user of participants) {
       if (user.bot) {
@@ -30,19 +31,12 @@ const targetGroup = '-1001689881186';
       } else if (user.deleted) {
         deleted++;
       } else {
-        // Evaluate status
         if (user.status) {
           const s = user.status.className;
           if (s === 'UserStatusOnline') {
             online++;
-            validUsers.push(user);
           } else if (s === 'UserStatusRecently') {
             recently++;
-            validUsers.push(user);
-          } else if (s === 'UserStatusOffline') {
-            // we could check when they were last online, but let's just count them
-            offline++;
-            // if offline but recently within 7 days, they might be good
           } else {
             offline++;
           }
@@ -52,12 +46,12 @@ const targetGroup = '-1001689881186';
       }
     }
 
-    console.log(`- Bots: ${bots}`);
-    console.log(`- Eliminados (Scam/Deleted): ${deleted}`);
-    console.log(`- Online ahora: ${online}`);
-    console.log(`- Conectados recientemente: ${recently}`);
-    console.log(`- Offline/Ocultos: ${offline}`);
-    console.log(`\nTotal de usuarios 'buenos' (Online o Recientemente): ${validUsers.length}`);
+    console.log('- Bots:', bots);
+    console.log('- Eliminados (Scam/Deleted):', deleted);
+    console.log('- Online ahora:', online);
+    console.log('- Conectados recientemente:', recently);
+    console.log('- Offline/Ocultos:', offline);
+    console.log('Total de usuarios buenos (Online o Recientemente):', online + recently);
 
   } catch (err) {
     console.error('Error al obtener participantes:', err.message);

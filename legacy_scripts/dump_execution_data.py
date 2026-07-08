@@ -13,8 +13,8 @@ try:
     
     data = json.loads(row['data'])
     
-    for result in data['resultData']['runData']['Dynamic Routing Engine']:
-        print(json.dumps(result['data']['main'], indent=2))
+    with open('exec_162646.json', 'w') as f:
+        json.dump(data, f, indent=2)
         
     conn.close()
 except Exception as e:
