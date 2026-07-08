@@ -29,6 +29,9 @@ if (fs.existsSync(sessionFile)) {
 
 const session = new StringSession(sessionString);
 
+// In-process dedup: msgId+chatId → prevents replay after reconnect in same session
+const sentMessages = new Set();
+
 async function start() {
     console.log('--- WorldModels Telegram DIRECT Sniffer ---');
     const client = new TelegramClient(session, apiId, apiHash, { connectionRetries: 5 });
@@ -48,9 +51,22 @@ async function start() {
 
         const text = message.text;
         const chatId = message.chatId ? message.chatId.toString() : '';
+        const msgId = message.id ? message.id.toString() : '';
 
         // Solo grupos objetivo
         if (!targetGroupIds.includes(chatId)) return;
+
+        // Dedup por ID de mensaje — evita reenvíos tras reconexión
+        const msgKey = `${chatId}:${msgId}`;
+        if (sentMessages.has(msgKey)) {
+            console.log('SKIP: ya enviado', msgKey);
+            return;
+        }
+        sentMessages.add(msgKey);
+        if (sentMessages.size > 2000) {
+            const first = sentMessages.values().next().value;
+            sentMessages.delete(first);
+        }
         console.log('--------------------------------');
         console.log('INCOMING MSG | ChatID:', chatId);
         console.log('Text:', text.substring(0, 60).replace(/\n/g, ' '));
@@ -86,6 +102,7 @@ async function start() {
             from: tmeLink,
             sender: tmeLink,
             chatId: chatId,
+            messageId: msgId,
             remoteJid: chatId + '@g.us',
             isGroup: true,
             text: text,

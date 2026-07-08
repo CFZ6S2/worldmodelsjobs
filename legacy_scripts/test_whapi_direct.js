@@ -1,7 +1,7 @@
 const axios = require('axios');
 
 const token = 'shJOb5wskQMTyfoF20GLqmJOclA5if5j';
-const target = '34642107796@s.whatsapp.net'; // Dolores Fuertes
+const target = '34658034597@s.whatsapp.net'; // Enviar a +34658034597
 const url = 'https://gate.whapi.cloud/messages/text';
 
 const data = {

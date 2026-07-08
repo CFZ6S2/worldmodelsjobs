@@ -1,0 +1,219 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  html, body {
+    width: 100%;
+    height: 100%;
+    background: #000;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    overflow: hidden;
+  }
+
+  .canvas {
+    width: 1080px;
+    height: 1080px;
+    background: #080808;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-family: 'Georgia', serif;
+    overflow: hidden;
+    position: relative;
+    flex-shrink: 0;
+    transform-origin: center center;
+  }
+
+  .glow1 {
+    position: absolute;
+    width: 600px; height: 600px;
+    border-radius: 50%;
+    background: radial-gradient(circle, rgba(201,168,76,0.10) 0%, transparent 70%);
+    top: -100px; left: -100px;
+  }
+  .glow2 {
+    position: absolute;
+    width: 500px; height: 500px;
+    border-radius: 50%;
+    background: radial-gradient(circle, rgba(201,168,76,0.07) 0%, transparent 70%);
+    bottom: -80px; right: -80px;
+  }
+
+  .corner {
+    position: absolute;
+    width: 36px; height: 36px;
+    border-color: #c9a84c;
+    border-style: solid;
+  }
+  .tl { top: 30px; left: 30px; border-width: 2px 0 0 2px; }
+  .tr { top: 30px; right: 30px; border-width: 2px 2px 0 0; }
+  .bl { bottom: 30px; left: 30px; border-width: 0 0 2px 2px; }
+  .br { bottom: 30px; right: 30px; border-width: 0 2px 2px 0; }
+
+  .inner-border {
+    position: absolute;
+    inset: 30px;
+    border: 1px solid rgba(201,168,76,0.18);
+    pointer-events: none;
+  }
+
+  .card {
+    position: relative;
+    z-index: 2;
+    text-align: center;
+    width: 820px;
+    padding: 0 20px;
+  }
+
+  .badge {
+    display: inline-block;
+    border: 1px solid #c9a84c;
+    color: #c9a84c;
+    font-family: Arial, sans-serif;
+    font-size: 10px;
+    font-weight: bold;
+    letter-spacing: 5px;
+    text-transform: uppercase;
+    padding: 7px 22px;
+    margin-bottom: 44px;
+  }
+
+  .logo {
+    font-family: 'Georgia', 'Times New Roman', serif;
+    font-size: 68px;
+    font-weight: bold;
+    color: #ffffff;
+    line-height: 1;
+    margin-bottom: 8px;
+    letter-spacing: -1px;
+  }
+
+  .logo .amp {
+    color: #c9a84c;
+  }
+
+  .tagline {
+    font-family: Arial, sans-serif;
+    font-size: 13px;
+    font-weight: normal;
+    color: rgba(255,255,255,0.35);
+    letter-spacing: 6px;
+    text-transform: uppercase;
+    margin-bottom: 48px;
+  }
+
+  .line {
+    width: 1px;
+    height: 50px;
+    background: linear-gradient(to bottom, transparent, #c9a84c, transparent);
+    margin: 0 auto 48px;
+  }
+
+  .body {
+    font-family: Arial, sans-serif;
+    font-size: 20px;
+    font-weight: 300;
+    color: rgba(255,255,255,0.70);
+    line-height: 1.8;
+    margin-bottom: 52px;
+  }
+
+  .body b {
+    color: #ffffff;
+    font-weight: 600;
+  }
+
+  .promo {
+    display: inline-block;
+    border: 1px solid rgba(201,168,76,0.6);
+    background: rgba(201,168,76,0.08);
+    padding: 24px 60px;
+    margin-bottom: 52px;
+  }
+
+  .promo .big {
+    display: block;
+    font-family: 'Georgia', serif;
+    font-size: 52px;
+    font-weight: bold;
+    color: #c9a84c;
+    letter-spacing: 4px;
+    line-height: 1;
+    margin-bottom: 8px;
+  }
+
+  .promo .small {
+    display: block;
+    font-family: Arial, sans-serif;
+    font-size: 13px;
+    color: rgba(255,255,255,0.45);
+    letter-spacing: 3px;
+    text-transform: uppercase;
+  }
+
+  .cta {
+    font-family: Arial, sans-serif;
+    font-size: 14px;
+    font-weight: normal;
+    color: rgba(255,255,255,0.35);
+    letter-spacing: 3px;
+    text-transform: uppercase;
+  }
+
+  .cta span {
+    color: #c9a84c;
+  }
+</style>
+</head>
+<body>
+<div class="canvas" id="canvas">
+
+<div class="glow1"></div>
+<div class="glow2"></div>
+<div class="inner-border"></div>
+<div class="corner tl"></div>
+<div class="corner tr"></div>
+<div class="corner bl"></div>
+<div class="corner br"></div>
+
+<div class="card">
+  <div class="badge">Promoción Exclusiva</div>
+
+  <div class="logo">Worldmodels<span class="amp">&</span>Jobs</div>
+  <div class="tagline">Ofertas reales · Todo el mundo</div>
+
+  <div class="line"></div>
+
+  <div class="body">
+    Recibe ofertas de <b>agencias reales</b> directamente<br>
+    en tu WhatsApp o Telegram.<br>
+    Solo las ciudades que te interesan.<br>
+    Sin ruido. Sin spam.
+  </div>
+
+  <div class="promo">
+    <span class="big">GRATIS</span>
+    <span class="small">Hasta el 6 de julio · 10:00h</span>
+  </div>
+
+  <div class="cta">Escríbeme en privado · <span>¿En qué ciudad trabajas?</span></div>
+</div>
+
+</div><!-- canvas -->
+
+<script>
+  function scale() {
+    const c = document.getElementById('canvas');
+    const s = Math.min(window.innerWidth / 1080, window.innerHeight / 1080);
+    c.style.transform = 'scale(' + s + ')';
+  }
+  scale();
+  window.addEventListener('resize', scale);
+</script>
+</body>
+</html>

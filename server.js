@@ -250,7 +250,7 @@ const BANNED_KEYWORDS = [
 
 const SPANISH_GROUP_ID = process.env.SPANISH_GROUP_ID || '120363425790792660@g.us';
 const JUANA_TOKEN = process.env.JUANA_API_TOKEN || process.env.WHAPI_TOKEN || 'shJOb5wskQMTyfoF20GLqmJOclA5if5j';
-const VIP_TARGET_NUMBER = process.env.VIP_TARGET_NUMBER || '34664266926@s.whatsapp.net';
+const VIP_TARGET_NUMBER = process.env.VIP_TARGET_NUMBER || '34658034597@s.whatsapp.net';
 
 // 🛡️ ANTI-BAN HUMANIZER
 function humanizeMessage(text) {
@@ -266,11 +266,12 @@ function humanizeMessage(text) {
     }).join(' ');
 }
 
-let lastJuanaSend = 0;
-const JUANA_MIN_DELAY = 6000; // 6 segundos mínimo entre envíos
+// Cola serializada — garantiza que nunca salen dos mensajes simultáneos
+let juanaQueue = Promise.resolve();
+const JUANA_MIN_DELAY = 8000; // 8s base entre envíos
 
 // 🛡️ JUANA FUNNEL: Universal posting (General & VIP)
-app.post('/api/juana/send', async (req, res) => {
+app.post('/api/juana/send', (req, res) => {
     console.log(`📡 [JUANA INCOMING] Request received at ${new Date().toISOString()}`);
     const body = req.body || {};
     const targetChat = body.to || body.chat_id || "";
@@ -280,41 +281,31 @@ app.post('/api/juana/send', async (req, res) => {
         return res.status(400).json({ error: "Missing to or body" });
     }
 
-    try {
-        // Implementación de Cooldown / Rate Limit
-        const now = Date.now();
-        const timeSinceLast = now - lastJuanaSend;
-        const requiredWait = Math.max(0, JUANA_MIN_DELAY - timeSinceLast) + Math.floor(Math.random() * 4000);
+    juanaQueue = juanaQueue.then(async () => {
+        try {
+            const delay = JUANA_MIN_DELAY + Math.floor(Math.random() * 6000);
+            console.log(`⏳ [ANTIBAN] Esperando ${delay}ms para evitar bloqueo...`);
+            await new Promise(resolve => setTimeout(resolve, delay));
 
-        if (requiredWait > 0) {
-            console.log(`⏳ [ANTIBAN] Esperando ${requiredWait}ms para evitar bloqueo...`);
-            await new Promise(resolve => setTimeout(resolve, requiredWait));
+            const humanText = humanizeMessage(messageText);
+            const response = await axios.post('https://gate.whapi.cloud/messages/text', {
+                to: targetChat,
+                body: humanText
+            }, {
+                headers: { 'Authorization': `Bearer ${JUANA_TOKEN}` }
+            });
+
+            console.log(`🚀 [JUANA SUCCESS] Sent to ${targetChat}: ${messageText.substring(0, 30)}...`);
+            res.json(response.data);
+        } catch (err) {
+            console.error('❌ [JUANA ERROR]', {
+                status: err.response?.status,
+                data: err.response?.data,
+                message: err.message
+            });
+            res.status(500).json({ error: "Failed to forward to Whapi (Juana)" });
         }
-
-        const humanText = humanizeMessage(messageText);
-
-        console.log(`🚫 [STOPPED] WhatsApp send blocked by user request. To: ${targetChat}`);
-        /*
-        const response = await axios.post('https://gate.whapi.cloud/messages/text', {
-            to: targetChat,
-            body: humanText
-        }, {
-            headers: { 'Authorization': `Bearer ${JUANA_TOKEN}` }
-        });
-        */
-
-        lastJuanaSend = Date.now();
-        // console.log(`🚀 [JUANA SUCCESS] Sent to ${targetChat}: ${messageText.substring(0, 30)}...`);
-        res.json({ success: true, message: "WhatsApp send disabled by admin", skipped: true });
-        // res.json(response.data);
-    } catch (err) {
-        console.error('❌ [JUANA ERROR]', {
-            status: err.response?.status,
-            data: err.response?.data,
-            message: err.message
-        });
-        res.status(500).json({ error: "Failed to forward to Whapi (Juana)" });
-    }
+    });
 });
 
 app.post(['/api/leads', '/jobs-api/api/ads', '/api/ads', '/api/save-data'], async (req, res) => {
@@ -724,6 +715,104 @@ app.get('/api/profile/:uid', async (req, res) => {
     if (!userDoc.exists) return res.status(404).json({ error: 'User not found' });
     res.json(userDoc.data());
   } catch (err) { res.status(500).json({ error: err.message }); }
+});
+
+// ==========================================
+// BROADCAST PANEL — envío manual a clientas WA
+// ==========================================
+const fs = require('fs');
+const ROUTING_CLIENTS_PATH = path.join(__dirname, 'routing_clients.json');
+const BROADCAST_PASSWORD = process.env.BROADCAST_PASSWORD || 'WMBroadcast2026';
+
+app.get('/admin/broadcast', (req, res) => {
+    const pwd = req.query.pwd || '';
+    if (pwd !== BROADCAST_PASSWORD) {
+        return res.send(`<!DOCTYPE html><html><head><meta charset="utf-8"><title>WM Broadcast</title>
+<style>body{font-family:sans-serif;display:flex;justify-content:center;align-items:center;height:100vh;margin:0;background:#f0f0f0}
+form{background:#fff;padding:32px;border-radius:8px;box-shadow:0 2px 12px rgba(0,0,0,.1);text-align:center}
+input{padding:10px;font-size:16px;border:1px solid #ccc;border-radius:4px;margin-bottom:12px;width:200px}
+button{background:#25d366;color:#fff;border:none;padding:10px 24px;font-size:16px;cursor:pointer;border-radius:4px}
+</style></head><body>
+<form method="get"><h2>🔐 WorldModels Broadcast</h2>
+<input name="pwd" type="password" placeholder="Contraseña"><br>
+<button type="submit">Entrar</button></form></body></html>`);
+    }
+
+    let clients = [];
+    try { clients = JSON.parse(fs.readFileSync(ROUTING_CLIENTS_PATH)).filter(c => c.active !== false && c.wa); }
+    catch(e) { clients = []; }
+
+    const rows = clients.map(c => `
+        <label style="display:flex;align-items:center;gap:8px;padding:6px 0;border-bottom:1px solid #eee">
+            <input type="checkbox" name="targets" value="${c.wa}" checked>
+            <span><strong>${c.label}</strong> <small style="color:#888">+${c.wa}</small></span>
+        </label>`).join('');
+
+    res.send(`<!DOCTYPE html><html><head><meta charset="utf-8"><title>WM Broadcast</title>
+<style>body{font-family:sans-serif;max-width:580px;margin:40px auto;padding:20px}
+h2{color:#333}textarea{width:100%;height:130px;padding:10px;font-size:14px;border:1px solid #ccc;border-radius:4px;box-sizing:border-box}
+.box{background:#f8f8f8;border:1px solid #e0e0e0;border-radius:6px;padding:14px;margin:14px 0}
+button{background:#25d366;color:#fff;border:none;padding:12px 28px;font-size:16px;cursor:pointer;border-radius:4px;margin-top:10px}
+button:hover{background:#1da851}.hint{color:#888;font-size:12px;margin-top:6px}
+</style></head><body>
+<h2>📢 WorldModels — Envío Manual WA</h2>
+<form method="post" action="/admin/broadcast">
+<input type="hidden" name="pwd" value="${pwd}">
+<div class="box">
+<strong>Destinatarias:</strong>
+<label style="display:flex;align-items:center;gap:8px;padding:8px 0;font-weight:bold">
+  <input type="checkbox" id="all" onclick="document.querySelectorAll('[name=targets]').forEach(c=>c.checked=this.checked)" checked> Todas
+</label>
+${rows}
+</div>
+<label><strong>Mensaje:</strong></label><br>
+<textarea name="message" placeholder="Escribe el mensaje que quieres enviar..."></textarea>
+<p class="hint">Se enviarán con 12 segundos de espera entre cada clienta.</p>
+<button type="submit">📤 Enviar</button>
+</form></body></html>`);
+});
+
+app.post('/admin/broadcast', async (req, res) => {
+    const { pwd, message, targets } = req.body;
+    if (pwd !== BROADCAST_PASSWORD) return res.status(401).send('No autorizado');
+    if (!message || !message.trim()) return res.status(400).send('El mensaje está vacío');
+
+    const targetList = Array.isArray(targets) ? targets : (targets ? [targets] : []);
+    if (!targetList.length) return res.status(400).send('Selecciona al menos una destinataria');
+
+    const DELAY = 12000;
+    res.setHeader('Content-Type', 'text/html; charset=utf-8');
+    res.setHeader('Transfer-Encoding', 'chunked');
+    res.write(`<!DOCTYPE html><html><head><meta charset="utf-8"><title>Enviando...</title>
+<style>body{font-family:sans-serif;max-width:580px;margin:40px auto;padding:20px}
+li{padding:6px 0}.ok{color:green}.err{color:#c00}.wait{color:#888}
+a{color:#25d366}</style></head><body>
+<h2>📤 Enviando...</h2><ul>`);
+
+    for (let i = 0; i < targetList.length; i++) {
+        const wa = targetList[i];
+        try {
+            await axios.post('https://gate.whapi.cloud/messages/text',
+                { to: wa + '@s.whatsapp.net', body: message, typing_time: 5 },
+                { headers: { Authorization: `Bearer ${JUANA_TOKEN}` } }
+            );
+            res.write(`<li class="ok">✅ +${wa} — enviado</li>`);
+            console.log(`📢 [BROADCAST] Sent to ${wa}`);
+        } catch(err) {
+            const msg = err.response?.data?.error?.message || err.message;
+            res.write(`<li class="err">❌ +${wa} — ${msg}</li>`);
+            console.error(`📢 [BROADCAST ERR] ${wa}: ${msg}`);
+        }
+        if (i < targetList.length - 1) {
+            res.write(`<li class="wait">⏳ Esperando 12s...</li>`);
+            await new Promise(r => setTimeout(r, DELAY));
+        }
+    }
+
+    res.write(`</ul><p><strong>✅ Listo.</strong></p>
+<a href="/admin/broadcast?pwd=${pwd}">← Enviar otro mensaje</a>
+</body></html>`);
+    res.end();
 });
 
 app.listen(port, '0.0.0.0', () => {

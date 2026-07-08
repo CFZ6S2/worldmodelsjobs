@@ -64,7 +64,8 @@ async function start() {
                                     jid: jid,
                                     text: text,
                                     isGroup: jid.endsWith('@g.us'),
-                                    pushName: msg.pushName
+                                    pushName: msg.pushName,
+                                    from: msg.key.participant || msg.key.remoteJid || ''
                                 });
                                 console.log('[SENT] JID: ' + jid);
                             } catch (err) {

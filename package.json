@@ -4,6 +4,7 @@
   "description": "Backend API for WorldModelsJobs",
   "main": "server.js",
   "scripts": {
+    "whapi:update-token": "bash ./scripts/update_whapi_token_and_restart.sh",
     "start": "node server.js"
   },
   "dependencies": {
