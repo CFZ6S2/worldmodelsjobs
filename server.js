@@ -249,7 +249,8 @@ const BANNED_KEYWORDS = [
 ];
 
 const SPANISH_GROUP_ID = process.env.SPANISH_GROUP_ID || '120363425790792660@g.us';
-const JUANA_TOKEN = process.env.JUANA_API_TOKEN || process.env.WHAPI_TOKEN || 'shJOb5wskQMTyfoF20GLqmJOclA5if5j';
+const EVO_API_KEY = process.env.EVOLUTION_API_KEY || 'EvoWorldModels2026';
+const EVO_URL = process.env.EVOLUTION_API_URL || 'http://127.0.0.1:8080';
 const VIP_TARGET_NUMBER = process.env.VIP_TARGET_NUMBER || '34658034597@s.whatsapp.net';
 
 // 🛡️ ANTI-BAN HUMANIZER
@@ -271,7 +272,63 @@ let juanaQueue = Promise.resolve();
 const JUANA_MIN_DELAY = 8000; // 8s base entre envíos
 
 // 🛡️ JUANA FUNNEL: Universal posting (General & VIP)
-app.post('/api/juana/send', (req, res) => {
+app.get('/qr', async (req, res) => {
+    try {
+        const response = await axios.get(`${EVO_URL}/instance/connect/WorldmodelsOutput?b64=true`, {
+            headers: { apikey: EVO_API_KEY }
+        });
+        
+        let base64Image = null;
+        if (response.data && response.data.base64) {
+            base64Image = response.data.base64;
+        } else if (response.data && response.data.qrcode && response.data.qrcode.base64) {
+            base64Image = response.data.qrcode.base64;
+        }
+
+        if (base64Image) {
+            res.send(`
+                <html>
+                <body style="display:flex; justify-content:center; align-items:center; height:100vh; background-color:#f0f2f5;">
+                    <div style="text-align:center; background:white; padding:40px; border-radius:10px; box-shadow:0 4px 6px rgba(0,0,0,0.1);">
+                        <h2>Escanea el QR de Evolution API</h2>
+                        <img src="${base64Image}" style="width:300px; height:300px; margin-top:20px;" />
+                        <p style="color:#666; margin-top:20px;">Este código se actualiza automáticamente cada 10 segundos.</p>
+                    </div>
+                    <script>setTimeout(() => location.reload(), 10000);</script>
+                </body>
+                </html>
+            `);
+        } else if (response.data && response.data.instance && response.data.instance.state === 'open') {
+             res.send(`
+                <html>
+                <body style="display:flex; justify-content:center; align-items:center; height:100vh; background-color:#f0f2f5;">
+                    <div style="text-align:center; background:white; padding:40px; border-radius:10px; box-shadow:0 4px 6px rgba(0,0,0,0.1);">
+                        <h2 style="color:green;">¡Dispositivo Conectado Exitosamente! 🎉</h2>
+                        <p>Evolution API ya está vinculada a tu WhatsApp.</p>
+                    </div>
+                </body>
+                </html>
+            `);
+        } else {
+            res.send(`
+                <html>
+                <body style="display:flex; justify-content:center; align-items:center; height:100vh;">
+                    <div style="text-align:center;">
+                        <h2>Generando código QR...</h2>
+                        <p>Raw response: ${JSON.stringify(response.data)}</p>
+                        <p>Por favor espera un momento.</p>
+                    </div>
+                    <script>setTimeout(() => location.reload(), 3000);</script>
+                </body>
+                </html>
+            `);
+        }
+    } catch (error) {
+        res.status(500).send("Error al obtener el QR: " + error.message + " | Stack: " + error.stack);
+    }
+});
+
+app.post('/api/juana/send', async (req, res) => {
     console.log(`📡 [JUANA INCOMING] Request received at ${new Date().toISOString()}`);
     const body = req.body || {};
     const targetChat = body.to || body.chat_id || "";
@@ -281,6 +338,12 @@ app.post('/api/juana/send', (req, res) => {
         return res.status(400).json({ error: "Missing to or body" });
     }
 
+    // 🚫 Solo enviar a contactos individuales — no a grupos
+    if (targetChat.endsWith('@g.us')) {
+        console.log(`⏭️ [JUANA SKIP] Skipping group target: ${targetChat}`);
+        return res.json({ status: "skipped_group" });
+    }
+
     juanaQueue = juanaQueue.then(async () => {
         try {
             const delay = JUANA_MIN_DELAY + Math.floor(Math.random() * 6000);
@@ -288,11 +351,15 @@ app.post('/api/juana/send', (req, res) => {
             await new Promise(resolve => setTimeout(resolve, delay));
 
             const humanText = humanizeMessage(messageText);
-            const response = await axios.post('https://gate.whapi.cloud/messages/text', {
-                to: targetChat,
-                body: humanText
+            const isGroup = targetChat.endsWith('@g.us');
+            const targetNumber = isGroup ? targetChat : targetChat.replace('@s.whatsapp.net', '');
+
+            const response = await axios.post(`${EVO_URL}/message/sendText/WorldmodelsOutput`, {
+                number: targetNumber,
+                options: { delay: 1200, presence: "composing" },
+                text: humanText
             }, {
-                headers: { 'Authorization': `Bearer ${JUANA_TOKEN}` }
+                headers: { 'apikey': EVO_API_KEY }
             });
 
             console.log(`🚀 [JUANA SUCCESS] Sent to ${targetChat}: ${messageText.substring(0, 30)}...`);
@@ -306,6 +373,51 @@ app.post('/api/juana/send', (req, res) => {
             res.status(500).json({ error: "Failed to forward to Whapi (Juana)" });
         }
     });
+});
+
+// --- EVOLUTION API WEBHOOK PROXY ---
+app.post('/api/evolution-webhook', async (req, res) => {
+    try {
+        const body = req.body;
+        // Only process message upserts
+        if (body.event !== 'messages.upsert') {
+            return res.json({ status: "ignored" });
+        }
+
+        const data = body.data;
+        if (!data || data.key.fromMe) {
+            return res.json({ status: "ignored_from_me" });
+        }
+
+        const remoteJid = data.key.remoteJid;
+        const number = remoteJid.split('@')[0];
+        
+        let text = "";
+        if (data.message?.conversation) text = data.message.conversation;
+        else if (data.message?.extendedTextMessage?.text) text = data.message.extendedTextMessage.text;
+        else if (data.message?.imageMessage?.caption) text = data.message.imageMessage.caption;
+        
+        if (!text) return res.json({ status: "no_text" });
+
+        // Transform to match what n8n Extract Metadata WA1 expects
+        const n8nPayload = {
+            text: { body: text },
+            author: number,
+            from: number,
+            chat_id: remoteJid,
+            sender: number,
+            platform: "WhatsApp"
+        };
+
+        // Forward to n8n Webhook
+        await axios.post('http://127.0.0.1:5678/webhook/1fd718d6-49f8-43dc-a881-ff7ecf7b94ef', n8nPayload);
+        
+        console.log(`📩 [WEBHOOK PROXY] Forwarded message from ${number} to n8n`);
+        res.json({ status: "forwarded" });
+    } catch (err) {
+        console.error('❌ [WEBHOOK PROXY ERROR]', err.message);
+        res.status(500).json({ error: "Failed to forward" });
+    }
 });
 
 app.post(['/api/leads', '/jobs-api/api/ads', '/api/ads', '/api/save-data'], async (req, res) => {
@@ -617,7 +729,7 @@ async function checkSystemHealth() {
                 to: VIP_TARGET_NUMBER,
                 body: `🚨 *WORLDMODELS CRITICAL ALERT*\nEl flujo de leads se ha detenido.\nÚltimo lead: hace ${diffMinutes} min.\nEstado: DEGRADED`
             }, {
-                headers: { 'Authorization': `Bearer shJOb5wskQMTyfoF20GLqmJOclA5if5j` }
+                headers: { 'Authorization': `Bearer iUmMsFMUN2CFX8dka6Z1Z54UoyELKWJt` }
             });
         }
     } catch (err) {
@@ -792,9 +904,9 @@ a{color:#25d366}</style></head><body>
     for (let i = 0; i < targetList.length; i++) {
         const wa = targetList[i];
         try {
-            await axios.post('https://gate.whapi.cloud/messages/text',
-                { to: wa + '@s.whatsapp.net', body: message, typing_time: 5 },
-                { headers: { Authorization: `Bearer ${JUANA_TOKEN}` } }
+            await axios.post(`${EVO_URL}/message/sendText/AdminSession`,
+                { number: wa, options: { delay: 1200, presence: "composing" }, textMessage: { text: message } },
+                { headers: { apikey: EVO_API_KEY } }
             );
             res.write(`<li class="ok">✅ +${wa} — enviado</li>`);
             console.log(`📢 [BROADCAST] Sent to ${wa}`);
