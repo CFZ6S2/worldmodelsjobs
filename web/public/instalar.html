@@ -1,0 +1,612 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+  <title>Instalar WorldModels</title>
+  <meta name="theme-color" content="#000000">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="WorldModels">
+  <link rel="apple-touch-icon" href="/icon-192.png">
+  <link rel="manifest" href="/manifest.webmanifest">
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js" crossorigin="anonymous"></script>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --gold: #c9a84c;
+      --gold-light: #f3e5ab;
+      --bg: #050505;
+      --card: #0e0e0e;
+      --border: rgba(201,168,76,0.15);
+      --text: #ffffff;
+      --muted: rgba(255,255,255,0.35);
+    }
+
+    html, body {
+      height: 100%;
+      background: var(--bg);
+      color: var(--text);
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif;
+      -webkit-font-smoothing: antialiased;
+      overflow-x: hidden;
+    }
+
+    body {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      min-height: 100dvh;
+      padding: env(safe-area-inset-top, 0) 20px env(safe-area-inset-bottom, 24px);
+    }
+
+    /* ── Ambient glow ── */
+    body::before {
+      content: '';
+      position: fixed;
+      top: -200px;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 600px;
+      height: 600px;
+      background: radial-gradient(circle, rgba(201,168,76,0.08) 0%, transparent 70%);
+      pointer-events: none;
+      z-index: 0;
+    }
+
+    .wrap {
+      position: relative;
+      z-index: 1;
+      width: 100%;
+      max-width: 420px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding-top: max(env(safe-area-inset-top), 48px);
+      padding-bottom: 40px;
+      gap: 32px;
+    }
+
+    /* ── Logo block ── */
+    .logo-ring {
+      width: 88px;
+      height: 88px;
+      border-radius: 22px;
+      background: linear-gradient(135deg, #c9a84c, #f3e5ab);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      box-shadow: 0 0 0 1px rgba(201,168,76,0.3), 0 20px 60px rgba(201,168,76,0.25);
+      overflow: hidden;
+      flex-shrink: 0;
+    }
+
+    .logo-ring img {
+      width: 72px;
+      height: 72px;
+      border-radius: 16px;
+      object-fit: cover;
+    }
+
+    .logo-fallback {
+      font-size: 36px;
+      font-weight: 900;
+      color: #000;
+      letter-spacing: -1px;
+    }
+
+    .heading {
+      text-align: center;
+    }
+
+    .heading h1 {
+      font-size: 26px;
+      font-weight: 900;
+      letter-spacing: -0.5px;
+      line-height: 1.15;
+    }
+
+    .heading .sub {
+      margin-top: 6px;
+      font-size: 12px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.12em;
+      color: var(--gold);
+    }
+
+    /* ── Section cards ── */
+    .card {
+      width: 100%;
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 20px;
+      padding: 24px;
+    }
+
+    .card-label {
+      font-size: 10px;
+      font-weight: 900;
+      text-transform: uppercase;
+      letter-spacing: 0.12em;
+      color: var(--muted);
+      margin-bottom: 20px;
+    }
+
+    /* ── Steps (iOS) ── */
+    .steps {
+      display: flex;
+      flex-direction: column;
+      gap: 18px;
+    }
+
+    .step {
+      display: flex;
+      align-items: flex-start;
+      gap: 14px;
+    }
+
+    .step-num {
+      flex-shrink: 0;
+      width: 32px;
+      height: 32px;
+      border-radius: 50%;
+      background: rgba(201,168,76,0.12);
+      border: 1px solid rgba(201,168,76,0.3);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 13px;
+      font-weight: 900;
+      color: var(--gold);
+    }
+
+    .step-body { flex: 1; }
+
+    .step-title {
+      font-size: 14px;
+      font-weight: 700;
+      line-height: 1.3;
+    }
+
+    .step-desc {
+      font-size: 12px;
+      color: var(--muted);
+      margin-top: 3px;
+      line-height: 1.5;
+    }
+
+    .step-icon {
+      display: inline-block;
+      font-size: 18px;
+      vertical-align: middle;
+      margin: 0 2px;
+    }
+
+    /* ── Pill badge ── */
+    .pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+      padding: 4px 10px;
+      border-radius: 100px;
+      font-size: 11px;
+      font-weight: 800;
+      background: rgba(201,168,76,0.1);
+      border: 1px solid rgba(201,168,76,0.25);
+      color: var(--gold);
+      vertical-align: middle;
+    }
+
+    /* ── Install button ── */
+    .btn-install {
+      width: 100%;
+      padding: 18px;
+      border-radius: 16px;
+      background: linear-gradient(135deg, #c9a84c, #f3e5ab);
+      border: none;
+      color: #000;
+      font-size: 15px;
+      font-weight: 900;
+      letter-spacing: 0.03em;
+      cursor: pointer;
+      transition: opacity 0.2s, transform 0.15s;
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    .btn-install:hover { opacity: 0.92; }
+    .btn-install:active { transform: scale(0.97); }
+
+    .btn-install:disabled {
+      background: rgba(255,255,255,0.06);
+      color: rgba(255,255,255,0.25);
+      cursor: not-allowed;
+    }
+
+    /* ── QR block ── */
+    .qr-wrap {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 16px;
+    }
+
+    #qr-canvas {
+      width: 180px;
+      height: 180px;
+      border-radius: 12px;
+      overflow: hidden;
+      background: #000;
+      border: 2px solid rgba(201,168,76,0.25);
+    }
+
+    #qr-canvas canvas,
+    #qr-canvas img {
+      display: block;
+      width: 180px !important;
+      height: 180px !important;
+    }
+
+    .qr-hint {
+      font-size: 12px;
+      color: var(--muted);
+      text-align: center;
+      line-height: 1.5;
+    }
+
+    /* ── Already installed ── */
+    .installed-badge {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 12px;
+      padding: 32px 24px;
+      text-align: center;
+    }
+
+    .installed-badge .check {
+      width: 64px;
+      height: 64px;
+      border-radius: 50%;
+      background: rgba(46,213,115,0.1);
+      border: 1px solid rgba(46,213,115,0.3);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 28px;
+    }
+
+    .installed-badge h2 {
+      font-size: 20px;
+      font-weight: 900;
+    }
+
+    .installed-badge p {
+      font-size: 13px;
+      color: var(--muted);
+      line-height: 1.5;
+    }
+
+    /* ── Unsupported ── */
+    .url-box {
+      background: rgba(255,255,255,0.04);
+      border: 1px solid rgba(255,255,255,0.08);
+      border-radius: 12px;
+      padding: 14px 16px;
+      font-size: 13px;
+      color: var(--gold);
+      text-align: center;
+      word-break: break-all;
+      font-family: monospace;
+      user-select: all;
+      margin-top: 12px;
+      cursor: pointer;
+    }
+
+    /* ── Footer ── */
+    .footer {
+      font-size: 10px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+      color: rgba(255,255,255,0.15);
+      text-align: center;
+    }
+
+    /* ── Divider ── */
+    .divider {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      width: 100%;
+      margin: 8px 0;
+    }
+
+    .divider::before, .divider::after {
+      content: '';
+      flex: 1;
+      height: 1px;
+      background: var(--border);
+    }
+
+    .divider span {
+      font-size: 10px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+      color: var(--muted);
+    }
+
+    /* ── Hidden sections ── */
+    .section { display: none; }
+    .section.active { display: flex; flex-direction: column; gap: 16px; width: 100%; }
+
+    @keyframes pulse-gold {
+      0%, 100% { box-shadow: 0 0 0 0 rgba(201,168,76,0.4); }
+      50% { box-shadow: 0 0 0 10px rgba(201,168,76,0); }
+    }
+
+    .pulse { animation: pulse-gold 2s infinite; }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+
+    <!-- Logo + title -->
+    <div style="display:flex;flex-direction:column;align-items:center;gap:16px">
+      <div class="logo-ring pulse">
+        <img src="/icon-192.png" alt="WorldModels"
+          onerror="this.style.display='none';this.nextElementSibling.style.display='flex'">
+        <div class="logo-fallback" style="display:none">W</div>
+      </div>
+      <div class="heading">
+        <h1>WorldModels</h1>
+        <div class="sub">Intelligence Feed · Instalar App</div>
+      </div>
+    </div>
+
+    <!-- ══════════════════════════════════ -->
+    <!-- ALREADY INSTALLED                 -->
+    <!-- ══════════════════════════════════ -->
+    <div id="section-installed" class="section">
+      <div class="card">
+        <div class="installed-badge">
+          <div class="check">✅</div>
+          <h2>Ya está instalada</h2>
+          <p>WorldModels está corriendo como app nativa en este dispositivo.</p>
+          <a href="/es/feed" style="margin-top:8px">
+            <button class="btn-install">Abrir el feed →</button>
+          </a>
+        </div>
+      </div>
+    </div>
+
+    <!-- ══════════════════════════════════ -->
+    <!-- iOS SAFARI                        -->
+    <!-- ══════════════════════════════════ -->
+    <div id="section-ios" class="section">
+      <div class="card">
+        <div class="card-label">Safari · iOS / iPadOS</div>
+        <div class="steps">
+          <div class="step">
+            <div class="step-num">1</div>
+            <div class="step-body">
+              <div class="step-title">
+                Pulsa el botón Compartir
+                <span class="step-icon">⬆️</span>
+              </div>
+              <div class="step-desc">En la barra inferior de Safari. Si estás en iPad, está arriba a la derecha.</div>
+            </div>
+          </div>
+          <div class="step">
+            <div class="step-num">2</div>
+            <div class="step-body">
+              <div class="step-title">
+                Toca <span class="pill">＋ Añadir a pantalla de inicio</span>
+              </div>
+              <div class="step-desc">Desliza hacia abajo en el menú que aparece hasta encontrar esta opción.</div>
+            </div>
+          </div>
+          <div class="step">
+            <div class="step-num">3</div>
+            <div class="step-body">
+              <div class="step-title">Confirma pulsando <span class="pill">Añadir</span></div>
+              <div class="step-desc">El icono de WorldModels aparecerá en tu pantalla de inicio.</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <p style="font-size:11px;color:var(--muted);text-align:center;line-height:1.6">
+        ⚠️ Apple sólo permite instalar apps web desde <strong style="color:#fff">Safari</strong>.<br>
+        Si estás en Chrome o Firefox para iOS, cópialo y ábrelo en Safari.
+      </p>
+    </div>
+
+    <!-- ══════════════════════════════════ -->
+    <!-- ANDROID / CHROMIUM                -->
+    <!-- ══════════════════════════════════ -->
+    <div id="section-android" class="section">
+      <div class="card">
+        <div class="card-label">Android · Chrome / Edge / Samsung</div>
+        <button class="btn-install" id="btn-android" onclick="doInstall()">
+          ⏳ Preparando instalación…
+        </button>
+        <p style="font-size:11px;color:var(--muted);margin-top:14px;line-height:1.6;text-align:center">
+          Se instalará como app nativa sin ocupar espacio en Google Play.
+        </p>
+      </div>
+
+      <div class="card" id="android-manual" style="display:none">
+        <div class="card-label">Instalación manual</div>
+        <div class="steps">
+          <div class="step">
+            <div class="step-num">1</div>
+            <div class="step-body">
+              <div class="step-title">Abre el menú <span class="step-icon">⋮</span></div>
+              <div class="step-desc">Los tres puntos arriba a la derecha de Chrome.</div>
+            </div>
+          </div>
+          <div class="step">
+            <div class="step-num">2</div>
+            <div class="step-body">
+              <div class="step-title">Toca <span class="pill">Añadir a pantalla inicio</span></div>
+              <div class="step-desc">O «Instalar app» si Chrome ya lo detecta como PWA.</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ══════════════════════════════════ -->
+    <!-- DESKTOP (Chrome / Edge / Brave)   -->
+    <!-- ══════════════════════════════════ -->
+    <div id="section-desktop" class="section">
+      <div class="card">
+        <div class="card-label">Escritorio · Chrome / Edge / Brave</div>
+        <button class="btn-install" id="btn-desktop" disabled onclick="doInstall()">
+          ⏳ Esperando señal del navegador…
+        </button>
+        <p style="font-size:11px;color:var(--muted);margin-top:14px;line-height:1.6;text-align:center">
+          Si el botón no se activa, busca el icono <strong style="color:#fff">⊕</strong> en la barra de dirección.
+        </p>
+      </div>
+
+      <div class="divider"><span>o instala en móvil</span></div>
+
+      <div class="card">
+        <div class="card-label">Escanea con tu móvil</div>
+        <div class="qr-wrap">
+          <div id="qr-canvas"></div>
+          <p class="qr-hint">Apunta la cámara aquí para abrir la<br>página de instalación en tu teléfono.</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- ══════════════════════════════════ -->
+    <!-- UNSUPPORTED / FIREFOX             -->
+    <!-- ══════════════════════════════════ -->
+    <div id="section-unsupported" class="section">
+      <div class="card">
+        <div class="card-label">Tu navegador</div>
+        <div class="steps">
+          <div class="step">
+            <div class="step-num">1</div>
+            <div class="step-body">
+              <div class="step-title">Copia este enlace</div>
+              <div class="step-desc">Y ábrelo en Chrome, Edge o Safari para instalar la app.</div>
+            </div>
+          </div>
+        </div>
+        <div class="url-box" onclick="copyUrl(this)">https://worldmodels-jobs.web.app/instalar</div>
+        <p style="font-size:11px;color:var(--muted);margin-top:12px;text-align:center">Toca la URL para copiarla</p>
+      </div>
+    </div>
+
+    <!-- Footer -->
+    <div class="footer">WorldModels · VIP Intelligence Feed</div>
+  </div>
+
+  <script>
+    const INSTALL_URL = 'https://worldmodels-jobs.web.app/instalar';
+
+    // ── Register service worker for PWA installability ──
+    if ('serviceWorker' in navigator) {
+      navigator.serviceWorker.register('/firebase-messaging-sw.js').catch(() => {});
+    }
+
+    // ── Detect environment ──
+    const ua = navigator.userAgent;
+    const isIOS = /iPad|iPhone|iPod/.test(ua) && !window.MSStream;
+    const isSafari = /^((?!chrome|android).)*safari/i.test(ua);
+    const isAndroid = /Android/.test(ua);
+    const isDesktop = !isIOS && !isAndroid;
+    const isStandalone =
+      window.matchMedia('(display-mode: standalone)').matches ||
+      window.navigator.standalone === true;
+
+    // PWA install prompt (Chrome / Edge / Brave / Samsung Internet)
+    let deferredPrompt = null;
+
+    window.addEventListener('beforeinstallprompt', (e) => {
+      e.preventDefault();
+      deferredPrompt = e;
+
+      // Unlock install buttons
+      const btnA = document.getElementById('btn-android');
+      const btnD = document.getElementById('btn-desktop');
+      if (btnA) { btnA.disabled = false; btnA.textContent = '⬇️  Instalar WorldModels'; }
+      if (btnD) { btnD.disabled = false; btnD.textContent = '⬇️  Instalar en escritorio'; }
+    });
+
+    async function doInstall() {
+      if (!deferredPrompt) return;
+      deferredPrompt.prompt();
+      const { outcome } = await deferredPrompt.userChoice;
+      deferredPrompt = null;
+      if (outcome === 'accepted') {
+        showSection('section-installed');
+      }
+    }
+
+    window.addEventListener('appinstalled', () => {
+      showSection('section-installed');
+    });
+
+    // ── Show the right section ──
+    function showSection(id) {
+      document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
+      const el = document.getElementById(id);
+      if (el) el.classList.add('active');
+    }
+
+    function detectAndShow() {
+      if (isStandalone) {
+        showSection('section-installed');
+        return;
+      }
+      if (isIOS) {
+        showSection('section-ios');
+        return;
+      }
+      if (isAndroid) {
+        showSection('section-android');
+        // Show manual fallback after 4s if prompt didn't fire
+        setTimeout(() => {
+          if (!deferredPrompt) {
+            const m = document.getElementById('android-manual');
+            if (m) m.style.display = 'block';
+          }
+        }, 4000);
+        return;
+      }
+      if (isDesktop) {
+        showSection('section-desktop');
+        // QR code
+        try {
+          new QRCode(document.getElementById('qr-canvas'), {
+            text: INSTALL_URL,
+            width: 180,
+            height: 180,
+            colorDark: '#c9a84c',
+            colorLight: '#000000',
+            correctLevel: QRCode.CorrectLevel.M,
+          });
+        } catch (e) {}
+        return;
+      }
+      showSection('section-unsupported');
+    }
+
+    function copyUrl(el) {
+      navigator.clipboard.writeText(INSTALL_URL).then(() => {
+        el.textContent = '✅ Copiado';
+        setTimeout(() => { el.textContent = INSTALL_URL; }, 2000);
+      }).catch(() => {});
+    }
+
+    detectAndShow();
+  </script>
+</body>
+</html>
