@@ -17,6 +17,7 @@ export default function PublishPage() {
     description: '',
     location: '',
     price: '',
+    contact: '',
     category: 'CAT_PLAZAS'
   });
   
@@ -37,11 +38,13 @@ export default function PublishPage() {
     setError(null);
 
     try {
-      await addDoc(collection(db, 'leads'), {
+      await addDoc(collection(db, 'ofertas'), {
         ...formData,
         userId: user.uid,
         userEmail: user.email,
-        status: 'pending',
+        status: 'active',
+        activa: true,
+        trash: false,
         timestamp: serverTimestamp(),
         ingestedAt: new Date().toISOString()
       });
@@ -143,6 +146,22 @@ export default function PublishPage() {
                       placeholder="e.g. 5000€"
                       value={formData.price}
                       onChange={(e) => setFormData({...formData, price: e.target.value})}
+                      style={{ width: '100%', padding: '16px 16px 16px 48px', background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.08)', borderRadius: '16px', color: '#fff', outline: 'none' }}
+                    />
+                  </div>
+                </div>
+
+                {/* Contact */}
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+                  <label style={{ fontSize: '10px', color: 'rgba(255,255,255,0.3)', fontWeight: 900, textTransform: 'uppercase' }}>Contact Info</label>
+                  <div style={{ position: 'relative' }}>
+                    <Send size={16} style={{ position: 'absolute', left: '16px', top: '18px', opacity: 0.3 }} />
+                    <input 
+                      type="text" 
+                      placeholder="e.g. Telegram @username or Phone"
+                      value={formData.contact}
+                      onChange={(e) => setFormData({...formData, contact: e.target.value})}
+                      required
                       style={{ width: '100%', padding: '16px 16px 16px 48px', background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.08)', borderRadius: '16px', color: '#fff', outline: 'none' }}
                     />
                   </div>

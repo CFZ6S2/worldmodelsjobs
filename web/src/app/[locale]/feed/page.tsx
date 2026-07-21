@@ -31,6 +31,8 @@ const getAdData = (ad: Ad, locale: string) => {
     description = ad.text_es;
   } else if (ad.descripcion) {
     description = ad.descripcion;
+  } else if (ad.description) {
+    description = ad.description;
   } else {
     description = ad.content || ad.rawText || '';
   }
