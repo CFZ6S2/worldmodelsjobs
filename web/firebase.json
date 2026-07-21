@@ -6,11 +6,23 @@
       "**/.*",
       "**/node_modules/**"
     ],
+    "cleanUrls": true,
+    "trailingSlash": false,
     "rewrites": [
-      { "source": "/panel", "destination": "/panel.html" },
-      { "source": "/registro", "destination": "/registro.html" },
-      { "source": "/routing", "destination": "/routing.html" },
-      { "source": "**", "destination": "/index.html" }
+      { "source": "/es/feed**", "destination": "/es/feed.html" },
+      { "source": "/es/pricing**", "destination": "/es/pricing.html" },
+      { "source": "/es/publish**", "destination": "/es/publish.html" },
+      { "source": "/es/profile**", "destination": "/es/profile.html" },
+      { "source": "/es/auth/**", "destination": "/es/auth/login.html" },
+      { "source": "/en/feed**", "destination": "/en/feed.html" },
+      { "source": "/en/pricing**", "destination": "/en/pricing.html" },
+      { "source": "/en/publish**", "destination": "/en/publish.html" },
+      { "source": "/en/profile**", "destination": "/en/profile.html" },
+      { "source": "/en/auth/**", "destination": "/en/auth/login.html" }
     ]
   }
 }
+
+
+
+
