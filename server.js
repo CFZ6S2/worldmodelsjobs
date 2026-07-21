@@ -124,6 +124,12 @@ rtdb.ref('/posts').on('child_added', async (snapshot) => {
 });
 
 // --- FCM PUSH NOTIFICATIONS BROADCAST ---
+// Error codes returned by FCM when a token is permanently invalid
+const FCM_STALE_CODES = new Set([
+    'messaging/registration-token-not-registered',
+    'messaging/invalid-registration-token',
+]);
+
 async function sendPushNotificationsForLead(title, description, location) {
     try {
         const settingsSnap = await db.collection('user_settings')
@@ -132,27 +138,30 @@ async function sendPushNotificationsForLead(title, description, location) {
 
         if (settingsSnap.empty) return;
 
-        const tokens = [];
+        // Track token → Firestore doc ref so we can delete stale tokens later
+        const tokenMap = new Map(); // token → DocumentReference
         const leadTextLower = (title + " " + description + " " + location).toLowerCase();
 
         settingsSnap.forEach(doc => {
             const data = doc.data();
             if (!data.fcmToken) return;
 
-            // Optional keyword filter check
+            // Optional keyword filter: skip if no keyword matches
             const keywords = Array.isArray(data.keywords) ? data.keywords : [];
             if (keywords.length > 0) {
                 const matches = keywords.some(kw => kw && leadTextLower.includes(kw.toLowerCase().trim()));
                 if (!matches) return;
             }
 
-            tokens.push(data.fcmToken);
+            // Last-write-wins for duplicate tokens across docs
+            tokenMap.set(data.fcmToken, doc.ref);
         });
 
-        if (tokens.length === 0) return;
+        if (tokenMap.size === 0) return;
+
+        const uniqueTokens = [...tokenMap.keys()];
 
         // Firebase Messaging Multicast (Batch up to 500)
-        const uniqueTokens = [...new Set(tokens)];
         const message = {
             notification: {
                 title: `🔥 ${title || 'Nuevo Lead VIP'}`,
@@ -168,6 +177,34 @@ async function sendPushNotificationsForLead(title, description, location) {
 
         const response = await admin.messaging().sendEachForMulticast(message);
         console.log(`📱 [FCM] Broadcast sent to ${response.successCount}/${uniqueTokens.length} devices.`);
+
+        // --- STALE TOKEN CLEANUP ---
+        // FCM returns per-token results in the same order as the tokens array.
+        // Any token that comes back with a permanent-failure code should be
+        // removed from Firestore so it never blocks future broadcasts.
+        const staleTokens = [];
+        response.responses.forEach((result, idx) => {
+            if (!result.success && FCM_STALE_CODES.has(result.error?.code)) {
+                staleTokens.push(uniqueTokens[idx]);
+            }
+        });
+
+        if (staleTokens.length > 0) {
+            console.log(`🧹 [FCM] Removing ${staleTokens.length} stale token(s) from Firestore...`);
+            const batch = db.batch();
+            for (const staleToken of staleTokens) {
+                const docRef = tokenMap.get(staleToken);
+                if (docRef) {
+                    batch.update(docRef, {
+                        fcmToken: admin.firestore.FieldValue.delete(),
+                        pushEnabled: false,
+                        tokenRemovedAt: new Date().toISOString(),
+                    });
+                }
+            }
+            await batch.commit();
+            console.log(`✅ [FCM] Stale tokens purged from Firestore.`);
+        }
     } catch (error) {
         console.error('❌ [FCM BROADCAST ERROR]:', error.message);
     }
