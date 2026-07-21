@@ -113,10 +113,66 @@ rtdb.ref('/posts').on('child_added', async (snapshot) => {
         await db.collection('lead_hashes').doc(hash).set({ createdAt: new Date().toISOString() });
 
         console.log(`🚀 [BRIDGE] Synced legacy lead to Web: ${finalTitulo}`);
+
+        // Trigger Push Notifications to subscribers
+        sendPushNotificationsForLead(finalTitulo, text, payload.ubicacion).catch(e => {
+            console.error('⚠️ [FCM] Error sending push notification:', e.message);
+        });
     } catch (err) {
         console.error('❌ [BRIDGE] Error syncing:', err.message);
     }
 });
+
+// --- FCM PUSH NOTIFICATIONS BROADCAST ---
+async function sendPushNotificationsForLead(title, description, location) {
+    try {
+        const settingsSnap = await db.collection('user_settings')
+            .where('pushEnabled', '==', true)
+            .get();
+
+        if (settingsSnap.empty) return;
+
+        const tokens = [];
+        const leadTextLower = (title + " " + description + " " + location).toLowerCase();
+
+        settingsSnap.forEach(doc => {
+            const data = doc.data();
+            if (!data.fcmToken) return;
+
+            // Optional keyword filter check
+            const keywords = Array.isArray(data.keywords) ? data.keywords : [];
+            if (keywords.length > 0) {
+                const matches = keywords.some(kw => kw && leadTextLower.includes(kw.toLowerCase().trim()));
+                if (!matches) return;
+            }
+
+            tokens.push(data.fcmToken);
+        });
+
+        if (tokens.length === 0) return;
+
+        // Firebase Messaging Multicast (Batch up to 500)
+        const uniqueTokens = [...new Set(tokens)];
+        const message = {
+            notification: {
+                title: `🔥 ${title || 'Nuevo Lead VIP'}`,
+                body: description.length > 120 ? description.substring(0, 117) + '...' : description,
+            },
+            data: {
+                click_action: '/es/feed',
+                url: '/es/feed',
+                location: location || 'Global'
+            },
+            tokens: uniqueTokens
+        };
+
+        const response = await admin.messaging().sendEachForMulticast(message);
+        console.log(`📱 [FCM] Broadcast sent to ${response.successCount}/${uniqueTokens.length} devices.`);
+    } catch (error) {
+        console.error('❌ [FCM BROADCAST ERROR]:', error.message);
+    }
+}
+
 
 // Watch extra paths just in case
 rtdb.ref('/leads').on('child_added', snapshot => rtdb.ref('/posts').child(snapshot.key).set(snapshot.val()));

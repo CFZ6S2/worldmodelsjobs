@@ -14,6 +14,12 @@ function pickLocaleFromBrowser(): string {
 
 export default function RootPage() {
   useEffect(() => {
+    // If we are already on a localized page (e.g. /es/), do not redirect
+    const path = window.location.pathname;
+    if (path.startsWith('/es') || path.startsWith('/en') || path.startsWith('/pt') || path.startsWith('/ru')) {
+      return;
+    }
+
     const saved = (localStorage.getItem('wm_locale') || '').toLowerCase();
     const locale = SUPPORTED_LOCALES.has(saved) ? saved : pickLocaleFromBrowser();
     window.location.replace(`/${locale}/`);
@@ -21,3 +27,4 @@ export default function RootPage() {
 
   return null;
 }
+
