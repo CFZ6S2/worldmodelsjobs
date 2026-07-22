@@ -156,5 +156,18 @@
       "london"
     ],
     "active": true
+  },
+  {
+    "id": "cl_paris_34632101279",
+    "label": "PARIS ES",
+    "wa": "34632101279",
+    "tg": "",
+    "cities": [
+      "paris"
+    ],
+    "categoryFilter": "evento",
+    "lang": "es",
+    "active": true,
+    "source": "manual"
   }
 ]
