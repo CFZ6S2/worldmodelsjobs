@@ -487,6 +487,8 @@ app.get('/qr', async (req, res) => {
     }
 });
 
+const juanaSentHistory = new Map();
+
 app.post('/api/juana/send', async (req, res) => {
     console.log(`📡 [JUANA INCOMING] Request received at ${new Date().toISOString()}`);
     const body = req.body || {};
@@ -501,6 +503,38 @@ app.post('/api/juana/send', async (req, res) => {
     if (targetChat.endsWith('@g.us')) {
         console.log(`⏭️ [JUANA SKIP] Skipping group target: ${targetChat}`);
         return res.json({ status: "skipped_group" });
+    }
+
+    // 🚫 HOTFIX: Evitar que Algeciras llegue a Ibiza por el bug "domiciLIO" de n8n
+    const textLower = messageText.toLowerCase();
+    if (textLower.includes('alerta ibiza') && textLower.includes('algeciras')) {
+        console.log(`⏭️ [JUANA SKIP] Blocked erroneous Ibiza routing for Algeciras lead.`);
+        return res.json({ status: "skipped_bad_route" });
+    }
+
+    // 🚫 DEDUPLICACIÓN: Evitar que n8n y server.js envíen el mismo lead repetido
+    // Limpiamos formato para comparar el texto base
+    const cleanText = messageText.replace(/[*_~📢📍💰👤🔌]/g, '').replace(/\s+/g, ' ').trim();
+    // Tomamos los primeros 60 caracteres del texto base
+    const textHash = cleanText.substring(0, 60);
+    const dedupKey = `${targetChat}_${textHash}`;
+    
+    const now = Date.now();
+    if (juanaSentHistory.has(dedupKey)) {
+        const timeSinceSent = now - juanaSentHistory.get(dedupKey);
+        if (timeSinceSent < 5 * 60 * 1000) { // 5 minutes
+            console.log(`⏭️ [JUANA SKIP] Blocked duplicate message to ${targetChat} (already queued in last 5m)`);
+            return res.json({ status: "skipped_duplicate" });
+        }
+    }
+    juanaSentHistory.set(dedupKey, now);
+
+    // Mantenimiento de memoria (límite de 1000 items)
+    if (juanaSentHistory.size > 1000) {
+        const tenMinsAgo = now - 10 * 60 * 1000;
+        for (const [key, timestamp] of juanaSentHistory.entries()) {
+            if (timestamp < tenMinsAgo) juanaSentHistory.delete(key);
+        }
     }
 
     juanaQueue = juanaQueue.then(async () => {
