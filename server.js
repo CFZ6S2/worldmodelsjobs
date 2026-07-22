@@ -20,6 +20,8 @@ const rtdb = admin.database();
 const auth = admin.auth();
 const crypto = require('crypto');
 const rateLimit = require('express-rate-limit');
+const fs = require('fs');
+const ROUTING_CLIENTS_PATH = path.join(__dirname, 'routing_clients.json');
 
 // --- GLOBAL ERROR HANDLING ---
 process.on('uncaughtException', (err) => {
@@ -118,6 +120,11 @@ rtdb.ref('/posts').on('child_added', async (snapshot) => {
         sendPushNotificationsForLead(finalTitulo, text, payload.ubicacion).catch(e => {
             console.error('⚠️ [FCM] Error sending push notification:', e.message);
         });
+
+        // Route to WhatsApp clients
+        routeLeadToClients(finalTitulo, text, payload.ubicacion, payload.categoria, payload.translations).catch(e => {
+            console.error('⚠️ [ROUTING] Error routing lead:', e.message);
+        });
     } catch (err) {
         console.error('❌ [BRIDGE] Error syncing:', err.message);
     }
@@ -207,6 +214,61 @@ async function sendPushNotificationsForLead(title, description, location) {
         }
     } catch (error) {
         console.error('❌ [FCM BROADCAST ERROR]:', error.message);
+    }
+}
+
+async function routeLeadToClients(title, description, city, categoria, translations = null) {
+    try {
+        if (!fs.existsSync(ROUTING_CLIENTS_PATH)) return;
+        let clients = [];
+        try { clients = JSON.parse(fs.readFileSync(ROUTING_CLIENTS_PATH)); } catch (e) { return; }
+        
+        const activeClients = clients.filter(c => c.active !== false && c.wa && Array.isArray(c.cities));
+        if (activeClients.length === 0) return;
+
+        const leadCityLower = (city || '').toLowerCase();
+        const textToCheck = `${title} ${description}`.toLowerCase();
+        
+        let matchedCount = 0;
+
+        for (const client of activeClients) {
+            const matchesCity = client.cities.some(cCity => {
+                const cLower = cCity.toLowerCase();
+                return leadCityLower.includes(cLower) || cLower.includes(leadCityLower);
+            });
+            if (!matchesCity) continue;
+
+            if (client.categoryFilter) {
+                const catFilter = client.categoryFilter.toLowerCase();
+                if (!textToCheck.includes(catFilter)) continue;
+            }
+
+            matchedCount++;
+            
+            let msgTitle = title;
+            let msgDesc = description;
+            const lang = client.lang || 'es';
+            
+            if (translations && translations[lang]) {
+                msgTitle = translations[lang].titulo || msgTitle;
+                msgDesc = translations[lang].descripcion || msgDesc;
+            }
+
+            const finalMessage = `*🔥 Nuevo Lead: ${city}*\n\n*${msgTitle}*\n${msgDesc}`;
+
+            console.log(`[ROUTING] Queued for ${client.label} (${client.wa})`);
+            
+            axios.post(`http://127.0.0.1:${port}/api/juana/send`, {
+                to: `${client.wa}@s.whatsapp.net`,
+                body: finalMessage
+            }).catch(e => console.error(`[ROUTING ERR] Failed to send to ${client.wa}:`, e.message));
+        }
+        
+        if (matchedCount > 0) {
+            console.log(`[ROUTING] ${matchedCount} client(s) matched for city="${city}"`);
+        }
+    } catch (e) {
+        console.error('❌ [ROUTING ERROR]:', e.message);
     }
 }
 
@@ -596,6 +658,12 @@ app.post(['/api/leads', '/jobs-api/api/ads', '/api/ads', '/api/save-data'], asyn
         await db.collection('lead_hashes').doc(hash).set({ createdAt: new Date().toISOString() });
 
         console.log(`💎 [SAVED] Ingested (Unfiltered): ${rawTitle.substring(0, 30)}`);
+
+        // Route to WhatsApp clients
+        routeLeadToClients(rawTitle, rawDescription, city, payload.categoria, payload.translations).catch(e => {
+            console.error('⚠️ [ROUTING] Error routing lead:', e.message);
+        });
+
         res.status(200).json({ success: true, id: hash });
     } catch (error) {
         console.error('❌ Ingestion failed:', error.message);
@@ -925,8 +993,6 @@ app.get('/api/profile/:uid', async (req, res) => {
 // ==========================================
 // BROADCAST PANEL — envío manual a clientas WA
 // ==========================================
-const fs = require('fs');
-const ROUTING_CLIENTS_PATH = path.join(__dirname, 'routing_clients.json');
 const BROADCAST_PASSWORD = process.env.BROADCAST_PASSWORD || 'WMBroadcast2026';
 
 app.get('/admin/broadcast', (req, res) => {
