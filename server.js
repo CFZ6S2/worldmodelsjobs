@@ -259,7 +259,11 @@ async function routeLeadToClients(title, description, city, categoria, translati
             const waLink = String(contact).replace(/\D/g, '');
             const safeWaUrl = waLink ? `https://wa.me/${waLink}` : '';
 
-            const finalMessage = `📢 ALERTA ${cityUpper}\n📍 ${city || 'Global'} | 💰 ${presupuesto}\n\n${msgTitle}\n${msgDesc}\n${safeWaUrl}\n\n👤 Remitente: +${waLink || contact}\n✏️ Fuente: ${source}`;
+            const alertWord = lang === 'en' ? 'ALERT' : 'ALERTA';
+            const senderWord = lang === 'en' ? 'Contact' : 'Remitente';
+            const sourceWord = lang === 'en' ? 'Source' : 'Fuente';
+
+            const finalMessage = `📢 ${alertWord} ${cityUpper}\n📍 ${city || 'Global'} | 💰 ${presupuesto}\n\n${msgTitle}\n${msgDesc}\n${safeWaUrl}\n\n👤 ${senderWord}: +${waLink || contact}\n✏️ ${sourceWord}: ${source}`;
 
             console.log(`[ROUTING] Queued for ${client.label} (${client.wa})`);
             
