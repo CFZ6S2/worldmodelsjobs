@@ -404,7 +404,8 @@ const BANNED_KEYWORDS = [
     'crypto', 'binance', 'forex', 'casino', 'stake', 'signals', 'trading', 'pump', 'usdt', 'virtual', 'inversión', 'ganar dinero', 'bitget',
     'nudes', 'onlyfans', 'video llamada', 'packs', 'contenido', 'paypig', 'fimdom',
     'hombre busca', 'pasivo', 'pasivos', 'hombre generoso', 'conoceré', 'man looks', 'man seeking', 'man seeks', 'generous man', 'sugar daddy', 'busco hombre',
-    'droga', 'drogas', 'drugs', 'cocaína', 'cocaina', 'coke', 'perico', 'nieve', 'tusi', 'tusibi', '2cb', 'marihuana', 'hierba', 'weed', 'maconha', 'porro', 'canuto', 'pastilla', 'éxtasis', 'extasis', 'mdma', 'mda', 'cristal', 'metanfetamina', 'crack', 'base', 'heroína', 'heroina', 'vaper', 'airbnb'
+    'droga', 'drogas', 'drugs', 'cocaína', 'cocaina', 'coke', 'perico', 'nieve', 'tusi', 'tusibi', '2cb', 'marihuana', 'hierba', 'weed', 'maconha', 'porro', 'canuto', 'pastilla', 'éxtasis', 'extasis', 'mdma', 'mda', 'cristal', 'metanfetamina', 'crack', 'base', 'heroína', 'heroina', 'vaper', 'airbnb',
+    'publicista', 'comisión', 'comision', 'telefonista'
 ];
 
 const SPANISH_GROUP_ID = process.env.SPANISH_GROUP_ID || '120363425790792660@g.us';
@@ -641,6 +642,31 @@ app.post(['/api/leads', '/jobs-api/api/ads', '/api/ads', '/api/save-data'], asyn
         if (senderDigits && (BANNED_NUMBERS.includes(senderDigits) || isBannedPrefix)) {
             console.log(`🚫 [BANNED] Sender blocked (Prefix or Number): ${senderDigits}`);
             return res.status(200).json({ success: false, reason: 'sender_banned' });
+        }
+
+        // 🛡️ SENDER + CITY COOLDOWN (20 mins)
+        if (senderDigits && city) {
+            const cooldownKey = `${senderDigits}_${city.toLowerCase()}`;
+            const now = Date.now();
+            if (global.senderCityCooldowns) {
+                if (global.senderCityCooldowns.has(cooldownKey)) {
+                    if (now - global.senderCityCooldowns.get(cooldownKey) < 20 * 60 * 1000) {
+                        console.log(`⏳ [COOLDOWN] Ignored lead from ${senderDigits} in ${city} (Under 20m cooldown)`);
+                        return res.status(200).json({ success: false, reason: 'sender_city_cooldown' });
+                    }
+                }
+            } else {
+                global.senderCityCooldowns = new Map();
+            }
+            global.senderCityCooldowns.set(cooldownKey, now);
+
+            // Cleanup map
+            if (global.senderCityCooldowns.size > 5000) {
+                const twentyMinsAgo = now - 20 * 60 * 1000;
+                for (const [key, timestamp] of global.senderCityCooldowns.entries()) {
+                    if (timestamp < twentyMinsAgo) global.senderCityCooldowns.delete(key);
+                }
+            }
         }
 
         // 🧠 SEMANTIC DEDUPLICATION
