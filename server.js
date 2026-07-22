@@ -515,15 +515,15 @@ app.post('/api/juana/send', async (req, res) => {
     // 🚫 DEDUPLICACIÓN: Evitar que n8n y server.js envíen el mismo lead repetido
     // Limpiamos formato para comparar el texto base
     const cleanText = messageText.replace(/[*_~📢📍💰👤🔌]/g, '').replace(/\s+/g, ' ').trim();
-    // Tomamos los primeros 60 caracteres del texto base
-    const textHash = cleanText.substring(0, 60);
+    // Tomamos los primeros 200 caracteres del texto base para mayor precisión
+    const textHash = cleanText.substring(0, 200);
     const dedupKey = `${targetChat}_${textHash}`;
     
     const now = Date.now();
     if (juanaSentHistory.has(dedupKey)) {
         const timeSinceSent = now - juanaSentHistory.get(dedupKey);
         if (timeSinceSent < 5 * 60 * 1000) { // 5 minutes
-            console.log(`⏭️ [JUANA SKIP] Blocked duplicate message to ${targetChat} (already queued in last 5m)`);
+            console.log(`[JUANA DEDUP] Duplicate discarded for ${targetChat}`);
             return res.json({ status: "skipped_duplicate" });
         }
     }
