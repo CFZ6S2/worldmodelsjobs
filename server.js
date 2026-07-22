@@ -240,7 +240,8 @@ async function routeLeadToClients(title, description, city, categoria, translati
 
             if (client.categoryFilter) {
                 const catFilter = client.categoryFilter.toLowerCase();
-                if (!textToCheck.includes(catFilter)) continue;
+                const categoriaVal = (categoria || '').toLowerCase();
+                if (!textToCheck.includes(catFilter) && !categoriaVal.includes(catFilter)) continue;
             }
 
             matchedCount++;
