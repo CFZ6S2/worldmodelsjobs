@@ -122,7 +122,7 @@ rtdb.ref('/posts').on('child_added', async (snapshot) => {
         });
 
         // Route to WhatsApp clients
-        routeLeadToClients(finalTitulo, text, payload.ubicacion, payload.categoria, payload.translations).catch(e => {
+        routeLeadToClients(finalTitulo, text, payload.ubicacion, payload.categoria, payload.translations, payload.contact, payload.platform || "Legacy", payload.presupuesto).catch(e => {
             console.error('⚠️ [ROUTING] Error routing lead:', e.message);
         });
     } catch (err) {
@@ -217,7 +217,7 @@ async function sendPushNotificationsForLead(title, description, location) {
     }
 }
 
-async function routeLeadToClients(title, description, city, categoria, translations = null) {
+async function routeLeadToClients(title, description, city, categoria, translations = null, contact = "-", source = "Unknown", presupuesto = "Open") {
     try {
         if (!fs.existsSync(ROUTING_CLIENTS_PATH)) return;
         let clients = [];
@@ -254,7 +254,11 @@ async function routeLeadToClients(title, description, city, categoria, translati
                 msgDesc = translations[lang].descripcion || msgDesc;
             }
 
-            const finalMessage = `*🔥 Nuevo Lead: ${city}*\n\n*${msgTitle}*\n${msgDesc}`;
+            const cityUpper = (city || 'GLOBAL').toUpperCase();
+            const waLink = String(contact).replace(/\D/g, '');
+            const safeWaUrl = waLink ? `https://wa.me/${waLink}` : '';
+
+            const finalMessage = `📢 ALERTA ${cityUpper}\n📍 ${city || 'Global'} | 💰 ${presupuesto}\n\n${msgTitle}\n${msgDesc}\n${safeWaUrl}\n\n👤 Remitente: +${waLink || contact}\n✏️ Fuente: ${source}`;
 
             console.log(`[ROUTING] Queued for ${client.label} (${client.wa})`);
             
@@ -646,6 +650,7 @@ app.post(['/api/leads', '/jobs-api/api/ads', '/api/ads', '/api/save-data'], asyn
             activa: true,
             moderation_status: 'auto_approved',
             source: "n8n_elite_v2_original_rules",
+            presupuesto: body.pago || "Open",
             translations: {
                 es: { titulo: body.title_es || rawTitle, descripcion: body.text_es || rawDescription },
                 en: { titulo: body.title_en || rawTitle, descripcion: body.text_en || rawDescription },
@@ -660,7 +665,7 @@ app.post(['/api/leads', '/jobs-api/api/ads', '/api/ads', '/api/save-data'], asyn
         console.log(`💎 [SAVED] Ingested (Unfiltered): ${rawTitle.substring(0, 30)}`);
 
         // Route to WhatsApp clients
-        routeLeadToClients(rawTitle, rawDescription, city, payload.categoria, payload.translations).catch(e => {
+        routeLeadToClients(rawTitle, rawDescription, city, payload.categoria, payload.translations, payload.contact, payload.platform, payload.presupuesto).catch(e => {
             console.error('⚠️ [ROUTING] Error routing lead:', e.message);
         });
 
