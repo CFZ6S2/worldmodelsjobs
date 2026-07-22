@@ -5,6 +5,8 @@ import {
   onAuthStateChanged,
   signInWithEmailAndPassword,
   signInWithPopup,
+  signInWithRedirect,
+  getRedirectResult,
   GoogleAuthProvider,
   signOut,
   User,
@@ -68,6 +70,20 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     setUserData(prev => prev ? { ...prev, ...data } : null);
   };
 
+  // Handle Google redirect result on page load (mobile flow).
+  // Must run once, before onAuthStateChanged resolves, so errors surface cleanly.
+  useEffect(() => {
+    getRedirectResult(auth).catch((err) => {
+      // These two codes are benign (user dismissed the picker or no redirect pending)
+      if (
+        err?.code !== 'auth/popup-closed-by-user' &&
+        err?.code !== 'auth/cancelled-popup-request'
+      ) {
+        console.error('[Auth] getRedirectResult error:', err);
+      }
+    });
+  }, []);
+
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, async (firebaseUser) => {
       setUser(firebaseUser);
@@ -117,7 +133,22 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
   const loginWithGoogle = async () => {
     const provider = new GoogleAuthProvider();
-    await signInWithPopup(auth, provider);
+    // Always prompt account chooser so the user isn't silently skipped
+    provider.setCustomParameters({ prompt: 'select_account' });
+
+    // Popups are unreliable on mobile browsers (blocked by default on iOS Safari
+    // and many Android browsers). Use the redirect flow there; popup on desktop.
+    const isMobile =
+      typeof window !== 'undefined' &&
+      /Android|iPhone|iPad|iPod/i.test(window.navigator.userAgent);
+
+    if (isMobile) {
+      // signInWithRedirect navigates away → Firebase redirects back →
+      // onAuthStateChanged fires with the user on return.
+      await signInWithRedirect(auth, provider);
+    } else {
+      await signInWithPopup(auth, provider);
+    }
   };
 
   const register = async (email: string, password: string) => {
