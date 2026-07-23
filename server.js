@@ -563,12 +563,8 @@ app.post('/api/juana/send', async (req, res) => {
 
             console.log(`🚀 [JUANA SUCCESS] Sent to ${targetChat}: ${messageText.substring(0, 30)}...`);
             res.json(response.data);
-        } catch (err) {
-            console.error('❌ [JUANA ERROR]', {
-                status: err.response?.status,
-                data: err.response?.data,
-                message: err.message
-            });
+        } catch (error) {
+            console.error(`❌ [JUANA ERROR for ${targetChat}]`, error.response ? JSON.stringify(error.response.data) : error.message);
             res.status(500).json({ error: "Failed to forward to Whapi (Juana)" });
         }
     });
